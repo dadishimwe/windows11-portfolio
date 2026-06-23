@@ -15,6 +15,7 @@ export type ErrorType = {
 export type HistoryType = {
 	input: string;
 	response: string | null;
+	promptPath?: string;
 };
 
 export type ProjectType = {

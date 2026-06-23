@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { site } from '../../../config/site';
+import { HOME_DIR } from '../../../config/filesystem';
+import { runTerminalCommand } from '../../../lib/terminalCommands';
 import { HistoryType } from '../../../typings';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './Terminal.module.css';
@@ -8,75 +10,49 @@ import styles from './Terminal.module.css';
 const terminalPath = `MINGW64:/c/Users/${site.username}`;
 const terminalPrompt = `${site.username}@${site.hostname}`;
 
+function formatPromptPath(cwd: string) {
+	if (cwd === HOME_DIR) return '~';
+	return cwd.replace(HOME_DIR, '~');
+}
+
 function Terminal() {
-	const [history, setHistory] = useState<HistoryType[] | []>([]);
+	const [history, setHistory] = useState<HistoryType[]>([]);
+	const [cwd, setCwd] = useState(HOME_DIR);
+	const [cachedPublicIp, setCachedPublicIp] = useState<string>();
+
+	const promptPath = formatPromptPath(cwd);
 
 	const executeCommand = useCallback(
-		(input) => {
-			const command = input.split(' ')[0];
+		async (input: string) => {
+			const promptAtExecution = formatPromptPath(cwd);
+			const result = await runTerminalCommand(input, {
+				cwd,
+				cachedPublicIp,
+			});
 
-			switch (command) {
-				case 'help':
-					setHistory([
-						...history,
-						{
-							input: input,
-							response: `help: Display this help message<br/>clear: Clear the terminal screen<br/>ls: List the files in the current directory<br/>echo: Displays text/string that are passed as an argument<br/>whoami: Display the name of the current user`,
-						},
-					]);
-					break;
-				case 'clear':
-					setHistory([]);
-					break;
-				case 'whoami':
-					setHistory([
-						...history,
-						{
-							input: input,
-							response: site.username,
-						},
-					]);
-					break;
-				case 'ls':
-					setHistory([
-						...history,
-
-						{
-							input: input,
-							response: `hello.txt`,
-						},
-					]);
-					break;
-				case 'echo':
-					setHistory([
-						...history,
-						{
-							input: input,
-							response: `${input.replace('echo ', '')}`,
-						},
-					]);
-					break;
-				case '':
-					setHistory([
-						...history,
-						{
-							input: input,
-							response: null,
-						},
-					]);
-					break;
-				default:
-					setHistory([
-						...history,
-						{
-							input: input,
-							response: `bash: ${input}: command not found`,
-						},
-					]);
-					break;
+			if (result.clear) {
+				setHistory([]);
+				return;
 			}
+
+			if (result.newCwd) {
+				setCwd(result.newCwd);
+			}
+
+			if (result.cachedPublicIp) {
+				setCachedPublicIp(result.cachedPublicIp);
+			}
+
+			setHistory((prev) => [
+				...prev,
+				{
+					input,
+					response: result.response,
+					promptPath: promptAtExecution,
+				},
+			]);
 		},
-		[history]
+		[cwd, cachedPublicIp]
 	);
 
 	useEffect(() => {
@@ -89,14 +65,14 @@ function Terminal() {
 		};
 
 		const handleKeyUp = async (e: KeyboardEvent) => {
-			if (e.key == 'Enter') {
-				const target = e.target as HTMLInputElement;
-				let input = target.value;
+			if (e.key !== 'Enter') return;
 
-				await executeCommand(input);
+			const target = e.target as HTMLInputElement;
+			if (!target.classList.contains('prompt')) return;
 
-				target.value = '';
-			}
+			const input = target.value;
+			await executeCommand(input);
+			target.value = '';
 		};
 
 		document.addEventListener('keydown', handleFocus);
@@ -108,7 +84,7 @@ function Terminal() {
 			document.removeEventListener('keyup', handleKeyUp);
 			document.removeEventListener('click', handleFocus);
 		};
-	}, [executeCommand, history]);
+	}, [executeCommand]);
 
 	return (
 		<DraggableWindow
@@ -130,17 +106,19 @@ function Terminal() {
 						className={styles.historyItem}
 					>
 						<p className={styles.terminalTitle}>
-							{terminalPrompt} <span>MINGW64</span> <span>~</span>
+							{terminalPrompt} <span>MINGW64</span>{' '}
+							<span>{item.promptPath ?? promptPath}</span>
 						</p>
 						<p>$ {item.input}</p>
-						{item.response?.split('<br/>')?.map((text, index) => (
-							<p key={index}>{text}</p>
+						{item.response?.split('<br/>')?.map((text, line) => (
+							<p key={line}>{text}</p>
 						))}
 					</div>
 				))}
 				<div className={styles.historyItem}>
 					<p className={styles.terminalTitle}>
-						{terminalPrompt} <span>MINGW64</span> <span>~</span>
+						{terminalPrompt} <span>MINGW64</span>{' '}
+						<span>{promptPath}</span>
 					</p>
 					<div className={`${styles.promt}`}>
 						<p>$</p>

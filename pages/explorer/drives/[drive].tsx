@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GetStaticPaths, GetStaticProps } from 'next';
@@ -33,6 +32,22 @@ function DrivePage({ drive }: Props) {
 							</div>
 							<div>
 								<p>Documents</p>
+								<p>{drive.folderTitle}</p>
+							</div>
+						</div>
+					</Link>
+					<Link href="/explorer/certifications" passHref>
+						<div className={styles.item}>
+							<div>
+								<Image
+									src="/icons/documents/documents.png"
+									alt="icon"
+									width={50}
+									height={50}
+								/>
+							</div>
+							<div>
+								<p>Certifications</p>
 								<p>{drive.folderTitle}</p>
 							</div>
 						</div>

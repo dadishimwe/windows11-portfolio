@@ -134,6 +134,17 @@ function Icons() {
 							<p>Links</p>
 						</div>
 					</DesktopLink>
+					<DesktopLink href="/explorer/certifications">
+						<div className={`${styles.item} selectoItem`}>
+							<Image
+								src="/icons/documents/documents.png"
+								alt="icon"
+								width={40}
+								height={40}
+							/>
+							<p>Certifications</p>
+						</div>
+					</DesktopLink>
 					<DesktopLink href="/explorer/pictures">
 						<div className={`${styles.item} selectoItem`}>
 							<Image

@@ -3,13 +3,14 @@ import Link from 'next/link';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
 import PageHead from '../../components/utils/PageHead/PageHead';
+import { certifications } from '../../config/certifications';
 import styles from '../../styles/utils/List.module.css';
 
-function Documents() {
+function Certifications() {
 	const content = () => (
 		<div className={styles.listItemContainer}>
-			<Link href="/explorer/certifications" passHref>
-				<a>
+			{certifications.map((cert) => {
+				const row = (
 					<div className={styles.listItem}>
 						<div className={styles.listItemName}>
 							<Image
@@ -18,31 +19,43 @@ function Documents() {
 								width={16}
 								height={16}
 							/>
-							<p>Certifications</p>
+							<p>{cert.name}</p>
 						</div>
 						<p className={styles.listItemDateModified}>
-							23/06/2026 12:00
+							{cert.dateModified}
 						</p>
-						<p className={styles.listItemType}>File folder</p>
-						<p className={styles.listItemSize}>3 items</p>
+						<p className={styles.listItemType}>Certificate</p>
+						<p className={styles.listItemSize}>{cert.issuer}</p>
 					</div>
-				</a>
-			</Link>
+				);
+
+				if (!cert.url) {
+					return <div key={cert.id}>{row}</div>;
+				}
+
+				return (
+					<Link key={cert.id} href={cert.url} passHref>
+						<a target="_blank" rel="noopener noreferrer">
+							{row}
+						</a>
+					</Link>
+				);
+			})}
 		</div>
 	);
 
 	return (
 		<>
 			<PageHead
-				title="Documents"
-				description="Documents folder — certifications and personal files."
-				path="/explorer/documents"
+				title="Certifications"
+				description="Fortinet, Peplink, and MIT Emerging Talent certifications."
+				path="/explorer/certifications"
 			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
-					folder="Documents"
-					topNav={true}
 					icon="documents"
+					folder="Certifications"
+					topNav={true}
 					component={content()}
 				/>
 				<Icons />
@@ -51,4 +64,4 @@ function Documents() {
 	);
 }
 
-export default Documents;
+export default Certifications;
