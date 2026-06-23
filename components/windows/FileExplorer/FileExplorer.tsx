@@ -38,6 +38,7 @@ import { RiArrowDropDownLine, RiComputerLine } from 'react-icons/ri';
 import { SiMaterialdesignicons } from 'react-icons/si';
 import { VscSearch, VscSymbolProperty } from 'react-icons/vsc';
 import { Context } from '../../../context/ContextProvider';
+import { isActivePath } from '../../../lib/pathUtils';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './FileExplorer.module.css';
 
@@ -57,6 +58,8 @@ function FileExplorer(props: Props) {
 	const [history, setHistory] = explorerHistoryState;
 	const [index, setIndex] = indexState;
 	const [wasManual, setWasManual] = wasManualState;
+
+	const activePath = router.asPath;
 
 	const [path, setPath] = useState(props.folder);
 	const [quickaccess, setQuickaccess] = useState(true);
@@ -624,7 +627,10 @@ function FileExplorer(props: Props) {
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/drives/C'
+										isActivePath(
+											activePath,
+											'/explorer/drives/C'
+										)
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -645,7 +651,10 @@ function FileExplorer(props: Props) {
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/ssd2'
+										isActivePath(
+											activePath,
+											'/explorer/drives/D'
+										)
 											? {
 													backgroundColor: '#2e2e2e',
 											  }

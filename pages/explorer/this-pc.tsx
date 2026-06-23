@@ -131,36 +131,40 @@ function ThisPC() {
 				</div>
 
 				<div className={styles.wrapper}>
-					<div className={`${styles.item} ${styles.disk}`}>
-						<div>
-							<Image
-								src="/icons/drives/c.png"
-								alt="icon"
-								width={50}
-								height={50}
-							/>
+					<Link href="/explorer/drives/C" passHref>
+						<div className={`${styles.item} ${styles.disk}`}>
+							<div>
+								<Image
+									src="/icons/drives/c.png"
+									alt="icon"
+									width={50}
+									height={50}
+								/>
+							</div>
+							<div>
+								<p>250GB SSD (C:)</p>
+								<span className={styles.progressBar} />
+								<p>85.8 GB free of 222 GB</p>
+							</div>
 						</div>
-						<div>
-							<p>250GB SSD (C:)</p>
-							<span className={styles.progressBar} />
-							<p>85.8 GB free of 222 GB</p>
+					</Link>
+					<Link href="/explorer/drives/D" passHref>
+						<div className={`${styles.item} ${styles.disk}`}>
+							<div>
+								<Image
+									src="/icons/drives/d.png"
+									alt="icon"
+									width={50}
+									height={50}
+								/>
+							</div>
+							<div>
+								<p>1TB SSD (D:)</p>
+								<span className={styles.progressBar} />
+								<p>393 GB free of 465 GB</p>
+							</div>
 						</div>
-					</div>
-					<div className={`${styles.item} ${styles.disk}`}>
-						<div>
-							<Image
-								src="/icons/drives/d.png"
-								alt="icon"
-								width={50}
-								height={50}
-							/>
-						</div>
-						<div>
-							<p>1TB SSD (D:)</p>
-							<span className={styles.progressBar} />
-							<p>393 GB free of 465 GB</p>
-						</div>
-					</div>
+					</Link>
 				</div>
 			</>
 		);

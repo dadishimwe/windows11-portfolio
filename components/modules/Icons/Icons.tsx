@@ -1,10 +1,35 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Selecto from 'react-selecto';
+import { Context } from '../../../context/ContextProvider';
+import { routeToWindow } from '../../../lib/windowUtils';
 import styles from './Icons.module.css';
 
-const ESCAPE_KEYS = ['46', 'Delete'];
+const DELETE_KEYS = ['Delete'];
+
+type DesktopLinkProps = {
+	href: string;
+	children: React.ReactNode;
+};
+
+function DesktopLink({ href, children }: DesktopLinkProps) {
+	const { minimizedState } = useContext(Context);
+	const [minimized, setMinimized] = minimizedState;
+
+	const handleClick = () => {
+		const windowName = routeToWindow(href);
+		if (windowName && minimized[windowName]) {
+			setMinimized({ ...minimized, [windowName]: false });
+		}
+	};
+
+	return (
+		<Link href={href} passHref>
+			<div onClick={handleClick}>{children}</div>
+		</Link>
+	);
+}
 
 function Icons() {
 	const [deleted, setDeleted] = useState(false);
@@ -22,7 +47,7 @@ function Icons() {
 
 	useEffect(() => {
 		const eventListener = (e: KeyboardEvent) => {
-			if (ESCAPE_KEYS.includes(String(e.key))) {
+			if (DELETE_KEYS.includes(e.key)) {
 				handleDelete();
 			}
 		};
@@ -54,73 +79,73 @@ function Icons() {
 			/>
 			<div className={`elements ${styles.container}`}>
 				<div className={`selecto-area ${styles.wrapper}`} id="selecto1">
-					<Link href={'/notepad/about'} passHref>
+					<DesktopLink href="/notepad/about">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/notes/notes.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>About me</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/projects'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/projects">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/folder/folder.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>Projects</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/tools'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/tools">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/folder/folder.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>Tools</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/podcasts'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/podcasts">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/folder/folder.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>Podcasts I listen to</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/links'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/links">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/links/links.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>Links</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/pictures'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/pictures">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/pictures/pictures.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 							<p>Pictures</p>
 						</div>
-					</Link>
-					<Link href={'/explorer/videos'} passHref>
+					</DesktopLink>
+					<DesktopLink href="/explorer/videos">
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/videos/videos.png"
@@ -128,10 +153,10 @@ function Icons() {
 								width={40}
 								height={40}
 								quality={100}
-							></Image>
+							/>
 							<p>Videos</p>
 						</div>
-					</Link>
+					</DesktopLink>
 
 					<div className={`${styles.item} selectoItem recycleBin`}>
 						{deleted ? (
@@ -140,14 +165,14 @@ function Icons() {
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 						) : (
 							<Image
 								src="/icons/trash/trash_empty.png"
 								alt="icon"
 								width={40}
 								height={40}
-							></Image>
+							/>
 						)}
 						<p>Recycle Bin</p>
 					</div>

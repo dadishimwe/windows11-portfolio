@@ -24,8 +24,13 @@ type Maximized = {
 	[key: string]: boolean | null;
 };
 
+type Minimized = {
+	[key: string]: boolean;
+};
+
 type ContextType = {
 	maximizedState: [Maximized, (newMaximized: Maximized) => void];
+	minimizedState: [Minimized, (newMinimized: Minimized) => void];
 	explorerHistoryState: [string[], (newExplorerHistory: string[]) => void];
 	indexState: [number, (newIndex: number) => void];
 	wasManualState: [boolean, (newWasManual: boolean) => void];
@@ -83,8 +88,16 @@ const initialLastPos = {
 	height: 0,
 };
 
+const initialMinimized = {
+	fileExplorer: false,
+	mediaPlayer: false,
+	notepad: false,
+	terminal: false,
+};
+
 const initialState: ContextType = {
 	maximizedState: [initialMaximized, () => {}],
+	minimizedState: [initialMinimized, () => {}],
 	explorerHistoryState: [[], () => {}],
 	indexState: [0, () => {}],
 	wasManualState: [false, () => {}],
@@ -97,6 +110,7 @@ export const Context = createContext<ContextType>(initialState);
 
 const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [maximized, setMaximized] = useState<Maximized>(initialMaximized);
+	const [minimized, setMinimized] = useState<Minimized>(initialMinimized);
 	const [explorerHistory, setExplorerHistory] = useState<string[]>([]);
 	const [index, setIndex] = useState<number>(0);
 	const [position, setPosition] = useState<PositionState>(initialPosition);
@@ -107,6 +121,7 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const appContext: ContextType = {
 		maximizedState: [maximized, setMaximized],
+		minimizedState: [minimized, setMinimized],
 		explorerHistoryState: [explorerHistory, setExplorerHistory],
 		indexState: [index, setIndex],
 		wasManualState: [wasManual, setWasManual],

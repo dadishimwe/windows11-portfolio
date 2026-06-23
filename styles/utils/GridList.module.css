@@ -57,3 +57,9 @@
 	background-color: #fff;
 	box-shadow: inset 100px 0 0 -1px #26a0da;
 }
+
+.driveDescription {
+	margin: 10px 20px 0;
+	color: #ccc;
+	font-size: 0.75rem;
+}

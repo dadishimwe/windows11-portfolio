@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AiOutlineWifi } from 'react-icons/ai';
 import { FiVolume2 } from 'react-icons/fi';
+import { Context } from '../../../context/ContextProvider';
+import { windowTitles } from '../../../lib/windowUtils';
 import { ErrorType } from '../../../typings';
 import Error from '../../windows/Error/Error';
 import styles from './Footer.module.css';
@@ -11,6 +13,8 @@ import WindowsMenu from './WindowsMenu';
 function Footer() {
 	const [winMenu, setWinMenu] = useState(false);
 	const [errors, setError] = useState([] as ErrorType[]);
+	const { minimizedState } = useContext(Context);
+	const [minimized, setMinimized] = minimizedState;
 
 	const handleError = (err: string) => {
 		setError([...errors, { error: err, index: errors.length }]);
@@ -20,35 +24,45 @@ function Footer() {
 		setWinMenu(!winMenu);
 	};
 
+	const handleRestoreWindow = (windowName: string) => {
+		setMinimized({ ...minimized, [windowName]: false });
+	};
+
 	const [hourStr, setHourStr] = useState('00:00 PM');
 	const [dateStr, setDateStr] = useState('1/1/1970');
 
 	useEffect(() => {
 		let isMounted = true;
-		setInterval(() => {
-			if (typeof navigator !== 'undefined') {
-				if (isMounted)
-					setHourStr(
-						new Date().toLocaleTimeString(navigator.language, {
-							hour: '2-digit',
-							minute: '2-digit',
-						})
-					);
-				if (isMounted)
-					setDateStr(
-						new Date().toLocaleDateString(navigator.language)
-					);
-			}
-		}, 1000);
+
+		const updateClock = () => {
+			if (typeof navigator === 'undefined' || !isMounted) return;
+
+			setHourStr(
+				new Date().toLocaleTimeString(navigator.language, {
+					hour: '2-digit',
+					minute: '2-digit',
+				})
+			);
+			setDateStr(new Date().toLocaleDateString(navigator.language));
+		};
+
+		updateClock();
+		const intervalId = window.setInterval(updateClock, 1000);
+
 		return () => {
 			isMounted = false;
+			window.clearInterval(intervalId);
 		};
 	}, []);
+
+	const minimizedWindows = Object.entries(minimized).filter(
+		([, isMinimized]) => isMinimized
+	);
 
 	return (
 		<>
 			{errors &&
-				errors.map((err, index) => {
+				errors.map((err) => {
 					return (
 						<Error
 							key={err.index}
@@ -83,6 +97,16 @@ function Footer() {
 							/>
 						</div>
 					</Link>
+					{minimizedWindows.map(([windowName]) => (
+						<div
+							key={windowName}
+							className={`${styles.icon} ${styles.minimizedWindow}`}
+							onClick={() => handleRestoreWindow(windowName)}
+							title={`Restore ${windowTitles[windowName] || windowName}`}
+						>
+							<p>{windowTitles[windowName] || windowName}</p>
+						</div>
+					))}
 					<div
 						className={styles.icon}
 						onClick={() => handleError('Firefox')}

@@ -84,6 +84,7 @@ function DraggableWindow({
 	const DraggableWindowContext = useContext(Context);
 
 	const [maximized, setMaximized] = DraggableWindowContext.maximizedState;
+	const [minimized, setMinimized] = DraggableWindowContext.minimizedState;
 	const [history, setHistory] = DraggableWindowContext.explorerHistoryState;
 	const [position, setPosition] = DraggableWindowContext.positionState;
 	const [windowPriority, setWindowPriority] =
@@ -103,12 +104,23 @@ function DraggableWindow({
 	};
 
 	const handleMaximize = () => {
+		if (minimized[windowName]) {
+			setMinimized({ ...minimized, [windowName]: false });
+		}
 		setMaximized({ ...maximized, [windowName]: !maximized[windowName] });
+	};
+
+	const handleMinimize = () => {
+		if (maximized[windowName]) {
+			setMaximized({ ...maximized, [windowName]: false });
+		}
+		setMinimized({ ...minimized, [windowName]: true });
 	};
 
 	const handleClose = () => {
 		setIsClosing(true);
 		setMaximized({ ...maximized, [windowName]: null });
+		setMinimized({ ...minimized, [windowName]: false });
 
 		if (windowName === 'fileExplorer') setHistory([]);
 		if (windowName === 'mediaPlayer') {
@@ -212,6 +224,10 @@ function DraggableWindow({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [maximized[windowName]]);
+
+	if (minimized[windowName]) {
+		return null;
+	}
 
 	return (
 		<AnimatePresence>
@@ -339,7 +355,10 @@ function DraggableWindow({
 									<div
 										className={`${styles.iconContainer} not_draggable`}
 									>
-										<div className={styles.icon}>
+										<div
+											className={styles.icon}
+											onClick={handleMinimize}
+										>
 											<VscChromeMinimize />
 										</div>
 										<div
