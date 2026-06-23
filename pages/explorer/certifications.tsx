@@ -65,7 +65,7 @@ function Certifications() {
 			head={{
 				title: 'Certifications',
 				description:
-					'Fortinet, Peplink, and MIT Emerging Talent certifications.',
+					'Fortinet NSE, FCF, FCA, and FortiGate Operator certifications on Credly.',
 				path: '/explorer/certifications',
 			}}
 			content={content}

@@ -12,6 +12,7 @@ export type Certification = {
 };
 
 export const certifications: Certification[] = [
+	// credlyUrl format: https://www.credly.com/badges/{uuid}/public_url
 	{
 		id: 'fortinet-nse-1a',
 		name: 'Introduction to the Threat Landscape 3.0',

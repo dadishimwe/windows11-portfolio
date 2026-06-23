@@ -7,6 +7,7 @@ import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
 import PageHead from '../../components/utils/PageHead/PageHead';
 import { Context } from '../../context/ContextProvider';
 import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
+import { getCloudinaryVideos } from '../../lib/cloudinary';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
@@ -97,54 +98,6 @@ function Videos({ data }: { data: MediaType[] }) {
 			<Icons />
 		</>
 	);
-}
-
-async function getCloudinaryVideos(): Promise<MediaType[]> {
-	const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-		process.env;
-
-	if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-		return [];
-	}
-
-	try {
-		const res = await fetch(
-			`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video?max_results=100`,
-			{
-				headers: {
-					Authorization: `Basic ${Buffer.from(
-						`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`
-					).toString('base64')}`,
-				},
-			}
-		);
-
-		if (!res.ok) {
-			return [];
-		}
-
-		const json = await res.json();
-
-		if (!Array.isArray(json.resources)) {
-			return [];
-		}
-
-		return json.resources.map((video: MediaType) => ({
-			thumbnail: (
-				video.secure_url.split('.').slice(0, -1).join('.') + '.webp'
-			).replace('/upload/', '/upload/q_auto:low/'),
-			filename:
-				video.public_id.replace('videos/', '').length > 25
-					? video.public_id.replace('videos/', '').slice(0, 25)
-					: video.public_id.replace('videos/', ''),
-			secure_url: video.secure_url,
-			url: video.secure_url,
-			format: video.format,
-			public_id: video.public_id,
-		}));
-	} catch {
-		return [];
-	}
 }
 
 export async function getStaticProps() {

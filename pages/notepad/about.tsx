@@ -10,7 +10,7 @@ function About() {
 		<>
 			<PageHead
 				title="About me"
-				description="Network engineer and data scientist. Fortinet & Peplink certified. MIT Emerging Talent alum."
+				description="Network engineer and data scientist. Fortinet NSE, FCF, FCA, and FortiGate Operator certified."
 				path="/notepad/about"
 			/>
 			<Icons />

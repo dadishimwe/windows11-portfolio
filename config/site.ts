@@ -10,9 +10,9 @@ export const site = {
 		'https://www.instagram.com/dadishimwe?igsh=dWpnMHN1b2VxcW9n',
 	personalWebsite: 'https://www.dadishimwe.com',
 	description:
-		'Network engineer and data scientist passionate about infrastructure and machine learning.',
+		'Network engineer and data scientist passionate about infrastructure, cybersecurity, and machine learning.',
 	keywords:
-		'dadi ishimwe, dadishimwe, network engineering, data science, machine learning, fortinet, peplink, portfolio',
+		'dadi ishimwe, dadishimwe, network engineering, cybersecurity, fortinet, data science, machine learning, portfolio',
 	ogSiteName: 'Dadi Ishimwe — Windows Portfolio',
 	ogImage: '/images/programmer.png',
 };

@@ -28,13 +28,13 @@ const directories: Record<string, string[]> = {
 
 const files: Record<string, string> = {
 	[`${HOME_DIR}/about.txt`]: `${site.name} — network engineer and data scientist.
-Passionate about infrastructure and machine learning.
-Fortinet & Peplink certified. MIT Emerging Talent alum.`,
-	[`${HOME_DIR}/skills.txt`]: `Network engineering
+Passionate about infrastructure, cybersecurity, and machine learning.
+Fortinet NSE certified (FCF, FCA, FortiGate Operator).`,
+	[`${HOME_DIR}/skills.txt`]: `Network engineering & cybersecurity
+Fortinet NSE / FortiGate
 Data science & machine learning
 Infrastructure & automation
-Python
-Fortinet / Peplink ecosystems`,
+Python`,
 	[`${HOME_DIR}/contact.txt`]: `Email: ${site.email}
 GitHub: ${site.github}
 LinkedIn: ${site.linkedin}

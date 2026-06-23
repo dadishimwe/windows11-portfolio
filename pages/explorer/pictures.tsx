@@ -8,6 +8,7 @@ import PageHead from '../../components/utils/PageHead/PageHead';
 import { Context } from '../../context/ContextProvider';
 import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
 import { getLocalGalleryImages } from '../../lib/localImages';
+import { getCloudinaryImages } from '../../lib/cloudinary';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
@@ -100,55 +101,13 @@ function Pictures({ data }: { data: MediaType[] }) {
 	);
 }
 
-async function getCloudinaryImages(): Promise<MediaType[] | null> {
-	const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-		process.env;
-
-	if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-		return null;
-	}
-
-	try {
-		const res = await fetch(
-			`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image?max_results=100`,
-			{
-				headers: {
-					Authorization: `Basic ${Buffer.from(
-						`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`
-					).toString('base64')}`,
-				},
-			}
-		);
-
-		if (!res.ok) {
-			return null;
-		}
-
-		const json = await res.json();
-
-		if (!Array.isArray(json.resources)) {
-			return null;
-		}
-
-		return json.resources.map((image: MediaType) => ({
-			url: image.secure_url.replace('/upload/', '/upload/q_auto:low/'),
-			secure_url: image.secure_url,
-			thumbnail: image.secure_url,
-			filename:
-				image.public_id.replace('images/', '').length > 25
-					? image.public_id.replace('images/', '').slice(0, 25)
-					: image.public_id.replace('images/', ''),
-			format: image.format,
-			public_id: image.public_id,
-		}));
-	} catch {
-		return null;
-	}
+async function fetchGalleryImages(): Promise<MediaType[]> {
+	const cloudinaryImages = await getCloudinaryImages();
+	return cloudinaryImages ?? getLocalGalleryImages();
 }
 
 export async function getStaticProps() {
-	const cloudinaryImages = await getCloudinaryImages();
-	const data = cloudinaryImages ?? getLocalGalleryImages();
+	const data = await fetchGalleryImages();
 
 	return {
 		props: { data },
