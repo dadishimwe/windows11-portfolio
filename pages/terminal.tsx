@@ -1,26 +1,18 @@
 import Head from 'next/head';
 import Icons from '../components/modules/Icons/Icons';
 import { default as TerminalComponent } from '../components/windows/Terminal/Terminal';
+import { site } from '../config/site';
 
 function Terminal() {
 	return (
 		<>
 			<Head>
-				<title>kassq - Terminal</title>
-				<link rel="canonical" href="https://www.kassq.dev/terminal" />
-
-				{/* Description */}
+				<title>{site.username} - Terminal</title>
 				<meta
 					name="description"
 					content="A place to execute commands and feel like being a hacker."
 				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - Terminal" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/terminal"
-				/>
+				<meta property="og:title" content={`${site.name} - Terminal`} />
 				<meta
 					property="og:description"
 					content="A place to execute commands and feel like being a hacker."
