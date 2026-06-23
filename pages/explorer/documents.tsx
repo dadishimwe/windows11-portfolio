@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
 
 function Documents() {
@@ -32,22 +30,16 @@ function Documents() {
 	);
 
 	return (
-		<>
-			<PageHead
-				title="Documents"
-				description="Documents folder — certifications and personal files."
-				path="/explorer/documents"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					folder="Documents"
-					topNav={true}
-					icon="documents"
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/documents"
+			head={{
+				title: 'Documents',
+				description:
+					'Documents folder — certifications and personal files.',
+				path: '/explorer/documents',
+			}}
+			content={content}
+		/>
 	);
 }
 

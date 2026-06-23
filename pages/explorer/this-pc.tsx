@@ -2,9 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/GridList.module.css';
 
 function ThisPC() {
@@ -171,22 +169,16 @@ function ThisPC() {
 	};
 
 	return (
-		<>
-			<PageHead
-				title="This PC"
-				description="File Explorer — This PC view on my Windows portfolio."
-				path="/explorer/this-pc"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					folder="This PC"
-					topNav={false}
-					icon="this-pc"
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/this-pc"
+			head={{
+				title: 'This PC',
+				description:
+					'File Explorer — This PC view on my Windows portfolio.',
+				path: '/explorer/this-pc',
+			}}
+			content={content}
+		/>
 	);
 }
 

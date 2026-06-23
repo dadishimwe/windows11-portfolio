@@ -15,7 +15,7 @@ function formatPromptPath(cwd: string) {
 	return cwd.replace(HOME_DIR, '~');
 }
 
-function Terminal() {
+function Terminal({ onClose }: { onClose?: () => void }) {
 	const [history, setHistory] = useState<HistoryType[]>([]);
 	const [cwd, setCwd] = useState(HOME_DIR);
 	const [cachedPublicIp, setCachedPublicIp] = useState<string>();
@@ -144,6 +144,7 @@ function Terminal() {
 					height={20}
 				/>
 			}
+			onClose={onClose}
 		>
 			<div className={`${styles.main} terminal`}>
 				{history.map((item, index) => (

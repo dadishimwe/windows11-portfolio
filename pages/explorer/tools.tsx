@@ -1,7 +1,5 @@
 import Image from 'next/image';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
 
 function Tools() {
@@ -110,22 +108,16 @@ function Tools() {
 		);
 	};
 	return (
-		<>
-			<PageHead
-				title="Tools"
-				description="The toolbox I use daily — networking, data science, and development tools."
-				path="/explorer/tools"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					icon="folder"
-					folder="Tools"
-					topNav={true}
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/tools"
+			head={{
+				title: 'Tools',
+				description:
+					'The toolbox I use daily — networking, data science, and development tools.',
+				path: '/explorer/tools',
+			}}
+			content={content}
+		/>
 	);
 }
 

@@ -3,10 +3,13 @@ import { site } from './site';
 export type WindowTaskbarMeta = {
 	title: string;
 	icon: string;
+	windowName?: string;
+	explorerPath?: string;
+	external?: boolean;
 	href?: string;
 };
 
-export type PinnedApp = {
+export type StartMenuApp = {
 	id: string;
 	label: string;
 	icon: string;
@@ -20,17 +23,24 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 	fileExplorer: {
 		title: 'File Explorer',
 		icon: '/icons/explorer/explorer.png',
-		href: '/explorer/quick-access',
+		windowName: 'fileExplorer',
+		explorerPath: '/explorer/quick-access',
 	},
 	notepad: {
 		title: 'Notepad',
 		icon: '/icons/notepad/notepad.png',
-		href: '/notepad/about',
+		windowName: 'notepad',
 	},
 	terminal: {
 		title: 'Terminal',
 		icon: '/icons/terminal/terminal.png',
-		href: '/terminal',
+		windowName: 'terminal',
+	},
+	pictures: {
+		title: 'Pictures',
+		icon: '/icons/pictures/pictures.png',
+		windowName: 'fileExplorer',
+		explorerPath: '/explorer/pictures',
 	},
 	mediaPlayer: {
 		title: 'Media Player',
@@ -39,10 +49,20 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 	firefox: {
 		title: 'Firefox',
 		icon: '/icons/firefox/firefox.png',
+		windowName: 'firefox',
 	},
 };
 
-export const pinnedApps: PinnedApp[] = [
+/** Always-visible taskbar shortcuts for portfolio apps */
+export const taskbarPinnedApps: WindowTaskbarMeta[] = [
+	windowTaskbarMeta.fileExplorer,
+	windowTaskbarMeta.terminal,
+	windowTaskbarMeta.pictures,
+	windowTaskbarMeta.firefox,
+];
+
+/** Social & external links — Start menu only */
+export const startMenuSocialApps: StartMenuApp[] = [
 	{
 		id: 'linkedin',
 		label: 'LinkedIn',
@@ -58,6 +78,13 @@ export const pinnedApps: PinnedApp[] = [
 		external: true,
 	},
 	{
+		id: 'github',
+		label: 'GitHub',
+		icon: '/svg/github.svg',
+		href: site.github,
+		external: true,
+	},
+	{
 		id: 'vscode',
 		label: 'Visual Studio Code',
 		icon: '/icons/vscode/vscode.png',
@@ -69,6 +96,23 @@ export const pinnedApps: PinnedApp[] = [
 export function openExternalUrl(url: string) {
 	const opened = window.open(url, '_blank', 'noopener,noreferrer');
 	if (!opened) {
-		window.alert('Please allow pop-ups to open this application.');
+		window.alert('Please allow pop-ups to open this link.');
+	}
+}
+
+export function normalizeUrl(input: string): string {
+	const trimmed = input.trim();
+	if (!trimmed) return FIREFOX_HOME_URL;
+	if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+		return trimmed;
+	}
+	return `https://${trimmed}`;
+}
+
+export function displayUrl(url: string): string {
+	try {
+		return new URL(url).hostname.replace(/^www\./, '');
+	} catch {
+		return url;
 	}
 }

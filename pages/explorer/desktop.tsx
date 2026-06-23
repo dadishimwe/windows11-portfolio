@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
 
 function Desktop() {
@@ -144,22 +142,16 @@ function Desktop() {
 	};
 
 	return (
-		<>
-			<PageHead
-				title="Desktop"
-				description="Desktop shortcuts and folders on my Windows portfolio."
-				path="/explorer/desktop"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					icon="desktop"
-					folder="Desktop"
-					topNav={true}
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/desktop"
+			head={{
+				title: 'Desktop',
+				description:
+					'Desktop shortcuts and folders on my Windows portfolio.',
+				path: '/explorer/desktop',
+			}}
+			content={content}
+		/>
 	);
 }
 

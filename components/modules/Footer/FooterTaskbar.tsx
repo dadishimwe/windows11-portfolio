@@ -1,17 +1,15 @@
-import { useRouter } from 'next/router';
 import { useContext } from 'react';
-import { Context } from '../../../context/ContextProvider';
 import {
-	pinnedApps,
+	openExternalUrl,
+	startMenuSocialApps,
+	taskbarPinnedApps,
 	windowTaskbarMeta,
 } from '../../../config/taskbar';
-import { handleWindowPriority } from '../../utils/WindowPriority/WindowPriority';
+import { useWindowManager } from '../../../hooks/useWindowManager';
 import {
-	getMinimizedWindows,
-	getOpenWindows,
-	routeToWindow,
+	getMinimizedWindowNames,
+	getOpenWindowNames,
 } from '../../../lib/windowUtils';
-import { openExternalUrl } from '../../../config/taskbar';
 import TaskbarButton from './TaskbarButton';
 import styles from './Footer.module.css';
 import WindowsMenu from './WindowsMenu';
@@ -22,64 +20,35 @@ type Props = {
 };
 
 function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
-	const router = useRouter();
-	const { minimizedState, firefoxOpenState, windowPriorityState } =
-		useContext(Context);
-	const [minimized, setMinimized] = minimizedState;
-	const [firefoxOpen, setFirefoxOpen] = firefoxOpenState;
-	const [windowPriority, setWindowPriority] = windowPriorityState;
+	const { openWindows, minimized, focusWindow, toggleWindow } =
+		useWindowManager();
 
-	const firefoxOverlay = firefoxOpen ? ['firefox'] : [];
-	const openWindows = getOpenWindows(
-		router.asPath,
-		minimized,
-		firefoxOverlay
-	);
-	const minimizedWindows = getMinimizedWindows(minimized);
-
-	const focusWindow = async (windowName: string) => {
-		const newPriority = await handleWindowPriority({
-			windowName,
-			windowPriority,
-		});
-		if (newPriority) setWindowPriority(newPriority);
-	};
+	const openWindowNames = getOpenWindowNames(openWindows, minimized);
+	const minimizedWindowNames = getMinimizedWindowNames(openWindows, minimized);
 
 	const handleRestoreWindow = (windowName: string) => {
-		setMinimized({ ...minimized, [windowName]: false });
-
-		if (windowName === 'firefox') {
-			setFirefoxOpen(true);
-			void focusWindow('firefox');
-			return;
-		}
-
-		if (routeToWindow(router.asPath) !== windowName) {
-			const href = windowTaskbarMeta[windowName]?.href;
-			if (href) router.push(href);
-		}
+		const meta = windowTaskbarMeta[windowName];
+		void toggleWindow(windowName as keyof typeof openWindows, {
+			explorerPath: meta?.explorerPath,
+		});
 	};
 
-	const handleFirefoxClick = async () => {
-		if (!firefoxOpen) {
-			setFirefoxOpen(true);
-			setMinimized({ ...minimized, firefox: false });
-			await focusWindow('firefox');
-			return;
-		}
+	const handlePinnedClick = (app: (typeof taskbarPinnedApps)[number]) => {
+		if (!app.windowName) return;
 
-		if (minimized.firefox) {
-			setMinimized({ ...minimized, firefox: false });
-			await focusWindow('firefox');
-			return;
-		}
-
-		await focusWindow('firefox');
+		void toggleWindow(
+			app.windowName as keyof typeof openWindows,
+			app.explorerPath ? { explorerPath: app.explorerPath } : undefined
+		);
 	};
 
-	const isFirefoxActive =
-		firefoxOpen && !minimized.firefox && openWindows.includes('firefox');
-	const isFirefoxMinimized = firefoxOpen && minimized.firefox;
+	const isPinnedActive = (app: (typeof taskbarPinnedApps)[number]) => {
+		if (!app.windowName) return false;
+		return (
+			openWindows[app.windowName as keyof typeof openWindows] &&
+			!minimized[app.windowName]
+		);
+	};
 
 	return (
 		<>
@@ -91,34 +60,76 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 						onClick={handleWinMenu}
 					/>
 				</div>
-				{openWindows.map((windowName) => {
-					const meta = windowTaskbarMeta[windowName];
-					if (!meta) return null;
+				{taskbarPinnedApps.map((app) => {
+					const windowName = app.windowName;
+					const isOpen =
+						windowName &&
+						openWindows[windowName as keyof typeof openWindows];
+					const isMin = windowName && minimized[windowName];
+					const isActive = isPinnedActive(app);
 
-					if (windowName === 'firefox') {
+					if (isOpen && !isMin && openWindowNames.includes(windowName!)) {
 						return (
 							<TaskbarButton
-								key="open-firefox"
-								label={meta.title}
-								icon={meta.icon}
+								key={`open-${app.title}`}
+								label={app.title}
+								icon={app.icon}
 								isActive
-								onClick={() => void focusWindow('firefox')}
+								onClick={() => void focusWindow(windowName!)}
+							/>
+						);
+					}
+
+					if (isOpen && isMin) {
+						return (
+							<TaskbarButton
+								key={`min-${app.title}`}
+								label={app.title}
+								icon={app.icon}
+								isMinimized
+								onClick={() => handleRestoreWindow(windowName!)}
 							/>
 						);
 					}
 
 					return (
 						<TaskbarButton
-							key={`open-${windowName}`}
-							label={meta.title}
-							icon={meta.icon}
-							href={meta.href}
-							isActive
+							key={`pin-${app.title}`}
+							label={app.title}
+							icon={app.icon}
+							onClick={() => handlePinnedClick(app)}
 						/>
 					);
 				})}
-				{minimizedWindows
-					.filter((windowName) => !openWindows.includes(windowName))
+				{openWindowNames
+					.filter(
+						(name) =>
+							!taskbarPinnedApps.some(
+								(app) => app.windowName === name
+							)
+					)
+					.map((windowName) => {
+						const meta = windowTaskbarMeta[windowName];
+						if (!meta) return null;
+
+						return (
+							<TaskbarButton
+								key={`open-${windowName}`}
+								label={meta.title}
+								icon={meta.icon}
+								isActive
+								onClick={() => void focusWindow(windowName)}
+							/>
+						);
+					})}
+				{minimizedWindowNames
+					.filter(
+						(name) =>
+							!openWindowNames.includes(name) &&
+							!taskbarPinnedApps.some(
+								(app) => app.windowName === name
+							)
+					)
 					.map((windowName) => {
 						const meta = windowTaskbarMeta[windowName];
 						if (!meta) return null;
@@ -133,24 +144,19 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 							/>
 						);
 					})}
-				{!isFirefoxActive && !isFirefoxMinimized && (
-					<TaskbarButton
-						label="Firefox"
-						icon="/icons/firefox/firefox.png"
-						onClick={() => void handleFirefoxClick()}
-					/>
-				)}
-				{pinnedApps.map((app) => (
-					<TaskbarButton
-						key={app.id}
-						label={app.label}
-						icon={app.icon}
-						external
-						onClick={() => openExternalUrl(app.href)}
-					/>
-				))}
 			</section>
-			<WindowsMenu winMenu={winMenu} handleWinMenu={handleWinMenu} />
+			<WindowsMenu
+				winMenu={winMenu}
+				handleWinMenu={handleWinMenu}
+				onOpenApp={(windowName, explorerPath) => {
+					handleWinMenu();
+					void toggleWindow(windowName, explorerPath ? { explorerPath } : undefined);
+				}}
+				onOpenSocial={(href) => {
+					handleWinMenu();
+					openExternalUrl(href);
+				}}
+			/>
 		</>
 	);
 }

@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import { site } from '../../config/site';
 import styles from '../../styles/utils/List.module.css';
 
@@ -95,22 +93,16 @@ function Links() {
 	};
 
 	return (
-		<>
-			<PageHead
-				title="Links"
-				description="LinkedIn, GitHub, Instagram, and email — all in one place."
-				path="/explorer/links"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					icon="folder"
-					folder="Links"
-					topNav={true}
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/links"
+			head={{
+				title: 'Links',
+				description:
+					'LinkedIn, GitHub, Instagram, and email — all in one place.',
+				path: '/explorer/links',
+			}}
+			content={content}
+		/>
 	);
 }
 

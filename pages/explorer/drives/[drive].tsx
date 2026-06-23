@@ -1,9 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Icons from '../../../components/modules/Icons/Icons';
-import FileExplorer from '../../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../../components/explorer/ExplorerPage';
 import { DriveConfig, DriveKey, drives, isDriveKey } from '../../../config/drives';
 import styles from '../../../styles/utils/GridList.module.css';
 
@@ -58,22 +56,15 @@ function DrivePage({ drive }: Props) {
 	);
 
 	return (
-		<>
-			<PageHead
-				title={drive.folderTitle}
-				description={drive.description}
-				path={`/explorer/drives/${drive.letter}`}
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					folder={drive.folderTitle}
-					topNav={false}
-					icon="folder"
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path={`/explorer/drives/${drive.letter}`}
+			head={{
+				title: drive.folderTitle,
+				description: drive.description,
+				path: `/explorer/drives/${drive.letter}`,
+			}}
+			content={content}
+		/>
 	);
 }
 

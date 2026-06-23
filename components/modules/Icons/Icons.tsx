@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { useContext, useEffect, useState } from 'react';
 import Selecto from 'react-selecto';
 import { Context } from '../../../context/ContextProvider';
-import { routeToWindow } from '../../../lib/windowUtils';
+import { hrefToWindow } from '../../../lib/windowUtils';
+import { useWindowManager } from '../../../hooks/useWindowManager';
 import styles from './Icons.module.css';
 
 const DELETE_KEYS = ['Delete'];
@@ -16,18 +16,40 @@ type DesktopLinkProps = {
 function DesktopLink({ href, children }: DesktopLinkProps) {
 	const { minimizedState } = useContext(Context);
 	const [minimized, setMinimized] = minimizedState;
+	const { openWindow, openWindows } = useWindowManager();
 
 	const handleClick = () => {
-		const windowName = routeToWindow(href);
-		if (windowName && minimized[windowName]) {
-			setMinimized({ ...minimized, [windowName]: false });
+		const target = hrefToWindow(href);
+		if (!target) return;
+
+		if (
+			openWindows[target.windowName] &&
+			minimized[target.windowName]
+		) {
+			setMinimized({ ...minimized, [target.windowName]: false });
+			return;
 		}
+
+		void openWindow(
+			target.windowName,
+			target.explorerPath
+				? { explorerPath: target.explorerPath }
+				: undefined
+		);
 	};
 
 	return (
-		<Link href={href} passHref>
-			<div onClick={handleClick}>{children}</div>
-		</Link>
+		<div
+			className={styles.desktopLink}
+			onClick={handleClick}
+			role="link"
+			tabIndex={0}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') handleClick();
+			}}
+		>
+			{children}
+		</div>
 	);
 }
 

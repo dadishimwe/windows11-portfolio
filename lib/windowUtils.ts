@@ -1,44 +1,51 @@
-import { windowTaskbarMeta } from '../config/taskbar';
+import { DEFAULT_EXPLORER_PATH } from '../config/explorerRoutes';
+import { initialOpenWindows, OpenWindows } from '../config/openWindows';
 
-export const windowTitles: Record<string, string> = Object.fromEntries(
-	Object.entries(windowTaskbarMeta).map(([key, meta]) => [key, meta.title])
-);
+export type OpenWindowOptions = {
+	explorerPath?: string;
+};
 
-export function routeToWindow(path: string): string | null {
+export { initialOpenWindows, DEFAULT_EXPLORER_PATH };
+
+export function routeToWindow(path: string): keyof OpenWindows | null {
 	const normalized = path.split('?')[0];
-
+	if (normalized.startsWith('/explorer')) return 'fileExplorer';
 	if (normalized.startsWith('/notepad')) return 'notepad';
 	if (normalized === '/terminal') return 'terminal';
-	if (normalized.startsWith('/explorer')) return 'fileExplorer';
-
 	return null;
 }
 
-export function getOpenWindows(
-	currentPath: string,
-	minimized: Record<string, boolean>,
-	overlayOpen: string[] = []
-): string[] {
-	const windows: string[] = [];
-	const currentWindow = routeToWindow(currentPath);
-
-	if (currentWindow && !minimized[currentWindow]) {
-		windows.push(currentWindow);
+export function hrefToWindow(href: string): {
+	windowName: keyof OpenWindows;
+	explorerPath?: string;
+} | null {
+	const normalized = href.split('?')[0];
+	if (normalized.startsWith('/explorer')) {
+		return { windowName: 'fileExplorer', explorerPath: normalized };
 	}
-
-	overlayOpen.forEach((windowName) => {
-		if (!minimized[windowName] && !windows.includes(windowName)) {
-			windows.push(windowName);
-		}
-	});
-
-	return windows;
+	if (normalized.startsWith('/notepad')) {
+		return { windowName: 'notepad' };
+	}
+	if (normalized === '/terminal') {
+		return { windowName: 'terminal' };
+	}
+	return null;
 }
 
-export function getMinimizedWindows(
+export function getOpenWindowNames(
+	openWindows: OpenWindows,
 	minimized: Record<string, boolean>
 ): string[] {
-	return Object.entries(minimized)
-		.filter(([, isMinimized]) => isMinimized)
-		.map(([windowName]) => windowName);
+	return Object.entries(openWindows)
+		.filter(([name, isOpen]) => isOpen && !minimized[name])
+		.map(([name]) => name);
+}
+
+export function getMinimizedWindowNames(
+	openWindows: OpenWindows,
+	minimized: Record<string, boolean>
+): string[] {
+	return Object.entries(openWindows)
+		.filter(([name, isOpen]) => isOpen && minimized[name])
+		.map(([name]) => name);
 }

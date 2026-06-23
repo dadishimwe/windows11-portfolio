@@ -47,6 +47,10 @@ type Props = {
 	icon: string;
 	topNav: boolean;
 	component?: React.ReactNode;
+	onClose?: () => void;
+	navigationMode?: 'router' | 'context';
+	currentPath?: string;
+	onNavigate?: (path: string) => void;
 };
 
 function FileExplorer(props: Props) {
@@ -59,7 +63,38 @@ function FileExplorer(props: Props) {
 	const [index, setIndex] = indexState;
 	const [wasManual, setWasManual] = wasManualState;
 
-	const activePath = router.asPath;
+	const navigationMode = props.navigationMode ?? 'router';
+	const activePath =
+		navigationMode === 'context'
+			? props.currentPath ?? ''
+			: router.asPath;
+
+	const NavLink = ({
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	}) => {
+		const basePath = href.split('?')[0];
+		if (navigationMode === 'context' && props.onNavigate) {
+			return (
+				<div
+					role="link"
+					tabIndex={0}
+					onClick={() => props.onNavigate?.(basePath)}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							props.onNavigate?.(basePath);
+						}
+					}}
+				>
+					{children}
+				</div>
+			);
+		}
+		return <Link href={href}>{children}</Link>;
+	};
 
 	const [path, setPath] = useState(props.folder);
 	const [quickaccess, setQuickaccess] = useState(true);
@@ -74,30 +109,41 @@ function FileExplorer(props: Props) {
 	const handleBlur = () => setPath(props.folder);
 
 	useEffect(() => {
-		if (asPath.includes('/explorer/') && !wasManual) {
+		const pathToTrack =
+			navigationMode === 'context' ? props.currentPath : asPath;
+
+		if (pathToTrack?.includes('/explorer/') && !wasManual) {
 			const newHistory = history.slice(0, index + 1);
-			newHistory.push(asPath);
+			newHistory.push(pathToTrack);
 			setHistory(newHistory);
 			setIndex(newHistory.length - 1);
 		}
 		setWasManual(false);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [asPath]);
+	}, [navigationMode === 'context' ? props.currentPath : asPath]);
+
+	const navigateTo = (path: string) => {
+		if (navigationMode === 'context' && props.onNavigate) {
+			props.onNavigate(path.split('?')[0]);
+			return;
+		}
+		router.push(path);
+	};
 
 	const handleBack = () => {
 		if (index > 0 && history.length > 0) {
 			setWasManual(true);
-			let i = index - 1;
+			const i = index - 1;
 			setIndex(i);
-			router.push(history[i]);
+			navigateTo(history[i]);
 		}
 	};
 	const handleNext = () => {
 		if (index < history.length - 1) {
 			setWasManual(true);
-			let i = index + 1;
+			const i = index + 1;
 			setIndex(i);
-			router.push(history[i]);
+			navigateTo(history[i]);
 		}
 	};
 
@@ -113,6 +159,7 @@ function FileExplorer(props: Props) {
 					height={20}
 				/>
 			}
+			onClose={props.onClose}
 		>
 			<div className={styles.top}>
 				<section className={styles.manage}>
@@ -363,7 +410,7 @@ function FileExplorer(props: Props) {
 									  }
 							}
 						/>
-						<Link href="/explorer/quick-access" passHref>
+						<NavLink href="/explorer/quick-access">
 							<div>
 								<Image
 									src="/icons/quickaccess/quickaccess.png"
@@ -373,16 +420,16 @@ function FileExplorer(props: Props) {
 								/>
 								<p>Quick access</p>
 							</div>
-						</Link>
+						</NavLink>
 					</div>
 					{quickaccess && (
 						<>
-							<Link href="/explorer/desktop?top=true" passHref>
+							<NavLink href="/explorer/desktop?top=true">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath ==
-										'/explorer/desktop?top=true'
+										activePath.split('?')[0] ==
+										'/explorer/desktop'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -397,13 +444,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Desktop</p>
 								</div>
-							</Link>
-							<Link href="/explorer/downloads?top=true" passHref>
+							</NavLink>
+							<NavLink href="/explorer/downloads?top=true">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath ==
-										'/explorer/downloads?top=true'
+										activePath.split('?')[0] ==
+										'/explorer/downloads'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -419,13 +466,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Downloads</p>
 								</div>
-							</Link>
-							<Link href="/explorer/documents?top=true" passHref>
+							</NavLink>
+							<NavLink href="/explorer/documents?top=true">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath ==
-										'/explorer/documents?top=true'
+										activePath.split('?')[0] ==
+										'/explorer/documents'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -440,13 +487,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Documents</p>
 								</div>
-							</Link>
-							<Link href="/explorer/pictures?top=true" passHref>
+							</NavLink>
+							<NavLink href="/explorer/pictures?top=true">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath ==
-										'/explorer/pictures?top=true'
+										activePath.split('?')[0] ==
+										'/explorer/pictures'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -461,13 +508,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Pictures</p>
 								</div>
-							</Link>
+							</NavLink>
 						</>
 					)}
 					<div
 						className={styles.navigationDropdown}
 						style={
-							router.pathname == '/explorer/this-pc'
+							activePath.split('?')[0] == '/explorer/this-pc'
 								? {
 										backgroundColor: '#2e2e2e',
 								  }
@@ -484,7 +531,7 @@ function FileExplorer(props: Props) {
 									  }
 							}
 						/>
-						<Link href="/explorer/this-pc" passHref>
+						<NavLink href="/explorer/this-pc">
 							<div>
 								<Image
 									src="/icons/this-pc/this-pc.png"
@@ -494,15 +541,16 @@ function FileExplorer(props: Props) {
 								/>
 								<p>This PC</p>
 							</div>
-						</Link>
+						</NavLink>
 					</div>
 					{thisPC && (
 						<>
-							<Link href="/explorer/desktop" passHref>
+							<NavLink href="/explorer/desktop">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/desktop'
+										activePath.split('?')[0] ==
+										'/explorer/desktop'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -517,12 +565,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Desktop</p>
 								</div>
-							</Link>
-							<Link href="/explorer/downloads" passHref>
+							</NavLink>
+							<NavLink href="/explorer/downloads">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/downloads'
+										activePath.split('?')[0] ==
+										'/explorer/downloads'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -538,12 +587,13 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Downloads</p>
 								</div>
-							</Link>
-							<Link href="/explorer/documents" passHref>
+							</NavLink>
+							<NavLink href="/explorer/documents">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/documents'
+										activePath.split('?')[0] ==
+										'/explorer/documents'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -558,13 +608,14 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Documents</p>
 								</div>
-							</Link>
+							</NavLink>
 
-							<Link href="/explorer/pictures" passHref>
+							<NavLink href="/explorer/pictures">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/pictures'
+										activePath.split('?')[0] ==
+										'/explorer/pictures'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -579,13 +630,14 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Pictures</p>
 								</div>
-							</Link>
+							</NavLink>
 
-							<Link href="/explorer/videos" passHref>
+							<NavLink href="/explorer/videos">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/videos'
+										activePath.split('?')[0] ==
+										'/explorer/videos'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -600,13 +652,14 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Videos</p>
 								</div>
-							</Link>
+							</NavLink>
 
-							<Link href="/explorer/music" passHref>
+							<NavLink href="/explorer/music">
 								<div
 									className={styles.navigationItem}
 									style={
-										router.asPath == '/explorer/music'
+										activePath.split('?')[0] ==
+										'/explorer/music'
 											? {
 													backgroundColor: '#2e2e2e',
 											  }
@@ -621,9 +674,9 @@ function FileExplorer(props: Props) {
 									/>
 									<p>Music</p>
 								</div>
-							</Link>
+							</NavLink>
 
-							<Link href="/explorer/drives/C" passHref>
+							<NavLink href="/explorer/drives/C">
 								<div
 									className={styles.navigationItem}
 									style={
@@ -645,9 +698,9 @@ function FileExplorer(props: Props) {
 									/>
 									<p>250GB SSD</p>
 								</div>
-							</Link>
+							</NavLink>
 
-							<Link href="/explorer/drives/D" passHref>
+							<NavLink href="/explorer/drives/D">
 								<div
 									className={styles.navigationItem}
 									style={
@@ -669,7 +722,7 @@ function FileExplorer(props: Props) {
 									/>
 									<p>1TB SSD</p>
 								</div>
-							</Link>
+							</NavLink>
 						</>
 					)}
 				</div>

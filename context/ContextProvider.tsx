@@ -1,4 +1,7 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, Dispatch, SetStateAction } from 'react';
+import { DEFAULT_EXPLORER_PATH } from '../config/explorerRoutes';
+import { initialOpenWindows, OpenWindows } from '../config/openWindows';
+import { buildInitialFirefoxTabs, FirefoxTab } from '../lib/firefoxTabs';
 
 type LastPos = {
 	x: number;
@@ -29,21 +32,23 @@ type Minimized = {
 };
 
 type ContextType = {
-	maximizedState: [Maximized, (newMaximized: Maximized) => void];
-	minimizedState: [Minimized, (newMinimized: Minimized) => void];
-	firefoxOpenState: [boolean, (open: boolean) => void];
-	explorerHistoryState: [string[], (newExplorerHistory: string[]) => void];
-	indexState: [number, (newIndex: number) => void];
-	wasManualState: [boolean, (newWasManual: boolean) => void];
-	positionState: [PositionState, (newPosition: PositionState) => void];
+	maximizedState: [Maximized, Dispatch<SetStateAction<Maximized>>];
+	minimizedState: [Minimized, Dispatch<SetStateAction<Minimized>>];
+	openWindowsState: [OpenWindows, Dispatch<SetStateAction<OpenWindows>>];
+	explorerPathState: [string, Dispatch<SetStateAction<string>>];
+	firefoxTabsState: [FirefoxTab[], Dispatch<SetStateAction<FirefoxTab[]>>];
+	activeFirefoxTabIdState: [string, Dispatch<SetStateAction<string>>];
+	explorerHistoryState: [string[], Dispatch<SetStateAction<string[]>>];
+	indexState: [number, Dispatch<SetStateAction<number>>];
+	wasManualState: [boolean, Dispatch<SetStateAction<boolean>>];
+	positionState: [PositionState, Dispatch<SetStateAction<PositionState>>];
 	windowPriorityState: [
 		WindowPriority,
-		(newPriority: WindowPriority) => void
+		Dispatch<SetStateAction<WindowPriority>>
 	];
-	lastPosState: [LastPos, (newLastPos: LastPos) => void];
+	lastPosState: [LastPos, Dispatch<SetStateAction<LastPos>>];
 };
 
-// React-selecto uses z-index 100 so these values must be higher than
 const initialPriority = {
 	fileExplorer: 101,
 };
@@ -104,10 +109,15 @@ const initialMinimized = {
 	firefox: false,
 };
 
+const initialFirefoxTabs = buildInitialFirefoxTabs();
+
 const initialState: ContextType = {
 	maximizedState: [initialMaximized, () => {}],
 	minimizedState: [initialMinimized, () => {}],
-	firefoxOpenState: [false, () => {}],
+	openWindowsState: [initialOpenWindows, () => {}],
+	explorerPathState: [DEFAULT_EXPLORER_PATH, () => {}],
+	firefoxTabsState: [initialFirefoxTabs, () => {}],
+	activeFirefoxTabIdState: [initialFirefoxTabs[0].id, () => {}],
 	explorerHistoryState: [[], () => {}],
 	indexState: [0, () => {}],
 	wasManualState: [false, () => {}],
@@ -121,7 +131,14 @@ export const Context = createContext<ContextType>(initialState);
 const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [maximized, setMaximized] = useState<Maximized>(initialMaximized);
 	const [minimized, setMinimized] = useState<Minimized>(initialMinimized);
-	const [firefoxOpen, setFirefoxOpen] = useState(false);
+	const [openWindows, setOpenWindows] =
+		useState<OpenWindows>(initialOpenWindows);
+	const [explorerPath, setExplorerPath] = useState(DEFAULT_EXPLORER_PATH);
+	const [firefoxTabs, setFirefoxTabs] =
+		useState<FirefoxTab[]>(initialFirefoxTabs);
+	const [activeFirefoxTabId, setActiveFirefoxTabId] = useState(
+		initialFirefoxTabs[0].id
+	);
 	const [explorerHistory, setExplorerHistory] = useState<string[]>([]);
 	const [index, setIndex] = useState<number>(0);
 	const [position, setPosition] = useState<PositionState>(initialPosition);
@@ -133,7 +150,10 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const appContext: ContextType = {
 		maximizedState: [maximized, setMaximized],
 		minimizedState: [minimized, setMinimized],
-		firefoxOpenState: [firefoxOpen, setFirefoxOpen],
+		openWindowsState: [openWindows, setOpenWindows],
+		explorerPathState: [explorerPath, setExplorerPath],
+		firefoxTabsState: [firefoxTabs, setFirefoxTabs],
+		activeFirefoxTabIdState: [activeFirefoxTabId, setActiveFirefoxTabId],
 		explorerHistoryState: [explorerHistory, setExplorerHistory],
 		indexState: [index, setIndex],
 		wasManualState: [wasManual, setWasManual],

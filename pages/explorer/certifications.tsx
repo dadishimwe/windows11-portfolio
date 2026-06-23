@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import { certifications } from '../../config/certifications';
 import styles from '../../styles/utils/List.module.css';
 
@@ -45,22 +43,16 @@ function Certifications() {
 	);
 
 	return (
-		<>
-			<PageHead
-				title="Certifications"
-				description="Fortinet, Peplink, and MIT Emerging Talent certifications."
-				path="/explorer/certifications"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					icon="documents"
-					folder="Certifications"
-					topNav={true}
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/certifications"
+			head={{
+				title: 'Certifications',
+				description:
+					'Fortinet, Peplink, and MIT Emerging Talent certifications.',
+				path: '/explorer/certifications',
+			}}
+			content={content}
+		/>
 	);
 }
 

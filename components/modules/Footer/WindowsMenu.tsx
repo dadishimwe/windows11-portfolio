@@ -1,16 +1,22 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { AiOutlinePoweroff } from 'react-icons/ai';
 import { IoIosArrowForward } from 'react-icons/io';
 import { VscSearch } from 'react-icons/vsc';
+import { OpenWindows } from '../../../config/openWindows';
 import { site } from '../../../config/site';
+import { startMenuSocialApps } from '../../../config/taskbar';
 import styles from './WindowsMenu.module.css';
 
 type Props = {
 	winMenu: boolean;
 	handleWinMenu: () => void;
+	onOpenApp: (
+		windowName: keyof OpenWindows,
+		explorerPath?: string
+	) => void;
+	onOpenSocial: (href: string) => void;
 };
 
 const slideVerticalAnimation = {
@@ -32,7 +38,12 @@ const slideVerticalAnimation = {
 	},
 };
 
-function WindowsMenu({ winMenu, handleWinMenu }: Props) {
+function WindowsMenu({
+	winMenu,
+	handleWinMenu,
+	onOpenApp,
+	onOpenSocial,
+}: Props) {
 	const node = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -88,98 +99,150 @@ function WindowsMenu({ winMenu, handleWinMenu }: Props) {
 								</div>
 							</div>
 							<div className={styles.winMenuPinnedBottom}>
-								<Link href="/explorer/quick-access" passHref>
-									<div onClick={() => handleWinMenu()}>
-										<Image
-											src="/icons/explorer/explorer.png"
-											alt="img"
-											width={30}
-											height={30}
-										></Image>
-										<p>File Explorer</p>
-									</div>
-								</Link>
-								<Link href="/explorer/pictures" passHref>
-									<div onClick={() => handleWinMenu()}>
-										<Image
-											src="/icons/pictures/pictures.png"
-											alt="img"
-											width={30}
-											height={30}
-										></Image>
-										<p>Photos</p>
-									</div>
-								</Link>
-								<Link href="/explorer/videos" passHref>
-									<div onClick={() => handleWinMenu()}>
-										<Image
-											src="/icons/videos/videos.png"
-											alt="img"
-											width={30}
-											height={30}
-										></Image>
-										<p>Videos</p>
-									</div>
-								</Link>
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() =>
+										onOpenApp(
+											'fileExplorer',
+											'/explorer/quick-access'
+										)
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											onOpenApp(
+												'fileExplorer',
+												'/explorer/quick-access'
+											);
+										}
+									}}
+								>
+									<Image
+										src="/icons/explorer/explorer.png"
+										alt="File Explorer"
+										width={30}
+										height={30}
+									/>
+									<p>File Explorer</p>
+								</div>
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() => onOpenApp('terminal')}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											onOpenApp('terminal');
+										}
+									}}
+								>
+									<Image
+										src="/icons/terminal/terminal.png"
+										alt="Terminal"
+										width={30}
+										height={30}
+									/>
+									<p>Terminal</p>
+								</div>
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() =>
+										onOpenApp(
+											'fileExplorer',
+											'/explorer/pictures'
+										)
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											onOpenApp(
+												'fileExplorer',
+												'/explorer/pictures'
+											);
+										}
+									}}
+								>
+									<Image
+										src="/icons/pictures/pictures.png"
+										alt="Photos"
+										width={30}
+										height={30}
+									/>
+									<p>Photos</p>
+								</div>
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() => onOpenApp('firefox')}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											onOpenApp('firefox');
+										}
+									}}
+								>
+									<Image
+										src="/icons/firefox/firefox.png"
+										alt="Firefox"
+										width={30}
+										height={30}
+									/>
+									<p>Firefox</p>
+								</div>
 							</div>
 						</div>
 						<div className={styles.winMenuPinnedContainer}>
 							<div className={styles.winMenuPinnedTop}>
-								<h2>Recommended</h2>
+								<h2>Connect</h2>
 								<div>
-									<p>More</p>
+									<p>Social</p>
 									<IoIosArrowForward />
 								</div>
 							</div>
-							<div className={styles.winMenuRecommendedBottom}>
-								<div className={styles.winMenuRecommendedItem}>
-									<Link
-										href="/explorer/quick-access"
-										passHref
+							<div className={styles.winMenuPinnedBottom}>
+								{startMenuSocialApps.map((app) => (
+									<div
+										key={app.id}
+										role="button"
+										tabIndex={0}
+										onClick={() => onOpenSocial(app.href)}
+										onKeyDown={(e) => {
+											if (
+												e.key === 'Enter' ||
+												e.key === ' '
+											) {
+												onOpenSocial(app.href);
+											}
+										}}
 									>
-										<div onClick={() => handleWinMenu()}>
-											<Image
-												src="/icons/explorer/explorer.png"
-												alt="img"
-												width={30}
-												height={30}
-											></Image>
-											<p>File Explorer</p>
-										</div>
-									</Link>
-									<Link href="/explorer/pictures" passHref>
-										<div onClick={() => handleWinMenu()}>
-											<Image
-												src="/icons/pictures/pictures.png"
-												alt="img"
-												width={30}
-												height={30}
-											></Image>
-											<p>Photos</p>
-										</div>
-									</Link>
-								</div>
-								<div className={styles.winMenuRecommendedItem}>
-									<Link href="/explorer/videos" passHref>
-										<div onClick={() => handleWinMenu()}>
-											<Image
-												src="/icons/videos/videos.png"
-												alt="img"
-												width={30}
-												height={30}
-											></Image>
-											<p>Videos</p>
-										</div>
-									</Link>
-									<div>
 										<Image
-											src="/icons/firefox/firefox.png"
-											alt="img"
+											src={app.icon}
+											alt={app.label}
 											width={30}
 											height={30}
-										></Image>
-										<p>Firefox</p>
+										/>
+										<p>{app.label}</p>
 									</div>
+								))}
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() =>
+										onOpenSocial(`mailto:${site.email}`)
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											onOpenSocial(
+												`mailto:${site.email}`
+											);
+										}
+									}}
+								>
+									<Image
+										src="/svg/email.svg"
+										alt="Email"
+										width={30}
+										height={30}
+									/>
+									<p>Email</p>
 								</div>
 							</div>
 						</div>
@@ -192,7 +255,7 @@ function WindowsMenu({ winMenu, handleWinMenu }: Props) {
 							alt=""
 							width={30}
 							height={30}
-						></Image>
+						/>
 						<p>{site.username}</p>
 					</div>
 					<div>

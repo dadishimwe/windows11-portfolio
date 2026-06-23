@@ -1,21 +1,26 @@
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
 import Icons from '../../components/modules/Icons/Icons';
 import { handleWindowPriority } from '../../components/utils/WindowPriority/WindowPriority';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
 import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
 import PageHead from '../../components/utils/PageHead/PageHead';
 import { Context } from '../../context/ContextProvider';
+import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
 import { getLocalGalleryImages } from '../../lib/localImages';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
 function Pictures({ data }: { data: MediaType[] }) {
+	const router = useRouter();
+	const isEmbed = router.query.embed === 'true';
 	const [openImage, setOpenImage] = useState<MediaType | null>(null);
 
 	const DraggableWindowContext = useContext(Context);
 	const [windowState, setWindowState] =
 		DraggableWindowContext.windowPriorityState;
+
+	useOpenFromRoute('fileExplorer', { explorerPath: '/explorer/pictures' });
 
 	const ImageContent = () => {
 		if (data.length === 0) {
@@ -59,6 +64,30 @@ function Pictures({ data }: { data: MediaType[] }) {
 		);
 	};
 
+	const embedContent = (
+		<>
+			{openImage && (
+				<MediaPlayer
+					media={openImage}
+					closeMedia={setOpenImage}
+					component={
+						<Image
+							src={openImage.url}
+							alt={openImage.filename}
+							layout="fill"
+							objectFit="contain"
+						/>
+					}
+				/>
+			)}
+			<ImageContent />
+		</>
+	);
+
+	if (isEmbed) {
+		return embedContent;
+	}
+
 	return (
 		<>
 			<PageHead
@@ -66,29 +95,7 @@ function Pictures({ data }: { data: MediaType[] }) {
 				description="Photos and images from Dadi Ishimwe's portfolio."
 				path="/explorer/pictures"
 			/>
-			<div style={{ height: '100%' }}>
-				{openImage && (
-					<MediaPlayer
-						media={openImage}
-						closeMedia={setOpenImage}
-						component={
-							<Image
-								src={openImage.url}
-								alt={openImage.filename}
-								layout="fill"
-								objectFit="contain"
-							/>
-						}
-					/>
-				)}
-				<FileExplorer
-					folder="Pictures"
-					topNav={false}
-					icon="pictures"
-					component={<ImageContent />}
-				/>
-				<Icons />
-			</div>
+			<Icons />
 		</>
 	);
 }

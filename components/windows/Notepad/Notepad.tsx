@@ -2,7 +2,13 @@ import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './Notepad.module.css';
-function Notepad({ initialText }: { initialText: string }) {
+function Notepad({
+	initialText,
+	onClose,
+}: {
+	initialText: string;
+	onClose?: () => void;
+}) {
 	const [text, setText] = useState(initialText);
 
 	const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -21,6 +27,7 @@ function Notepad({ initialText }: { initialText: string }) {
 					height={20}
 				/>
 			}
+			onClose={onClose}
 		>
 			<div className={styles.top}>
 				<section className={styles.navButtons}>

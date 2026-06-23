@@ -2,9 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/GridList.module.css';
 import listItemStyles from '../../styles/utils/List.module.css';
 
@@ -160,22 +158,16 @@ function QuickAccess() {
 	};
 
 	return (
-		<>
-			<PageHead
-				title="Quick access"
-				description="Quick access to files and folders on my Windows portfolio."
-				path="/explorer/quick-access"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					folder="Quick access"
-					topNav={false}
-					icon="quickaccess"
-					component={content()}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/quick-access"
+			head={{
+				title: 'Quick access',
+				description:
+					'Quick access to files and folders on my Windows portfolio.',
+				path: '/explorer/quick-access',
+			}}
+			content={content}
+		/>
 	);
 }
 

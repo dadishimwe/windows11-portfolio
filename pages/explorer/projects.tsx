@@ -1,7 +1,5 @@
 import Image from 'next/image';
-import Icons from '../../components/modules/Icons/Icons';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
-import PageHead from '../../components/utils/PageHead/PageHead';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
 import { ProjectType } from '../../typings';
 
@@ -63,22 +61,16 @@ function Projects({ data }: { data: ProjectType[] }) {
 		);
 	};
 	return (
-		<>
-			<PageHead
-				title="Projects"
-				description="Open source projects from my GitHub — no forks, only public repos."
-				path="/explorer/projects"
-			/>
-			<div style={{ height: '100%' }}>
-				<FileExplorer
-					icon="folder"
-					folder="Projects"
-					component={content()}
-					topNav={true}
-				/>
-				<Icons />
-			</div>
-		</>
+		<ExplorerPage
+			path="/explorer/projects"
+			head={{
+				title: 'Projects',
+				description:
+					'Open source projects from my GitHub — no forks, only public repos.',
+				path: '/explorer/projects',
+			}}
+			content={content}
+		/>
 	);
 }
 

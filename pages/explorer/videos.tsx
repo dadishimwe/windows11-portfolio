@@ -1,20 +1,25 @@
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
 import Icons from '../../components/modules/Icons/Icons';
 import { handleWindowPriority } from '../../components/utils/WindowPriority/WindowPriority';
-import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
 import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
 import PageHead from '../../components/utils/PageHead/PageHead';
 import { Context } from '../../context/ContextProvider';
+import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
 function Videos({ data }: { data: MediaType[] }) {
+	const router = useRouter();
+	const isEmbed = router.query.embed === 'true';
 	const [openVideo, setOpenVideo] = useState<MediaType | null>(null);
 
 	const DraggableWindowContext = useContext(Context);
 	const [windowState, setWindowState] =
 		DraggableWindowContext.windowPriorityState;
+
+	useOpenFromRoute('fileExplorer', { explorerPath: '/explorer/videos' });
 
 	const VideoContent = () => {
 		if (data.length === 0) {
@@ -58,6 +63,30 @@ function Videos({ data }: { data: MediaType[] }) {
 		);
 	};
 
+	const embedContent = (
+		<>
+			{openVideo && (
+				<MediaPlayer
+					closeMedia={setOpenVideo}
+					media={openVideo}
+					component={
+						<video
+							controls
+							autoPlay
+							src={openVideo.secure_url}
+							style={{ width: '100%', height: '100%' }}
+						/>
+					}
+				/>
+			)}
+			<VideoContent />
+		</>
+	);
+
+	if (isEmbed) {
+		return embedContent;
+	}
+
 	return (
 		<>
 			<PageHead
@@ -65,29 +94,7 @@ function Videos({ data }: { data: MediaType[] }) {
 				description="Videos from Dadi Ishimwe's portfolio."
 				path="/explorer/videos"
 			/>
-			<div style={{ height: '100%' }}>
-				{openVideo && (
-					<MediaPlayer
-						closeMedia={setOpenVideo}
-						media={openVideo}
-						component={
-							<video
-								controls
-								autoPlay
-								src={openVideo.secure_url}
-								style={{ width: '100%', height: '100%' }}
-							/>
-						}
-					/>
-				)}
-				<FileExplorer
-					folder="Videos"
-					topNav={false}
-					icon="videos"
-					component={<VideoContent />}
-				/>
-				<Icons />
-			</div>
+			<Icons />
 		</>
 	);
 }
