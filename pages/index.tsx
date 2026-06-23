@@ -5,21 +5,15 @@ export default function Home() {
 	return (
 		<>
 			<Head>
-				<title>kassq</title>
-				<link rel="canonical" href="https://www.kassq.dev" />
-
-				{/* Description */}
+				<title>dadishimwe</title>
 				<meta
 					name="description"
-					content="Kassq's personal website. A place to share my projects and learn about me. I do some coding sometimes."
+					content="Dadi Ishimwe — network engineer and data scientist. Infrastructure, ML, and a Windows 11 desktop portfolio."
 				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq" />
-				<meta property="og:url" content="https://www.kassq.dev" />
+				<meta property="og:title" content="Dadi Ishimwe" />
 				<meta
 					property="og:description"
-					content="Kassq's personal website. A place to share my projects and learn about me. I do some coding sometimes."
+					content="Network engineer and data scientist passionate about infrastructure and machine learning."
 				/>
 			</Head>
 			<div style={{ height: '100%' }}>

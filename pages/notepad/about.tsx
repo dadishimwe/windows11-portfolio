@@ -1,47 +1,40 @@
 import Head from 'next/head';
 import Icons from '../../components/modules/Icons/Icons';
 import Notepad from '../../components/windows/Notepad/Notepad';
+
 function About() {
-	const getAge = () => {
-		const dateString = '2002-01-30';
-		var today = new Date();
-		var birthDate = new Date(dateString);
-		var age = today.getFullYear() - birthDate.getFullYear();
-		var m = today.getMonth() - birthDate.getMonth();
-		if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-			age--;
-		}
-		return age;
-	};
 	const textContent = () => {
-		return `Hello, my name is Kasperi! 👋\n\nI am a ${getAge()}-year-old Computer Science student from Naantali, Finland. I am interested on all kinds of tech related topics such as web development! Open the Links folder to follow me on social media! 🤠\n\nBtw this website is built with Next.js and React and is recreation of my windows desktop :D\n\nMessy source code available on GitHub: https://github.com/KasperiP/windows11-portfolio
+		return `Hello, my name is Dadi Ishimwe! 👋
+
+I'm a network engineer and data scientist passionate about infrastructure and machine learning. I love building reliable systems and turning data into something useful.
+
+Certifications:
+• Fortinet Certified
+• Peplink Certified
+
+Education:
+• MIT Emerging Talent — Computer and Data Science
+
+Open the Links folder on the desktop to find me on LinkedIn, GitHub, Instagram, or shoot me an email.
+
+This site is a Windows 11-style portfolio built with Next.js and React.
+
+Source code: https://github.com/dadishimwe/windows11-portfolio
 		`;
 	};
 
 	return (
 		<>
 			<Head>
-				<title>kassq - About me</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/notepad/about"
-				/>
-
-				{/* Description */}
+				<title>dadishimwe - About me</title>
 				<meta
 					name="description"
-					content="Who am I? I guess you will find out after reading this."
+					content="Network engineer and data scientist. Fortinet & Peplink certified. MIT Emerging Talent alum."
 				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - About me" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/notepad/about"
-				/>
+				<meta property="og:title" content="Dadi Ishimwe - About me" />
 				<meta
 					property="og:description"
-					content="Who am I? I guess you will find out after reading this."
+					content="Network engineer and data scientist passionate about infrastructure and ML."
 				/>
 			</Head>
 			<div style={{ height: '100%' }}>
