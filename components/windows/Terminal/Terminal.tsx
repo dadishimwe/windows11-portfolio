@@ -10,8 +10,8 @@ import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
 import {
-	buildInitialTerminalSessions,
 	createTerminalSession,
+	getInitialTerminalState,
 	TerminalSession,
 } from '../../../lib/terminalTabs';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
@@ -31,11 +31,12 @@ function focusTerminalInput(input: HTMLInputElement | null) {
 }
 
 function Terminal({ onClose }: { onClose?: () => void }) {
+	const [initial] = useState(getInitialTerminalState);
 	const [sessions, setSessions] = useState<TerminalSession[]>(
-		buildInitialTerminalSessions
+		initial.sessions
 	);
 	const [activeSessionId, setActiveSessionId] = useState(
-		() => buildInitialTerminalSessions()[0].id
+		initial.activeSessionId
 	);
 	const [inputValue, setInputValue] = useState('');
 

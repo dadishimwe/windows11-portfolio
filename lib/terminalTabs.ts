@@ -24,3 +24,11 @@ export function createTerminalSession(title?: string): TerminalSession {
 export function buildInitialTerminalSessions(): TerminalSession[] {
 	return [createTerminalSession('MINGW64')];
 }
+
+export function getInitialTerminalState(): {
+	sessions: TerminalSession[];
+	activeSessionId: string;
+} {
+	const sessions = buildInitialTerminalSessions();
+	return { sessions, activeSessionId: sessions[0].id };
+}
