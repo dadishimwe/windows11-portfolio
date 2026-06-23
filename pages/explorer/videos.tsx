@@ -17,6 +17,10 @@ function Videos({ data }: { data: MediaType[] }) {
 		DraggableWindowContext.windowPriorityState;
 
 	const VideoContent = () => {
+		if (data.length === 0) {
+			return <p className={styles.emptyFolder}>This folder is empty.</p>;
+		}
+
 		return (
 			<div className={styles.wrapper}>
 				{data.map((video) => (
@@ -38,7 +42,7 @@ function Videos({ data }: { data: MediaType[] }) {
 							<Image
 								className="no_click"
 								src={video.thumbnail}
-								alt="icon"
+								alt={video.filename}
 								width="100%"
 								height="100%"
 								layout="responsive"
@@ -46,7 +50,7 @@ function Videos({ data }: { data: MediaType[] }) {
 							/>
 						</div>
 						<p className="no_click">
-							{video.filename.slice(0, -7)}.{video.format}
+							{video.filename}.{video.format}
 						</p>
 					</div>
 				))}
@@ -57,28 +61,12 @@ function Videos({ data }: { data: MediaType[] }) {
 	return (
 		<>
 			<Head>
-				<title>kassq - Videos</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/explorer/videos"
-				/>
-
-				{/* Description */}
+				<title>dadishimwe - Videos</title>
 				<meta
 					name="description"
-					content="Here you can find funny dog and cat videos I randomly post sometimes. Maybe horses too."
+					content="Videos from Dadi Ishimwe's portfolio."
 				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - Videos" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/explorer/videos"
-				/>
-				<meta
-					property="og:description"
-					content="Here you can find funny dog and cat videos I randomly post sometimes. Maybe horses too."
-				/>
+				<meta property="og:title" content="Dadi Ishimwe - Videos" />
 			</Head>
 			<div style={{ height: '100%' }}>
 				{openVideo && (
@@ -107,22 +95,37 @@ function Videos({ data }: { data: MediaType[] }) {
 	);
 }
 
-export async function getStaticProps() {
-	const res = await fetch(
-		`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/video?max_results=100`,
-		{
-			headers: {
-				Authorization: `Basic ${Buffer.from(
-					process.env.CLOUDINARY_API_KEY +
-						':' +
-						process.env.CLOUDINARY_API_SECRET
-				).toString('base64')}}`,
-			},
-		}
-	).then((res) => res.json());
+async function getCloudinaryVideos(): Promise<MediaType[]> {
+	const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+		process.env;
 
-	const data = res.resources.map((video: MediaType) => {
-		return {
+	if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+		return [];
+	}
+
+	try {
+		const res = await fetch(
+			`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/video?max_results=100`,
+			{
+				headers: {
+					Authorization: `Basic ${Buffer.from(
+						`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`
+					).toString('base64')}`,
+				},
+			}
+		);
+
+		if (!res.ok) {
+			return [];
+		}
+
+		const json = await res.json();
+
+		if (!Array.isArray(json.resources)) {
+			return [];
+		}
+
+		return json.resources.map((video: MediaType) => ({
 			thumbnail: (
 				video.secure_url.split('.').slice(0, -1).join('.') + '.webp'
 			).replace('/upload/', '/upload/q_auto:low/'),
@@ -131,21 +134,21 @@ export async function getStaticProps() {
 					? video.public_id.replace('videos/', '').slice(0, 25)
 					: video.public_id.replace('videos/', ''),
 			secure_url: video.secure_url,
+			url: video.secure_url,
 			format: video.format,
-		};
-	});
-
-	if (!data) {
-		return {
-			notFound: true,
-		};
+			public_id: video.public_id,
+		}));
+	} catch {
+		return [];
 	}
+}
+
+export async function getStaticProps() {
+	const data = await getCloudinaryVideos();
 
 	return {
-		props: {
-			data,
-		},
-		revalidate: 10,
+		props: { data },
+		revalidate: 60,
 	};
 }
 

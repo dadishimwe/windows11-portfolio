@@ -187,7 +187,7 @@ function WindowsMenu({ winMenu, handleWinMenu }: Props) {
 				<div className={styles.winMenuFooter}>
 					<div>
 						<Image
-							src="/images/windowsUser.webp"
+							src="/images/programmer.png"
 							alt=""
 							width={30}
 							height={30}

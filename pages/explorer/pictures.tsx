@@ -6,6 +6,7 @@ import { handleWindowPriority } from '../../components/utils/WindowPriority/Wind
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
 import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
 import { Context } from '../../context/ContextProvider';
+import { getLocalGalleryImages } from '../../lib/localImages';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
@@ -17,6 +18,10 @@ function Pictures({ data }: { data: MediaType[] }) {
 		DraggableWindowContext.windowPriorityState;
 
 	const ImageContent = () => {
+		if (data.length === 0) {
+			return <p className={styles.emptyFolder}>This folder is empty.</p>;
+		}
+
 		return (
 			<div className={styles.wrapper}>
 				{data.map((image) => (
@@ -38,7 +43,7 @@ function Pictures({ data }: { data: MediaType[] }) {
 							<Image
 								className="no_click"
 								src={image.url}
-								alt="icon"
+								alt={image.filename}
 								width="100%"
 								height="100%"
 								layout="responsive"
@@ -46,7 +51,7 @@ function Pictures({ data }: { data: MediaType[] }) {
 							/>
 						</div>
 						<p className="no_click">
-							{image.filename.slice(0, -7)}.{image.format}
+							{image.filename}.{image.format}
 						</p>
 					</div>
 				))}
@@ -57,28 +62,12 @@ function Pictures({ data }: { data: MediaType[] }) {
 	return (
 		<>
 			<Head>
-				<title>kassq - Pictures</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/explorer/pictures"
-				/>
-
-				{/* Description */}
+				<title>dadishimwe - Pictures</title>
 				<meta
 					name="description"
-					content="Funny memes and pictures from the internet."
+					content="Photos and images from Dadi Ishimwe's portfolio."
 				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - Pictures" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/explorer/pictures"
-				/>
-				<meta
-					property="og:description"
-					content="Funny memes and pictures from the internet."
-				/>
+				<meta property="og:title" content="Dadi Ishimwe - Pictures" />
 			</Head>
 			<div style={{ height: '100%' }}>
 				{openImage && (
@@ -88,7 +77,7 @@ function Pictures({ data }: { data: MediaType[] }) {
 						component={
 							<Image
 								src={openImage.url}
-								alt="icon"
+								alt={openImage.filename}
 								layout="fill"
 								objectFit="contain"
 							/>
@@ -107,43 +96,59 @@ function Pictures({ data }: { data: MediaType[] }) {
 	);
 }
 
-export async function getStaticProps() {
-	const res = await fetch(
-		`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/image?max_results=100`,
-		{
-			headers: {
-				Authorization: `Basic ${Buffer.from(
-					process.env.CLOUDINARY_API_KEY +
-						':' +
-						process.env.CLOUDINARY_API_SECRET
-				).toString('base64')}}`,
-			},
-		}
-	).then((res) => res.json());
+async function getCloudinaryImages(): Promise<MediaType[] | null> {
+	const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+		process.env;
 
-	const data = res.resources.map((image: MediaType) => {
-		return {
+	if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+		return null;
+	}
+
+	try {
+		const res = await fetch(
+			`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image?max_results=100`,
+			{
+				headers: {
+					Authorization: `Basic ${Buffer.from(
+						`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`
+					).toString('base64')}`,
+				},
+			}
+		);
+
+		if (!res.ok) {
+			return null;
+		}
+
+		const json = await res.json();
+
+		if (!Array.isArray(json.resources)) {
+			return null;
+		}
+
+		return json.resources.map((image: MediaType) => ({
 			url: image.secure_url.replace('/upload/', '/upload/q_auto:low/'),
 			secure_url: image.secure_url,
+			thumbnail: image.secure_url,
 			filename:
 				image.public_id.replace('images/', '').length > 25
 					? image.public_id.replace('images/', '').slice(0, 25)
 					: image.public_id.replace('images/', ''),
 			format: image.format,
-		};
-	});
-
-	if (!data) {
-		return {
-			notFound: true,
-		};
+			public_id: image.public_id,
+		}));
+	} catch {
+		return null;
 	}
+}
+
+export async function getStaticProps() {
+	const cloudinaryImages = await getCloudinaryImages();
+	const data = cloudinaryImages ?? getLocalGalleryImages();
 
 	return {
-		props: {
-			data,
-		},
-		revalidate: 10,
+		props: { data },
+		revalidate: 60,
 	};
 }
 

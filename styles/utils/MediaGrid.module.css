@@ -28,3 +28,9 @@
 .mediaItem:hover {
 	background-color: #2e2e2e;
 }
+
+.emptyFolder {
+	padding: 20px;
+	color: #fff;
+	font-size: 0.8rem;
+}

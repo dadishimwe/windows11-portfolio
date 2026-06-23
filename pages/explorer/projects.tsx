@@ -102,21 +102,30 @@ function Projects({ data }: { data: ProjectType[] }) {
 }
 
 export async function getStaticProps() {
-	const res = await fetch(`https://api.github.com/users/KasperiP/repos`);
-	const data = (await res.json()).filter(
-		(project: ProjectType) =>
-			project.fork === false && project.full_name !== 'KasperiP/KasperiP'
-	);
+	let data: ProjectType[] = [];
 
-	if (!data) {
-		return {
-			notFound: true,
-		};
+	try {
+		const res = await fetch(
+			'https://api.github.com/users/dadishimwe/repos'
+		);
+
+		if (res.ok) {
+			const json = await res.json();
+			data = Array.isArray(json)
+				? json.filter(
+						(project: ProjectType) =>
+							project.fork === false &&
+							project.full_name !== 'dadishimwe/dadishimwe'
+				  )
+				: [];
+		}
+	} catch {
+		data = [];
 	}
 
 	return {
 		props: { data },
-		revalidate: 10,
+		revalidate: 60,
 	};
 }
 
