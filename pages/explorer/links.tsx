@@ -1,18 +1,16 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
+import PageHead from '../../components/utils/PageHead/PageHead';
+import { site } from '../../config/site';
 import styles from '../../styles/utils/List.module.css';
 
 function Links() {
 	const content = () => {
 		return (
 			<div className={styles.listItemContainer}>
-				<Link
-					href="https://www.linkedin.com/in/dadi-ishimwe-473a50275"
-					passHref
-				>
+				<Link href={site.linkedin} passHref>
 					<a target="_blank" rel="noopener noreferrer">
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
@@ -32,7 +30,7 @@ function Links() {
 						</div>
 					</a>
 				</Link>
-				<Link href="https://github.com/dadishimwe" passHref>
+				<Link href={site.github} passHref>
 					<a target="_blank" rel="noopener noreferrer">
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
@@ -52,10 +50,7 @@ function Links() {
 						</div>
 					</a>
 				</Link>
-				<Link
-					href="https://www.instagram.com/dadishimwe?igsh=dWpnMHN1b2VxcW9n"
-					passHref
-				>
+				<Link href={site.instagram} passHref>
 					<a target="_blank" rel="noopener noreferrer">
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
@@ -75,7 +70,7 @@ function Links() {
 						</div>
 					</a>
 				</Link>
-				<Link href="mailto:dadi29skl@gmail.com" passHref>
+				<Link href={`mailto:${site.email}`} passHref>
 					<a rel="noopener noreferrer">
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
@@ -101,18 +96,11 @@ function Links() {
 
 	return (
 		<>
-			<Head>
-				<title>dadishimwe - Links</title>
-				<meta
-					name="description"
-					content="LinkedIn, GitHub, Instagram, and email — all in one place."
-				/>
-				<meta property="og:title" content="Dadi Ishimwe - Links" />
-				<meta
-					property="og:description"
-					content="LinkedIn, GitHub, Instagram, and email — all in one place."
-				/>
-			</Head>
+			<PageHead
+				title="Links"
+				description="LinkedIn, GitHub, Instagram, and email — all in one place."
+				path="/explorer/links"
+			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
 					icon="folder"

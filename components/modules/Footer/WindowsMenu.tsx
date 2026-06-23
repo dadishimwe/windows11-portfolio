@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { AiOutlinePoweroff } from 'react-icons/ai';
 import { IoIosArrowForward } from 'react-icons/io';
 import { VscSearch } from 'react-icons/vsc';
+import { site } from '../../../config/site';
 import styles from './WindowsMenu.module.css';
 
 type Props = {
@@ -192,7 +193,7 @@ function WindowsMenu({ winMenu, handleWinMenu }: Props) {
 							width={30}
 							height={30}
 						></Image>
-						<p>dadishimwe</p>
+						<p>{site.username}</p>
 					</div>
 					<div>
 						<AiOutlinePoweroff />

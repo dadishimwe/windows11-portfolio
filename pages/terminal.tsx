@@ -1,23 +1,15 @@
-import Head from 'next/head';
 import Icons from '../components/modules/Icons/Icons';
 import { default as TerminalComponent } from '../components/windows/Terminal/Terminal';
-import { site } from '../config/site';
+import PageHead from '../components/utils/PageHead/PageHead';
 
 function Terminal() {
 	return (
 		<>
-			<Head>
-				<title>{site.username} - Terminal</title>
-				<meta
-					name="description"
-					content="A place to execute commands and feel like being a hacker."
-				/>
-				<meta property="og:title" content={`${site.name} - Terminal`} />
-				<meta
-					property="og:description"
-					content="A place to execute commands and feel like being a hacker."
-				/>
-			</Head>
+			<PageHead
+				title="Terminal"
+				description="A place to execute commands and feel like being a hacker."
+				path="/terminal"
+			/>
 			<div style={{ height: '100%' }}>
 				<TerminalComponent />
 				<Icons />

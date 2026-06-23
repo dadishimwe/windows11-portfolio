@@ -1,10 +1,10 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
+import PageHead from '../../components/utils/PageHead/PageHead';
 import styles from '../../styles/utils/GridList.module.css';
 
 function ThisPC() {
@@ -168,30 +168,11 @@ function ThisPC() {
 
 	return (
 		<>
-			<Head>
-				<title>kassq - This PC</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/explorer/this-pc"
-				/>
-
-				{/* Description */}
-				<meta
-					name="description"
-					content="Yeah, this is the file explorer's this PC page. Nothing interesting here."
-				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - This PC" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/explorer/this-pc"
-				/>
-				<meta
-					property="og:description"
-					content="Yeah, this is the file explorer's this PC page. Nothing interesting here."
-				/>
-			</Head>
+			<PageHead
+				title="This PC"
+				description="File Explorer — This PC view on my Windows portfolio."
+				path="/explorer/this-pc"
+			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
 					folder="This PC"

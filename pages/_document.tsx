@@ -1,12 +1,12 @@
-// pages/_document.js
-
+import { getSiteUrl, site } from '../config/site';
 import { Head, Html, Main, NextScript } from 'next/document';
 
 export default function Document() {
+	const siteUrl = getSiteUrl();
+
 	return (
 		<Html lang="en">
 			<Head>
-				{/* Fonts */}
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
 				<link rel="preconnect" href="https://fonts.gstatic.com" />
 				<link
@@ -14,43 +14,33 @@ export default function Document() {
 					rel="stylesheet"
 				/>
 
-				{/* SEO & Open Graph meta tags */}
 				<meta name="theme-color" content="#55FFFF" />
 				<meta charSet="utf-8" />
 				<meta name="language" content="english" />
-
-				<meta name="author" content="kassq" />
-				<meta name="designer" content="kassq" />
-				<meta name="publisher" content="kassq" />
-
-				<meta
-					name="keywords"
-					content="kassq, kasperi, coding, development"
-				/>
-
+				<meta name="author" content={site.username} />
+				<meta name="designer" content={site.name} />
+				<meta name="publisher" content={site.name} />
+				<meta name="keywords" content={site.keywords} />
 				<meta name="robots" content="index, follow" />
 				<meta name="subject" content="Personal" />
 
-				{/* Global OpenGraph tags */}
-				<meta
-					property="og:site_name"
-					content="Average Windows enjoyer"
-				/>
+				<meta property="og:site_name" content={site.ogSiteName} />
 				<meta property="og:type" content="website" />
-				<meta property="og:url" content="https://www.kassq.dev" />
+				<meta property="og:url" content={siteUrl} />
 				<meta
 					property="og:image"
-					content="https://www.kassq.dev/logo.webp"
+					content={`${siteUrl}${site.ogImage}`}
 				/>
 
-				{/* Global Site Tag (gtag.js) - Google Analytics */}
-				<script
-					async
-					src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
-				/>
-				<script
-					dangerouslySetInnerHTML={{
-						__html: `
+				{process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS && (
+					<>
+						<script
+							async
+							src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+						/>
+						<script
+							dangerouslySetInnerHTML={{
+								__html: `
 							window.dataLayer = window.dataLayer || [];
 							function gtag(){dataLayer.push(arguments);}
 							gtag('js', new Date());
@@ -58,8 +48,10 @@ export default function Document() {
 							page_path: window.location.pathname,
 							});
 						`,
-					}}
-				/>
+							}}
+						/>
+					</>
+				)}
 			</Head>
 			<body>
 				<Main />

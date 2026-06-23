@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { getSiteUrl, site } from '../../../config/site';
 import styles from './Bluescreen.module.css';
 
 type Props = {
@@ -33,7 +34,7 @@ function Bluescreen({ errorCode }: Props) {
 	return (
 		<>
 			<Head>
-				<title>kassq - {errorCode || 'ERROR'}</title>
+				<title>{site.username} - {errorCode || 'ERROR'}</title>
 			</Head>
 			<div className={styles.container}>
 				<div className={styles.wrapper}>
@@ -58,7 +59,7 @@ function Bluescreen({ errorCode }: Props) {
 						<div>
 							<h2>
 								For more information about this issue and
-								possible fixes, visit https://kassq.dev/error
+								possible fixes, visit {getSiteUrl()}
 							</h2>
 							<h2>
 								If you call a support person, give them this

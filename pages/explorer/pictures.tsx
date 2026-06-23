@@ -1,10 +1,10 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import { useContext, useState } from 'react';
 import Icons from '../../components/modules/Icons/Icons';
 import { handleWindowPriority } from '../../components/utils/WindowPriority/WindowPriority';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
 import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
+import PageHead from '../../components/utils/PageHead/PageHead';
 import { Context } from '../../context/ContextProvider';
 import { getLocalGalleryImages } from '../../lib/localImages';
 import styles from '../../styles/utils/MediaGrid.module.css';
@@ -61,14 +61,11 @@ function Pictures({ data }: { data: MediaType[] }) {
 
 	return (
 		<>
-			<Head>
-				<title>dadishimwe - Pictures</title>
-				<meta
-					name="description"
-					content="Photos and images from Dadi Ishimwe's portfolio."
-				/>
-				<meta property="og:title" content="Dadi Ishimwe - Pictures" />
-			</Head>
+			<PageHead
+				title="Pictures"
+				description="Photos and images from Dadi Ishimwe's portfolio."
+				path="/explorer/pictures"
+			/>
 			<div style={{ height: '100%' }}>
 				{openImage && (
 					<MediaPlayer

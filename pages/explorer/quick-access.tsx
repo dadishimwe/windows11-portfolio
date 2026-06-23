@@ -1,10 +1,10 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
+import PageHead from '../../components/utils/PageHead/PageHead';
 import styles from '../../styles/utils/GridList.module.css';
 import listItemStyles from '../../styles/utils/List.module.css';
 
@@ -161,30 +161,11 @@ function QuickAccess() {
 
 	return (
 		<>
-			<Head>
-				<title>kassq - Quick access</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/explorer/quick-access"
-				/>
-
-				{/* Description */}
-				<meta
-					name="description"
-					content="Want to go fast? Here's a quick access to my files and folders."
-				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - Quick access" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/explorer/quick-access"
-				/>
-				<meta
-					property="og:description"
-					content="Want to go fast? Here's a quick access to my files and folders."
-				/>
-			</Head>
+			<PageHead
+				title="Quick access"
+				description="Quick access to files and folders on my Windows portfolio."
+				path="/explorer/quick-access"
+			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
 					folder="Quick access"

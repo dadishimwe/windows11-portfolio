@@ -1,18 +1,15 @@
-import Head from 'next/head';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
+import PageHead from '../../components/utils/PageHead/PageHead';
 
 function Podcasts() {
 	return (
 		<>
-			<Head>
-				<title>dadishimwe - Podcasts</title>
-				<meta
-					name="description"
-					content="Podcasts and tech audio I enjoy."
-				/>
-				<meta property="og:title" content="Dadi Ishimwe - Podcasts" />
-			</Head>
+			<PageHead
+				title="Podcasts"
+				description="Podcasts and tech audio I enjoy."
+				path="/explorer/podcasts"
+			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
 					icon="folder"

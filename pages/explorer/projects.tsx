@@ -1,7 +1,7 @@
-import Head from 'next/head';
 import Image from 'next/image';
 import Icons from '../../components/modules/Icons/Icons';
 import FileExplorer from '../../components/windows/FileExplorer/FileExplorer';
+import PageHead from '../../components/utils/PageHead/PageHead';
 import styles from '../../styles/utils/List.module.css';
 import { ProjectType } from '../../typings';
 
@@ -64,30 +64,11 @@ function Projects({ data }: { data: ProjectType[] }) {
 	};
 	return (
 		<>
-			<Head>
-				<title>kassq - Projects</title>
-				<link
-					rel="canonical"
-					href="https://www.kassq.dev/explorer/projects"
-				/>
-
-				{/* Description */}
-				<meta
-					name="description"
-					content="Too lazy to go to my GitHub page? Here's a list of my open source projects. No forks, no private repos, only my public repos."
-				/>
-
-				{/* OpenGraph */}
-				<meta property="og:title" content="Kassq - Quick access" />
-				<meta
-					property="og:url"
-					content="https://www.kassq.dev/explorer/projects"
-				/>
-				<meta
-					property="og:description"
-					content="Too lazy to go to my GitHub page? Here's a list of my open source projects. No forks, no private repos, only my public repos."
-				/>
-			</Head>
+			<PageHead
+				title="Projects"
+				description="Open source projects from my GitHub — no forks, only public repos."
+				path="/explorer/projects"
+			/>
 			<div style={{ height: '100%' }}>
 				<FileExplorer
 					icon="folder"
