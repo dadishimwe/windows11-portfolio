@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
@@ -20,10 +20,16 @@ function Terminal() {
 	const [cwd, setCwd] = useState(HOME_DIR);
 	const [cachedPublicIp, setCachedPublicIp] = useState<string>();
 
+	const inputRef = useRef<HTMLInputElement>(null);
+	const commandHistoryRef = useRef<string[]>([]);
+	const historyIndexRef = useRef(-1);
+	const draftRef = useRef('');
+
 	const promptPath = formatPromptPath(cwd);
 
 	const executeCommand = useCallback(
 		async (input: string) => {
+			const trimmed = input.trim();
 			const promptAtExecution = formatPromptPath(cwd);
 			const result = await runTerminalCommand(input, {
 				cwd,
@@ -43,6 +49,13 @@ function Terminal() {
 				setCachedPublicIp(result.cachedPublicIp);
 			}
 
+			if (trimmed) {
+				const previous = commandHistoryRef.current;
+				if (previous[previous.length - 1] !== trimmed) {
+					commandHistoryRef.current = [...previous, trimmed];
+				}
+			}
+
 			setHistory((prev) => [
 				...prev,
 				{
@@ -56,32 +69,65 @@ function Terminal() {
 	);
 
 	useEffect(() => {
-		const handleFocus = () => {
-			const terminal = document.getElementsByClassName(
-				'prompt'
-			)[0] as HTMLInputElement;
-			terminal?.focus();
-			terminal?.scrollIntoView();
+		const input = inputRef.current;
+		if (!input) return;
+
+		const handleKeyDown = async (e: KeyboardEvent) => {
+			const commandHistory = commandHistoryRef.current;
+
+			if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				if (commandHistory.length === 0) return;
+
+				if (historyIndexRef.current === -1) {
+					draftRef.current = input.value;
+					historyIndexRef.current = commandHistory.length - 1;
+				} else {
+					historyIndexRef.current = Math.max(
+						0,
+						historyIndexRef.current - 1
+					);
+				}
+
+				input.value = commandHistory[historyIndexRef.current];
+				return;
+			}
+
+			if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				if (historyIndexRef.current === -1) return;
+
+				const nextIndex = historyIndexRef.current + 1;
+				if (nextIndex >= commandHistory.length) {
+					historyIndexRef.current = -1;
+					input.value = draftRef.current;
+					return;
+				}
+
+				historyIndexRef.current = nextIndex;
+				input.value = commandHistory[nextIndex];
+				return;
+			}
+
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				const value = input.value;
+				await executeCommand(value);
+				input.value = '';
+				historyIndexRef.current = -1;
+				draftRef.current = '';
+			}
 		};
 
-		const handleKeyUp = async (e: KeyboardEvent) => {
-			if (e.key !== 'Enter') return;
+		const handleFocus = () => input.focus();
 
-			const target = e.target as HTMLInputElement;
-			if (!target.classList.contains('prompt')) return;
-
-			const input = target.value;
-			await executeCommand(input);
-			target.value = '';
-		};
-
-		document.addEventListener('keydown', handleFocus);
+		input.addEventListener('keydown', handleKeyDown);
 		document.addEventListener('click', handleFocus);
-		document.addEventListener('keyup', handleKeyUp);
+
+		input.focus();
 
 		return () => {
-			document.removeEventListener('keydown', handleFocus);
-			document.removeEventListener('keyup', handleKeyUp);
+			input.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('click', handleFocus);
 		};
 	}, [executeCommand]);
@@ -122,7 +168,13 @@ function Terminal() {
 					</p>
 					<div className={`${styles.promt}`}>
 						<p>$</p>
-						<input type="text" className="prompt" />
+						<input
+							ref={inputRef}
+							type="text"
+							className="prompt"
+							spellCheck={false}
+							autoComplete="off"
+						/>
 					</div>
 				</div>
 			</div>
