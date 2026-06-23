@@ -1,0 +1,16 @@
+.certLinkRow {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.externalIcon {
+	flex-shrink: 0;
+	margin-left: 4px;
+	opacity: 0.65;
+	font-size: 0.75rem;
+}
+
+.certLinkRow:hover .externalIcon {
+	opacity: 1;
+}

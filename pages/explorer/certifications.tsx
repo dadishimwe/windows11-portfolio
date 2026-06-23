@@ -1,13 +1,18 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
-import { certifications } from '../../config/certifications';
+import {
+	certifications,
+	getCertificationHref,
+} from '../../config/certifications';
 import styles from '../../styles/utils/List.module.css';
+import certStyles from '../../styles/utils/Certifications.module.css';
+import { FiExternalLink } from 'react-icons/fi';
 
 function Certifications() {
 	const content = () => (
 		<div className={styles.listItemContainer}>
 			{certifications.map((cert) => {
+				const href = getCertificationHref(cert);
 				const row = (
 					<div className={styles.listItem}>
 						<div className={styles.listItemName}>
@@ -18,25 +23,37 @@ function Certifications() {
 								height={16}
 							/>
 							<p>{cert.name}</p>
+							{href && (
+								<FiExternalLink
+									className={certStyles.externalIcon}
+									aria-hidden
+								/>
+							)}
 						</div>
 						<p className={styles.listItemDateModified}>
 							{cert.dateModified}
 						</p>
-						<p className={styles.listItemType}>Certificate</p>
+						<p className={styles.listItemType}>
+							{href ? 'Credly badge' : 'Certificate'}
+						</p>
 						<p className={styles.listItemSize}>{cert.issuer}</p>
 					</div>
 				);
 
-				if (!cert.url) {
+				if (!href) {
 					return <div key={cert.id}>{row}</div>;
 				}
 
 				return (
-					<Link key={cert.id} href={cert.url} passHref>
-						<a target="_blank" rel="noopener noreferrer">
-							{row}
-						</a>
-					</Link>
+					<a
+						key={cert.id}
+						className={certStyles.certLinkRow}
+						href={href}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{row}
+					</a>
 				);
 			})}
 		</div>

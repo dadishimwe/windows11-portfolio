@@ -1,4 +1,4 @@
-import { certifications } from './certifications';
+import { certifications, getCertificationHref } from './certifications';
 import { site } from './site';
 
 export const HOME_DIR = `/home/${site.username}`;
@@ -42,8 +42,9 @@ Instagram: ${site.instagram}`,
 };
 
 certifications.forEach((cert) => {
+	const href = getCertificationHref(cert);
 	files[`${HOME_DIR}/Documents/Certifications/${cert.id}.txt`] =
-		`${cert.name}\nIssuer: ${cert.issuer}\n${cert.url ? `URL: ${cert.url}` : 'Verification link: pending'}`;
+		`${cert.name}\nIssuer: ${cert.issuer}\n${href ? `Credly: ${href}` : 'Verification link: pending'}`;
 });
 
 export function listDirectory(path: string): string[] | null {
