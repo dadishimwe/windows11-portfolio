@@ -1,9 +1,13 @@
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
-import { HistoryType } from '../../../typings';
+import {
+	buildInitialTerminalSessions,
+	createTerminalSession,
+	TerminalSession,
+} from '../../../lib/terminalTabs';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './Terminal.module.css';
 
@@ -16,38 +20,75 @@ function formatPromptPath(cwd: string) {
 }
 
 function Terminal({ onClose }: { onClose?: () => void }) {
-	const [history, setHistory] = useState<HistoryType[]>([]);
-	const [cwd, setCwd] = useState(HOME_DIR);
-	const [cachedPublicIp, setCachedPublicIp] = useState<string>();
+	const [sessions, setSessions] = useState<TerminalSession[]>(
+		buildInitialTerminalSessions
+	);
+	const [activeSessionId, setActiveSessionId] = useState(
+		() => buildInitialTerminalSessions()[0].id
+	);
+	const [inputValue, setInputValue] = useState('');
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const commandHistoryRef = useRef<string[]>([]);
 	const historyIndexRef = useRef(-1);
 	const draftRef = useRef('');
 
-	const promptPath = formatPromptPath(cwd);
+	const activeSession =
+		sessions.find((session) => session.id === activeSessionId) ??
+		sessions[0];
+
+	const promptPath = formatPromptPath(activeSession.cwd);
+
+	const updateSession = useCallback(
+		(sessionId: string, updater: (session: TerminalSession) => TerminalSession) => {
+			setSessions((prev) =>
+				prev.map((session) =>
+					session.id === sessionId ? updater(session) : session
+				)
+			);
+		},
+		[]
+	);
 
 	const executeCommand = useCallback(
 		async (input: string) => {
 			const trimmed = input.trim();
-			const promptAtExecution = formatPromptPath(cwd);
+			const session = sessions.find((item) => item.id === activeSessionId);
+			if (!session) return;
+
+			const promptAtExecution = formatPromptPath(session.cwd);
 			const result = await runTerminalCommand(input, {
-				cwd,
-				cachedPublicIp,
+				cwd: session.cwd,
+				cachedPublicIp: session.cachedPublicIp,
 			});
 
 			if (result.clear) {
-				setHistory([]);
+				updateSession(activeSessionId, (current) => ({
+					...current,
+					history: [],
+				}));
 				return;
 			}
 
-			if (result.newCwd) {
-				setCwd(result.newCwd);
-			}
+			updateSession(activeSessionId, (current) => {
+				const next: TerminalSession = { ...current };
 
-			if (result.cachedPublicIp) {
-				setCachedPublicIp(result.cachedPublicIp);
-			}
+				if (result.newCwd) next.cwd = result.newCwd;
+				if (result.cachedPublicIp) {
+					next.cachedPublicIp = result.cachedPublicIp;
+				}
+
+				next.history = [
+					...current.history,
+					{
+						input,
+						response: result.response,
+						promptPath: promptAtExecution,
+					},
+				];
+
+				return next;
+			});
 
 			if (trimmed) {
 				const previous = commandHistoryRef.current;
@@ -55,131 +96,170 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 					commandHistoryRef.current = [...previous, trimmed];
 				}
 			}
-
-			setHistory((prev) => [
-				...prev,
-				{
-					input,
-					response: result.response,
-					promptPath: promptAtExecution,
-				},
-			]);
 		},
-		[cwd, cachedPublicIp]
+		[activeSessionId, sessions, updateSession]
 	);
 
-	useEffect(() => {
-		const input = inputRef.current;
-		if (!input) return;
+	const handleInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
+		const commandHistory = commandHistoryRef.current;
 
-		const handleKeyDown = async (e: KeyboardEvent) => {
-			const commandHistory = commandHistoryRef.current;
+		if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			if (commandHistory.length === 0) return;
 
-			if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				if (commandHistory.length === 0) return;
-
-				if (historyIndexRef.current === -1) {
-					draftRef.current = input.value;
-					historyIndexRef.current = commandHistory.length - 1;
-				} else {
-					historyIndexRef.current = Math.max(
-						0,
-						historyIndexRef.current - 1
-					);
-				}
-
-				input.value = commandHistory[historyIndexRef.current];
-				return;
+			if (historyIndexRef.current === -1) {
+				draftRef.current = inputValue;
+				historyIndexRef.current = commandHistory.length - 1;
+			} else {
+				historyIndexRef.current = Math.max(
+					0,
+					historyIndexRef.current - 1
+				);
 			}
 
-			if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				if (historyIndexRef.current === -1) return;
+			setInputValue(commandHistory[historyIndexRef.current]);
+			return;
+		}
 
-				const nextIndex = historyIndexRef.current + 1;
-				if (nextIndex >= commandHistory.length) {
-					historyIndexRef.current = -1;
-					input.value = draftRef.current;
-					return;
-				}
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			if (historyIndexRef.current === -1) return;
 
-				historyIndexRef.current = nextIndex;
-				input.value = commandHistory[nextIndex];
-				return;
-			}
-
-			if (e.key === 'Enter') {
-				e.preventDefault();
-				const value = input.value;
-				await executeCommand(value);
-				input.value = '';
+			const nextIndex = historyIndexRef.current + 1;
+			if (nextIndex >= commandHistory.length) {
 				historyIndexRef.current = -1;
-				draftRef.current = '';
+				setInputValue(draftRef.current);
+				return;
 			}
-		};
 
-		const handleFocus = () => input.focus();
+			historyIndexRef.current = nextIndex;
+			setInputValue(commandHistory[nextIndex]);
+			return;
+		}
 
-		input.addEventListener('keydown', handleKeyDown);
-		document.addEventListener('click', handleFocus);
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			await executeCommand(inputValue);
+			setInputValue('');
+			historyIndexRef.current = -1;
+			draftRef.current = '';
+		}
+	};
 
-		input.focus();
+	const handleAddTab = () => {
+		const nextSession = createTerminalSession();
+		setSessions((prev) => [...prev, nextSession]);
+		setActiveSessionId(nextSession.id);
+		setInputValue('');
+		historyIndexRef.current = -1;
+		draftRef.current = '';
+	};
 
-		return () => {
-			input.removeEventListener('keydown', handleKeyDown);
-			document.removeEventListener('click', handleFocus);
-		};
-	}, [executeCommand]);
+	const handleCloseTab = (sessionId: string) => {
+		if (sessions.length === 1) {
+			const replacement = createTerminalSession('MINGW64');
+			setSessions([replacement]);
+			setActiveSessionId(replacement.id);
+			setInputValue('');
+			commandHistoryRef.current = [];
+			historyIndexRef.current = -1;
+			draftRef.current = '';
+			return;
+		}
+
+		const sessionIndex = sessions.findIndex(
+			(session) => session.id === sessionId
+		);
+		const nextSessions = sessions.filter(
+			(session) => session.id !== sessionId
+		);
+		setSessions(nextSessions);
+
+		if (sessionId === activeSessionId) {
+			const nextSession =
+				nextSessions[Math.max(0, sessionIndex - 1)] ?? nextSessions[0];
+			setActiveSessionId(nextSession.id);
+			setInputValue('');
+			historyIndexRef.current = -1;
+			draftRef.current = '';
+		}
+	};
+
+	useEffect(() => {
+		inputRef.current?.focus();
+	}, [activeSessionId]);
 
 	return (
 		<DraggableWindow
-			windowName={'terminal'}
+			windowName="terminal"
 			topTitle={terminalPath}
 			topIcon={
 				<Image
-					src={`/icons/terminal/terminal.png`}
+					src="/icons/terminal/terminal.png"
 					alt="ico"
 					width={20}
 					height={20}
 				/>
 			}
 			onClose={onClose}
+			terminalTabBar={{
+				tabs: sessions.map((session) => ({
+					id: session.id,
+					title: session.title,
+				})),
+				activeTabId: activeSessionId,
+				onSelect: (id) => {
+					setActiveSessionId(id);
+					setInputValue('');
+					historyIndexRef.current = -1;
+					draftRef.current = '';
+				},
+				onClose: handleCloseTab,
+				onAdd: handleAddTab,
+			}}
 		>
-			<div className={`${styles.main} terminal`}>
-				{history.map((item, index) => (
-					<div
-						key={`${item.input}${index}`}
-						className={styles.historyItem}
-					>
+			<div
+				className={styles.shell}
+				onClick={() => inputRef.current?.focus()}
+			>
+				<div className={styles.background} aria-hidden />
+				<div className={`${styles.main} terminal`}>
+					{activeSession.history.map((item, index) => (
+						<div
+							key={`${item.input}${index}`}
+							className={styles.historyItem}
+						>
+							<p className={styles.terminalTitle}>
+								{terminalPrompt} <span>MINGW64</span>{' '}
+								<span>{item.promptPath ?? promptPath}</span>
+							</p>
+							<p>$ {item.input}</p>
+							{item.response?.split('<br/>')?.map((text, line) => (
+								<p key={line}>{text}</p>
+							))}
+						</div>
+					))}
+					<div className={styles.historyItem}>
 						<p className={styles.terminalTitle}>
 							{terminalPrompt} <span>MINGW64</span>{' '}
-							<span>{item.promptPath ?? promptPath}</span>
+							<span>{promptPath}</span>
 						</p>
-						<p>$ {item.input}</p>
-						{item.response?.split('<br/>')?.map((text, line) => (
-							<p key={line}>{text}</p>
-						))}
-					</div>
-				))}
-				<div className={styles.historyItem}>
-					<p className={styles.terminalTitle}>
-						{terminalPrompt} <span>MINGW64</span>{' '}
-						<span>{promptPath}</span>
-					</p>
-					<div className={`${styles.promt}`}>
-						<p>$</p>
-						<input
-							ref={inputRef}
-							type="text"
-							className="prompt"
-							spellCheck={false}
-							autoComplete="off"
-						/>
+						<div className={styles.promt}>
+							<p>$</p>
+							<input
+								ref={inputRef}
+								type="text"
+								className="prompt"
+								spellCheck={false}
+								autoComplete="off"
+								value={inputValue}
+								onChange={(e) => setInputValue(e.target.value)}
+								onKeyDown={handleInputKeyDown}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div className={styles.background} />
 		</DraggableWindow>
 	);
 }

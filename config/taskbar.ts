@@ -106,7 +106,13 @@ export function normalizeUrl(input: string): string {
 	if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
 		return trimmed;
 	}
-	return `https://${trimmed}`;
+	if (
+		trimmed.startsWith('localhost') ||
+		/^([\w-]+\.)+[\w-]{2,}(:\d+)?(\/.*)?$/i.test(trimmed)
+	) {
+		return `https://${trimmed}`;
+	}
+	return `https://duckduckgo.com/?q=${encodeURIComponent(trimmed)}`;
 }
 
 export function displayUrl(url: string): string {

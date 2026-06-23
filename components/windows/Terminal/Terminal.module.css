@@ -6,12 +6,18 @@
 	font-display: swap;
 }
 
+.shell {
+	position: relative;
+	height: calc(100% - 2rem);
+	overflow: hidden;
+}
+
 .main {
-	position: absolute;
+	position: relative;
 	z-index: 1;
 	overflow-y: auto;
 	width: 100%;
-	height: calc(100% - 32px);
+	height: 100%;
 	padding: 10px;
 	font-weight: 600;
 	font-family: 'Lucida Console', sans-serif;
@@ -37,7 +43,6 @@
 	display: flex;
 	gap: 5px;
 	align-items: flex-start;
-	height: 100%;
 	color: #fff;
 }
 
@@ -58,8 +63,12 @@
 }
 
 .background {
-	height: calc(100% - 32px);
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	height: 100%;
 	border-radius: 0 0 10px 10px;
 	background-image: url('/images/darknoice.png');
 	opacity: 0.9;
+	pointer-events: none;
 }

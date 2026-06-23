@@ -58,6 +58,14 @@ const variants = {
 	},
 };
 
+type TerminalTabBarProps = {
+	tabs: { id: string; title: string }[];
+	activeTabId: string;
+	onSelect: (id: string) => void;
+	onClose: (id: string) => void;
+	onAdd: () => void;
+};
+
 type Props = {
 	children: ReactNode;
 	windowName: string;
@@ -65,6 +73,7 @@ type Props = {
 	topIcon?: ReactNode;
 	close?: (newMedia: null) => void;
 	onClose?: () => void;
+	terminalTabBar?: TerminalTabBarProps;
 };
 
 function DraggableWindow({
@@ -74,6 +83,7 @@ function DraggableWindow({
 	topIcon,
 	close,
 	onClose,
+	terminalTabBar,
 }: Props) {
 	const router = useRouter();
 	const nodeRef = useRef(null);
@@ -327,7 +337,110 @@ function DraggableWindow({
 						<div className={styles.main}>
 							<nav>
 								<section className={`${styles.top} draggable`}>
-									{windowName === 'terminal' ? (
+									{windowName === 'terminal' && terminalTabBar ? (
+										<>
+											<div
+												className={
+													styles.terminalContainer
+												}
+											>
+												<div
+													className={
+														styles.terminalTabList
+													}
+												>
+													{terminalTabBar.tabs.map(
+														(tab) => (
+															<div
+																key={tab.id}
+																className={`${
+																	styles.terminalTab
+																} ${
+																	tab.id ===
+																	terminalTabBar.activeTabId
+																		? styles.terminalTabActive
+																		: ''
+																}`}
+																onClick={() =>
+																	terminalTabBar.onSelect(
+																		tab.id
+																	)
+																}
+																role="tab"
+																tabIndex={0}
+															>
+																<p>
+																	{tab.title}
+																</p>
+																<span
+																	className={
+																		styles.terminalTabClose
+																	}
+																	role="button"
+																	tabIndex={0}
+																	aria-label={`Close ${tab.title}`}
+																	onClick={(
+																		e
+																	) => {
+																		e.stopPropagation();
+																		terminalTabBar.onClose(
+																			tab.id
+																		);
+																	}}
+																	onKeyDown={(
+																		e
+																	) => {
+																		if (
+																			e.key ===
+																				'Enter' ||
+																			e.key ===
+																				' '
+																		) {
+																			e.stopPropagation();
+																			terminalTabBar.onClose(
+																				tab.id
+																			);
+																		}
+																	}}
+																>
+																	<VscChromeClose />
+																</span>
+															</div>
+														)
+													)}
+												</div>
+												<div
+													className={
+														styles.manageButtons
+													}
+												>
+													<span
+														className={
+															styles.terminalIconButton
+														}
+														role="button"
+														tabIndex={0}
+														aria-label="New terminal tab"
+														onClick={
+															terminalTabBar.onAdd
+														}
+														onKeyDown={(e) => {
+															if (
+																e.key ===
+																	'Enter' ||
+																e.key === ' '
+															) {
+																terminalTabBar.onAdd();
+															}
+														}}
+													>
+														<AiOutlinePlus />
+													</span>
+													<RiArrowDropDownLine />
+												</div>
+											</div>
+										</>
+									) : windowName === 'terminal' ? (
 										<>
 											<div
 												className={

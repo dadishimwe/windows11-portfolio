@@ -1,10 +1,10 @@
 import Footer from '../../modules/Footer/Footer';
 import DesktopWindows from '../../DesktopWindows/DesktopWindows';
-import useFirstVisitFirefox from '../../../hooks/useFirstVisitFirefox';
+import useAutoOpenFirefox from '../../../hooks/useAutoOpenFirefox';
 import styles from './Layout.module.css';
 
 function Layout({ children }: { children: React.ReactNode }) {
-	useFirstVisitFirefox();
+	useAutoOpenFirefox();
 
 	return (
 		<>
