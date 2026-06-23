@@ -100,6 +100,10 @@ function FileExplorer(props: Props) {
 	const [quickaccess, setQuickaccess] = useState(true);
 	const [thisPC, setThisPC] = useState(true);
 
+	useEffect(() => {
+		setPath(props.folder);
+	}, [props.folder]);
+
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setPath(e.target.value);
 	};

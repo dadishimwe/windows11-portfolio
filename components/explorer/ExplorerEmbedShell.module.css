@@ -1,0 +1,12 @@
+.shell {
+	min-height: 360px;
+	padding: 12px 8px 16px;
+	background-color: #191919;
+	color: #fff;
+}
+
+.empty {
+	margin: 24px 12px;
+	color: #ccc;
+	font-size: 0.85rem;
+}

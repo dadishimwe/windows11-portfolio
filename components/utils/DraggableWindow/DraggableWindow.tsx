@@ -456,11 +456,15 @@ function DraggableWindow({
 									) : (
 										<>
 											<div
-												className={`${styles.topContainer} draggable`}
+												className={`${styles.topContainer} not_draggable`}
 											>
 												{topIcon}
 												<p>{topTitle}</p>
 											</div>
+											<div
+												className={`${styles.windowDragHandle} draggable`}
+												aria-hidden
+											/>
 										</>
 									)}
 									<div

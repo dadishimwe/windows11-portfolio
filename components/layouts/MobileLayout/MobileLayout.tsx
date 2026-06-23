@@ -233,30 +233,45 @@ function MobileLayout() {
 											key={cert.id}
 											className={styles.certItem}
 										>
-											<h3>{cert.name}</h3>
-											<p className={styles.certMeta}>
-												{cert.issuer} ·{' '}
-												{cert.dateModified}
-											</p>
-											{href ? (
-												<a
-													className={styles.certLink}
-													href={href}
-													target="_blank"
-													rel="noopener noreferrer"
-												>
-													View on Credly{' '}
-													<FiExternalLink />
-												</a>
-											) : (
-												<span
+											{cert.badgeImageUrl && (
+												<Image
+													src={cert.badgeImageUrl}
+													alt={`${cert.name} badge`}
+													width={72}
+													height={72}
 													className={
-														styles.certPending
+														styles.certBadge
 													}
-												>
-													Credly link coming soon
-												</span>
+												/>
 											)}
+											<div>
+												<h3>{cert.name}</h3>
+												<p className={styles.certMeta}>
+													{cert.issuer} ·{' '}
+													{cert.dateModified}
+												</p>
+												{href ? (
+													<a
+														className={
+															styles.certLink
+														}
+														href={href}
+														target="_blank"
+														rel="noopener noreferrer"
+													>
+														View on Credly{' '}
+														<FiExternalLink />
+													</a>
+												) : (
+													<span
+														className={
+															styles.certPending
+														}
+													>
+														Credly link coming soon
+													</span>
+												)}
+											</div>
 										</div>
 									);
 								})}

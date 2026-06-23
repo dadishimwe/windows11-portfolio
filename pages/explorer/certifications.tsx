@@ -4,55 +4,66 @@ import {
 	certifications,
 	getCertificationHref,
 } from '../../config/certifications';
-import styles from '../../styles/utils/List.module.css';
-import certStyles from '../../styles/utils/Certifications.module.css';
+import styles from '../../styles/utils/Certifications.module.css';
 import { FiExternalLink } from 'react-icons/fi';
 
 function Certifications() {
 	const content = () => (
-		<div className={styles.listItemContainer}>
+		<div className={styles.badgeGrid}>
 			{certifications.map((cert) => {
 				const href = getCertificationHref(cert);
-				const row = (
-					<div className={styles.listItem}>
-						<div className={styles.listItemName}>
-							<Image
-								src="/icons/documents/documents_small.png"
-								alt="icon"
-								width={16}
-								height={16}
-							/>
-							<p>{cert.name}</p>
-							{href && (
-								<FiExternalLink
-									className={certStyles.externalIcon}
-									aria-hidden
+				const card = (
+					<div className={styles.badgeCard}>
+						<div className={styles.badgeImageWrap}>
+							{cert.badgeImageUrl ? (
+								<Image
+									src={cert.badgeImageUrl}
+									alt={`${cert.name} badge`}
+									width={96}
+									height={96}
+									className={styles.badgeImage}
+								/>
+							) : (
+								<Image
+									src="/icons/documents/documents.png"
+									alt=""
+									width={64}
+									height={64}
 								/>
 							)}
 						</div>
-						<p className={styles.listItemDateModified}>
-							{cert.dateModified}
-						</p>
-						<p className={styles.listItemType}>
-							{href ? 'Credly badge' : 'Certificate'}
-						</p>
-						<p className={styles.listItemSize}>{cert.issuer}</p>
+						<div className={styles.badgeInfo}>
+							<p className={styles.badgeName}>{cert.name}</p>
+							<p className={styles.badgeMeta}>
+								{cert.issuer} · {cert.dateModified}
+							</p>
+							{href && (
+								<span className={styles.badgeLinkHint}>
+									View on Credly{' '}
+									<FiExternalLink aria-hidden />
+								</span>
+							)}
+						</div>
 					</div>
 				);
 
 				if (!href) {
-					return <div key={cert.id}>{row}</div>;
+					return (
+						<div key={cert.id} className={styles.badgeItem}>
+							{card}
+						</div>
+					);
 				}
 
 				return (
 					<a
 						key={cert.id}
-						className={certStyles.certLinkRow}
+						className={styles.badgeItem}
 						href={href}
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						{row}
+						{card}
 					</a>
 				);
 			})}

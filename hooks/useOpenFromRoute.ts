@@ -6,12 +6,15 @@ import { useWindowManager } from './useWindowManager';
 
 export function useOpenFromRoute(
 	windowName: keyof OpenWindows,
-	options?: OpenWindowOptions
+	options?: OpenWindowOptions & { enabled?: boolean }
 ) {
 	const router = useRouter();
 	const { openWindow } = useWindowManager();
+	const enabled = options?.enabled !== false;
 
 	useEffect(() => {
+		if (!enabled) return;
+
 		const explorerPath =
 			options?.explorerPath ?? router.asPath.split('?')[0];
 		void openWindow(
@@ -20,5 +23,5 @@ export function useOpenFromRoute(
 		);
 		// Open once when landing on a deep-linked route
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [enabled]);
 }

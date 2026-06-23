@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
+import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
 import Icons from '../modules/Icons/Icons';
 import PageHead from '../utils/PageHead/PageHead';
-import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
+import ExplorerEmbedShell from './ExplorerEmbedShell';
 
 type HeadProps = {
 	title: string;
@@ -20,10 +21,15 @@ function ExplorerPage({ path, head, content }: Props) {
 	const router = useRouter();
 	const isEmbed = router.query.embed === 'true';
 
-	useOpenFromRoute('fileExplorer', { explorerPath: path });
+	useOpenFromRoute('fileExplorer', {
+		explorerPath: path,
+		enabled: !isEmbed,
+	});
 
 	if (isEmbed) {
-		return <>{content?.()}</>;
+		return (
+			<ExplorerEmbedShell>{content?.()}</ExplorerEmbedShell>
+		);
 	}
 
 	return (
