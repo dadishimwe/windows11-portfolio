@@ -64,6 +64,7 @@ type Props = {
 	topTitle: string;
 	topIcon?: ReactNode;
 	close?: (newMedia: null) => void;
+	onClose?: () => void;
 };
 
 function DraggableWindow({
@@ -72,6 +73,7 @@ function DraggableWindow({
 	topTitle,
 	topIcon,
 	close,
+	onClose,
 }: Props) {
 	const router = useRouter();
 	const nodeRef = useRef(null);
@@ -137,6 +139,13 @@ function DraggableWindow({
 				)
 			);
 			return setWindowPriority(newPriority);
+		}
+
+		if (onClose) {
+			setTimeout(() => {
+				onClose();
+			}, 500);
+			return;
 		}
 
 		setTimeout(() => {

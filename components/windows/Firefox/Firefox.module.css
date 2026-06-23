@@ -1,0 +1,56 @@
+.browserToolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid #3f3f3f;
+	background-color: #2b2b2b;
+}
+
+.addressBar {
+	flex: 1;
+	padding: 6px 10px;
+	border-radius: 4px;
+	background-color: #1a1a1a;
+	color: #e0e0e0;
+	font-size: 0.75rem;
+}
+
+.browserFrame {
+	width: 100%;
+	height: calc(100% - 41px);
+	border: none;
+	background-color: #fff;
+}
+
+.fallback {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: center;
+	justify-content: center;
+	height: calc(100% - 41px);
+	padding: 24px;
+	background-color: #1e1e1e;
+	text-align: center;
+}
+
+.fallback p {
+	max-width: 360px;
+	color: #ccc;
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+.fallback a {
+	padding: 8px 16px;
+	border-radius: 4px;
+	background-color: #ff7139;
+	color: #fff;
+	font-size: 0.8rem;
+	text-decoration: none;
+}
+
+.fallback a:hover {
+	background-color: #e56530;
+}

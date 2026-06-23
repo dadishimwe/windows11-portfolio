@@ -31,6 +31,7 @@ type Minimized = {
 type ContextType = {
 	maximizedState: [Maximized, (newMaximized: Maximized) => void];
 	minimizedState: [Minimized, (newMinimized: Minimized) => void];
+	firefoxOpenState: [boolean, (open: boolean) => void];
 	explorerHistoryState: [string[], (newExplorerHistory: string[]) => void];
 	indexState: [number, (newIndex: number) => void];
 	wasManualState: [boolean, (newWasManual: boolean) => void];
@@ -52,6 +53,7 @@ const initialMaximized = {
 	mediaPlayer: null,
 	notepad: null,
 	terminal: null,
+	firefox: null,
 };
 
 const initialPosition = {
@@ -79,6 +81,12 @@ const initialPosition = {
 		width: 880,
 		height: 550,
 	},
+	firefox: {
+		x: 0,
+		y: 0,
+		width: 960,
+		height: 600,
+	},
 };
 
 const initialLastPos = {
@@ -93,11 +101,13 @@ const initialMinimized = {
 	mediaPlayer: false,
 	notepad: false,
 	terminal: false,
+	firefox: false,
 };
 
 const initialState: ContextType = {
 	maximizedState: [initialMaximized, () => {}],
 	minimizedState: [initialMinimized, () => {}],
+	firefoxOpenState: [false, () => {}],
 	explorerHistoryState: [[], () => {}],
 	indexState: [0, () => {}],
 	wasManualState: [false, () => {}],
@@ -111,6 +121,7 @@ export const Context = createContext<ContextType>(initialState);
 const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [maximized, setMaximized] = useState<Maximized>(initialMaximized);
 	const [minimized, setMinimized] = useState<Minimized>(initialMinimized);
+	const [firefoxOpen, setFirefoxOpen] = useState(false);
 	const [explorerHistory, setExplorerHistory] = useState<string[]>([]);
 	const [index, setIndex] = useState<number>(0);
 	const [position, setPosition] = useState<PositionState>(initialPosition);
@@ -122,6 +133,7 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const appContext: ContextType = {
 		maximizedState: [maximized, setMaximized],
 		minimizedState: [minimized, setMinimized],
+		firefoxOpenState: [firefoxOpen, setFirefoxOpen],
 		explorerHistoryState: [explorerHistory, setExplorerHistory],
 		indexState: [index, setIndex],
 		wasManualState: [wasManual, setWasManual],

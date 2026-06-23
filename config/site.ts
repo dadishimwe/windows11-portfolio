@@ -8,6 +8,7 @@ export const site = {
 	linkedin: 'https://www.linkedin.com/in/dadi-ishimwe-473a50275',
 	instagram:
 		'https://www.instagram.com/dadishimwe?igsh=dWpnMHN1b2VxcW9n',
+	personalWebsite: 'https://www.dadishimwe.com',
 	description:
 		'Network engineer and data scientist passionate about infrastructure and machine learning.',
 	keywords:

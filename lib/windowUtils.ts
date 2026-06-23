@@ -16,12 +16,23 @@ export function routeToWindow(path: string): string | null {
 
 export function getOpenWindows(
 	currentPath: string,
-	minimized: Record<string, boolean>
+	minimized: Record<string, boolean>,
+	overlayOpen: string[] = []
 ): string[] {
+	const windows: string[] = [];
 	const currentWindow = routeToWindow(currentPath);
-	if (!currentWindow || minimized[currentWindow]) return [];
 
-	return [currentWindow];
+	if (currentWindow && !minimized[currentWindow]) {
+		windows.push(currentWindow);
+	}
+
+	overlayOpen.forEach((windowName) => {
+		if (!minimized[windowName] && !windows.includes(windowName)) {
+			windows.push(windowName);
+		}
+	});
+
+	return windows;
 }
 
 export function getMinimizedWindows(
