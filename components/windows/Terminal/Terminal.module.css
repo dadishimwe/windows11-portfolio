@@ -55,6 +55,8 @@
 	font-weight: 600;
 	font-size: 0.9rem;
 	word-wrap: break-word;
+	user-select: text;
+	caret-color: #fff;
 }
 
 .historyItem {

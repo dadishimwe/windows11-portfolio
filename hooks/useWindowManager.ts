@@ -41,6 +41,10 @@ export function useWindowManager() {
 			}
 
 			await focusWindow(name);
+
+			if (name === 'terminal' && typeof window !== 'undefined') {
+				window.dispatchEvent(new CustomEvent('terminal:focus'));
+			}
 		},
 		[focusWindow, setExplorerPath, setMinimized, setOpenWindows]
 	);

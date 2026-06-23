@@ -1,5 +1,11 @@
 import Image from 'next/image';
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import {
+	KeyboardEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
@@ -17,6 +23,11 @@ const terminalPrompt = `${site.username}@${site.hostname}`;
 function formatPromptPath(cwd: string) {
 	if (cwd === HOME_DIR) return '~';
 	return cwd.replace(HOME_DIR, '~');
+}
+
+function focusTerminalInput(input: HTMLInputElement | null) {
+	if (!input) return;
+	input.focus({ preventScroll: true });
 }
 
 function Terminal({ onClose }: { onClose?: () => void }) {
@@ -39,21 +50,31 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 
 	const promptPath = formatPromptPath(activeSession.cwd);
 
-	const updateSession = useCallback(
-		(sessionId: string, updater: (session: TerminalSession) => TerminalSession) => {
-			setSessions((prev) =>
-				prev.map((session) =>
-					session.id === sessionId ? updater(session) : session
-				)
-			);
-		},
-		[]
-	);
+	const focusInput = useCallback(() => {
+		focusTerminalInput(inputRef.current);
+	}, []);
+
+	useEffect(() => {
+		focusInput();
+		const timers = [0, 50, 150, 400].map((delay) =>
+			window.setTimeout(focusInput, delay)
+		);
+
+		const handleExternalFocus = () => focusInput();
+		window.addEventListener('terminal:focus', handleExternalFocus);
+
+		return () => {
+			timers.forEach((timer) => window.clearTimeout(timer));
+			window.removeEventListener('terminal:focus', handleExternalFocus);
+		};
+	}, [activeSessionId, focusInput]);
 
 	const executeCommand = useCallback(
 		async (input: string) => {
 			const trimmed = input.trim();
-			const session = sessions.find((item) => item.id === activeSessionId);
+			const sessionId = activeSessionId;
+
+			const session = sessions.find((item) => item.id === sessionId);
 			if (!session) return;
 
 			const promptAtExecution = formatPromptPath(session.cwd);
@@ -63,32 +84,38 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 			});
 
 			if (result.clear) {
-				updateSession(activeSessionId, (current) => ({
-					...current,
-					history: [],
-				}));
+				setSessions((prev) =>
+					prev.map((current) =>
+						current.id === sessionId
+							? { ...current, history: [] }
+							: current
+					)
+				);
 				return;
 			}
 
-			updateSession(activeSessionId, (current) => {
-				const next: TerminalSession = { ...current };
+			setSessions((prev) =>
+				prev.map((current) => {
+					if (current.id !== sessionId) return current;
 
-				if (result.newCwd) next.cwd = result.newCwd;
-				if (result.cachedPublicIp) {
-					next.cachedPublicIp = result.cachedPublicIp;
-				}
+					const next: TerminalSession = { ...current };
+					if (result.newCwd) next.cwd = result.newCwd;
+					if (result.cachedPublicIp) {
+						next.cachedPublicIp = result.cachedPublicIp;
+					}
 
-				next.history = [
-					...current.history,
-					{
-						input,
-						response: result.response,
-						promptPath: promptAtExecution,
-					},
-				];
+					next.history = [
+						...current.history,
+						{
+							input,
+							response: result.response,
+							promptPath: promptAtExecution,
+						},
+					];
 
-				return next;
-			});
+					return next;
+				})
+			);
 
 			if (trimmed) {
 				const previous = commandHistoryRef.current;
@@ -97,10 +124,10 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 				}
 			}
 		},
-		[activeSessionId, sessions, updateSession]
+		[activeSessionId, sessions]
 	);
 
-	const handleInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
+	const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
 		const commandHistory = commandHistoryRef.current;
 
 		if (e.key === 'ArrowUp') {
@@ -139,7 +166,7 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			await executeCommand(inputValue);
+			void executeCommand(inputValue).then(() => focusInput());
 			setInputValue('');
 			historyIndexRef.current = -1;
 			draftRef.current = '';
@@ -185,10 +212,6 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 		}
 	};
 
-	useEffect(() => {
-		inputRef.current?.focus();
-	}, [activeSessionId]);
-
 	return (
 		<DraggableWindow
 			windowName="terminal"
@@ -202,6 +225,8 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 				/>
 			}
 			onClose={onClose}
+			onActivate={focusInput}
+			onReady={focusInput}
 			terminalTabBar={{
 				tabs: sessions.map((session) => ({
 					id: session.id,
@@ -219,8 +244,11 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 			}}
 		>
 			<div
-				className={styles.shell}
-				onClick={() => inputRef.current?.focus()}
+				className={`${styles.shell} not_draggable`}
+				onMouseDown={(e) => {
+					e.stopPropagation();
+					focusInput();
+				}}
 			>
 				<div className={styles.background} aria-hidden />
 				<div className={`${styles.main} terminal`}>
@@ -249,12 +277,15 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 							<input
 								ref={inputRef}
 								type="text"
-								className="prompt"
+								className="prompt not_draggable"
 								spellCheck={false}
 								autoComplete="off"
+								autoCorrect="off"
+								autoCapitalize="off"
 								value={inputValue}
 								onChange={(e) => setInputValue(e.target.value)}
 								onKeyDown={handleInputKeyDown}
+								onMouseDown={(e) => e.stopPropagation()}
 							/>
 						</div>
 					</div>

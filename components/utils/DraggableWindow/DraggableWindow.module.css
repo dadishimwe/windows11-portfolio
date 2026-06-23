@@ -26,6 +26,7 @@
 
 .top {
 	display: flex;
+	align-items: center;
 	justify-content: space-between;
 	height: 2rem;
 	padding-left: 5px;
@@ -119,7 +120,11 @@
 	align-items: center;
 	justify-content: center;
 	padding: 2px;
+	border: none;
 	border-radius: 4px;
+	background: transparent;
+	color: inherit;
+	font-size: 0.85rem;
 	cursor: pointer;
 }
 
@@ -132,12 +137,23 @@
 	align-items: center;
 	justify-content: center;
 	padding: 2px 4px;
+	border: none;
 	border-radius: 4px;
+	background: transparent;
+	color: inherit;
+	font-size: 1.2rem;
 	cursor: pointer;
 }
 
 .terminalIconButton:hover {
 	background-color: #2e2e2e;
+}
+
+.windowDragHandle {
+	flex: 1;
+	align-self: stretch;
+	min-width: 32px;
+	cursor: move;
 }
 
 .terminalContainer svg:hover {

@@ -73,6 +73,8 @@ type Props = {
 	topIcon?: ReactNode;
 	close?: (newMedia: null) => void;
 	onClose?: () => void;
+	onActivate?: () => void;
+	onReady?: () => void;
 	terminalTabBar?: TerminalTabBarProps;
 };
 
@@ -83,6 +85,8 @@ function DraggableWindow({
 	topIcon,
 	close,
 	onClose,
+	onActivate,
+	onReady,
 	terminalTabBar,
 }: Props) {
 	const router = useRouter();
@@ -165,7 +169,14 @@ function DraggableWindow({
 
 	const handleClick = (e: MouseEvent<HTMLDivElement>, window: string) => {
 		handlePriority(e, window);
+		onActivate?.();
 	};
+
+	useEffect(() => {
+		if (!loading) {
+			onReady?.();
+		}
+	}, [loading, onReady]);
 
 	useEffect(() => {
 		(async () => {
@@ -324,6 +335,8 @@ function DraggableWindow({
 						initial={
 							history.length > 1 && windowName === 'fileExplorer'
 								? { scale: 1 }
+								: windowName === 'terminal'
+								? { scale: 1 }
 								: { scale: 0 }
 						}
 						exit={{ scale: 0 }}
@@ -336,13 +349,11 @@ function DraggableWindow({
 					>
 						<div className={styles.main}>
 							<nav>
-								<section className={`${styles.top} draggable`}>
+								<section className={styles.top}>
 									{windowName === 'terminal' && terminalTabBar ? (
 										<>
 											<div
-												className={
-													styles.terminalContainer
-												}
+												className={`${styles.terminalContainer} not_draggable`}
 											>
 												<div
 													className={
@@ -372,12 +383,11 @@ function DraggableWindow({
 																<p>
 																	{tab.title}
 																</p>
-																<span
+																<button
+																	type="button"
 																	className={
 																		styles.terminalTabClose
 																	}
-																	role="button"
-																	tabIndex={0}
 																	aria-label={`Close ${tab.title}`}
 																	onClick={(
 																		e
@@ -387,24 +397,9 @@ function DraggableWindow({
 																			tab.id
 																		);
 																	}}
-																	onKeyDown={(
-																		e
-																	) => {
-																		if (
-																			e.key ===
-																				'Enter' ||
-																			e.key ===
-																				' '
-																		) {
-																			e.stopPropagation();
-																			terminalTabBar.onClose(
-																				tab.id
-																			);
-																		}
-																	}}
 																>
 																	<VscChromeClose />
-																</span>
+																</button>
 															</div>
 														)
 													)}
@@ -414,31 +409,25 @@ function DraggableWindow({
 														styles.manageButtons
 													}
 												>
-													<span
+													<button
+														type="button"
 														className={
 															styles.terminalIconButton
 														}
-														role="button"
-														tabIndex={0}
 														aria-label="New terminal tab"
 														onClick={
 															terminalTabBar.onAdd
 														}
-														onKeyDown={(e) => {
-															if (
-																e.key ===
-																	'Enter' ||
-																e.key === ' '
-															) {
-																terminalTabBar.onAdd();
-															}
-														}}
 													>
 														<AiOutlinePlus />
-													</span>
+													</button>
 													<RiArrowDropDownLine />
 												</div>
 											</div>
+											<div
+												className={`${styles.windowDragHandle} draggable`}
+												aria-hidden
+											/>
 										</>
 									) : windowName === 'terminal' ? (
 										<>
@@ -467,7 +456,7 @@ function DraggableWindow({
 									) : (
 										<>
 											<div
-												className={styles.topContainer}
+												className={`${styles.topContainer} draggable`}
 											>
 												{topIcon}
 												<p>{topTitle}</p>

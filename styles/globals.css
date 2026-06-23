@@ -22,6 +22,11 @@ input {
 	outline: none;
 }
 
+input,
+textarea {
+	user-select: text;
+}
+
 a {
 	text-decoration: none;
 }
