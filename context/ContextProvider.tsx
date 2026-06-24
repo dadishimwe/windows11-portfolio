@@ -1,6 +1,10 @@
 import React, { createContext, useState, Dispatch, SetStateAction } from 'react';
 import { DEFAULT_EXPLORER_PATH } from '../config/explorerRoutes';
 import { initialOpenWindows, OpenWindows } from '../config/openWindows';
+import {
+	initialMediaPlayerState,
+	MediaPlayerState,
+} from '../config/mediaPlayer';
 import { buildInitialFirefoxTabs, FirefoxTab } from '../lib/firefoxTabs';
 
 type LastPos = {
@@ -47,6 +51,10 @@ type ContextType = {
 		Dispatch<SetStateAction<WindowPriority>>
 	];
 	lastPosState: [LastPos, Dispatch<SetStateAction<LastPos>>];
+	mediaPlayerState: [
+		MediaPlayerState,
+		Dispatch<SetStateAction<MediaPlayerState>>,
+	];
 };
 
 const initialPriority = {
@@ -124,6 +132,7 @@ const initialState: ContextType = {
 	positionState: [initialPosition, () => {}],
 	windowPriorityState: [initialPriority, () => {}],
 	lastPosState: [initialLastPos, () => {}],
+	mediaPlayerState: [initialMediaPlayerState, () => {}],
 };
 
 export const Context = createContext<ContextType>(initialState);
@@ -146,6 +155,8 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [windowPriority, setWindowPriority] =
 		useState<WindowPriority>(initialPriority);
 	const [lastPos, setLastPos] = useState<LastPos>(initialLastPos);
+	const [mediaPlayer, setMediaPlayer] =
+		useState<MediaPlayerState>(initialMediaPlayerState);
 
 	const appContext: ContextType = {
 		maximizedState: [maximized, setMaximized],
@@ -160,6 +171,7 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 		positionState: [position, setPosition],
 		windowPriorityState: [windowPriority, setWindowPriority],
 		lastPosState: [lastPos, setLastPos],
+		mediaPlayerState: [mediaPlayer, setMediaPlayer],
 	};
 
 	return <Context.Provider value={appContext}>{children}</Context.Provider>;

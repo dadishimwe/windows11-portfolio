@@ -1,19 +1,14 @@
 import Image from 'next/image';
-import { useContext, useState } from 'react';
+import { useRouter } from 'next/router';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
-import { handleWindowPriority } from '../../components/utils/WindowPriority/WindowPriority';
-import MediaPlayer from '../../components/windows/MediaPlayer/MediaPlayer';
-import { Context } from '../../context/ContextProvider';
+import { postOpenMediaMessage } from '../../lib/mediaPlayerMessages';
 import { getCloudinaryVideos } from '../../lib/cloudinary';
 import styles from '../../styles/utils/MediaGrid.module.css';
 import { MediaType } from '../../typings';
 
 function Videos({ data }: { data: MediaType[] }) {
-	const [openVideo, setOpenVideo] = useState<MediaType | null>(null);
-
-	const DraggableWindowContext = useContext(Context);
-	const [windowState, setWindowState] =
-		DraggableWindowContext.windowPriorityState;
+	const router = useRouter();
+	const isEmbed = router.query.embed === 'true';
 
 	const content = () => {
 		if (data.length === 0) {
@@ -21,56 +16,43 @@ function Videos({ data }: { data: MediaType[] }) {
 		}
 
 		return (
-			<>
-				{openVideo && (
-					<MediaPlayer
-						closeMedia={setOpenVideo}
-						media={openVideo}
-						component={
-							<video
-								controls
-								autoPlay
-								src={openVideo.secure_url}
-								style={{ width: '100%', height: '100%' }}
+			<div className={styles.wrapper}>
+				{data.map((video) => (
+					<div
+						className={`${styles.mediaItem} no_click`}
+						key={video.public_id ?? video.filename}
+						onClick={() => {
+							if (isEmbed) {
+								postOpenMediaMessage(video, 'video');
+							}
+						}}
+						role="button"
+						tabIndex={0}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								if (isEmbed) {
+									postOpenMediaMessage(video, 'video');
+								}
+							}
+						}}
+					>
+						<div className={styles.imageWrapper}>
+							<Image
+								className="no_click"
+								src={video.thumbnail}
+								alt={video.filename}
+								width="100%"
+								height="100%"
+								layout="responsive"
+								objectFit="contain"
 							/>
-						}
-					/>
-				)}
-				<div className={styles.wrapper}>
-					{data.map((video) => (
-						<div
-							className={`${styles.mediaItem} no_click`}
-							key={video.filename}
-							onClick={async () => {
-								setOpenVideo(video);
-
-								const newWindowState =
-									await handleWindowPriority({
-										windowName: 'mediaPlayer',
-										windowPriority: windowState,
-									});
-								if (!newWindowState) return;
-								setWindowState(newWindowState);
-							}}
-						>
-							<div className={styles.imageWrapper}>
-								<Image
-									className="no_click"
-									src={video.thumbnail}
-									alt={video.filename}
-									width="100%"
-									height="100%"
-									layout="responsive"
-									objectFit="contain"
-								/>
-							</div>
-							<p className="no_click">
-								{video.filename}.{video.format}
-							</p>
 						</div>
-					))}
-				</div>
-			</>
+						<p className="no_click">
+							{video.filename}.{video.format}
+						</p>
+					</div>
+				))}
+			</div>
 		);
 	};
 

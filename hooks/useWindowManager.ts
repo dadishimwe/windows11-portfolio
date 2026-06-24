@@ -70,6 +70,15 @@ export function useWindowManager() {
 		[minimized, openWindow, openWindows]
 	);
 
+	const navigateExplorer = useCallback(
+		(path: string) => {
+			setExplorerPath(path);
+			setMinimized((prev) => ({ ...prev, fileExplorer: false }));
+			void focusWindow('fileExplorer');
+		},
+		[focusWindow, setExplorerPath, setMinimized]
+	);
+
 	return {
 		openWindows,
 		minimized,
@@ -79,5 +88,6 @@ export function useWindowManager() {
 		closeWindow,
 		toggleWindow,
 		focusWindow,
+		navigateExplorer,
 	};
 }

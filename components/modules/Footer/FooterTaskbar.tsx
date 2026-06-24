@@ -1,15 +1,19 @@
 import { useContext } from 'react';
 import {
+	getMediaTaskbarMeta,
 	openExternalUrl,
 	startMenuSocialApps,
 	taskbarPinnedApps,
 	windowTaskbarMeta,
+	WindowTaskbarMeta,
 } from '../../../config/taskbar';
+import { useMediaPlayer } from '../../../hooks/useMediaPlayer';
 import { useWindowManager } from '../../../hooks/useWindowManager';
 import {
 	getMinimizedWindowNames,
 	getOpenWindowNames,
 } from '../../../lib/windowUtils';
+import { Context } from '../../../context/ContextProvider';
 import TaskbarButton from './TaskbarButton';
 import styles from './Footer.module.css';
 import WindowsMenu from './WindowsMenu';
@@ -19,14 +23,53 @@ type Props = {
 	handleWinMenu: () => void;
 };
 
-function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
-	const { openWindows, minimized, focusWindow, toggleWindow } =
-		useWindowManager();
+function isPathPinnedOpen(
+	app: WindowTaskbarMeta,
+	explorerPath: string,
+	fileExplorerOpen: boolean
+) {
+	if (!fileExplorerOpen) return false;
+	if (app.pathPin && app.explorerPath) {
+		return explorerPath === app.explorerPath;
+	}
+	if (app.windowName === 'fileExplorer' && !app.pathPin) {
+		return true;
+	}
+	return false;
+}
 
-	const openWindowNames = getOpenWindowNames(openWindows, minimized);
-	const minimizedWindowNames = getMinimizedWindowNames(openWindows, minimized);
+function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
+	const { mediaPlayerState } = useContext(Context);
+	const [mediaPlayer] = mediaPlayerState;
+
+	const {
+		openWindows,
+		minimized,
+		explorerPath,
+		focusWindow,
+		toggleWindow,
+		navigateExplorer,
+	} = useWindowManager();
+
+	const { focusMedia, restoreMedia } = useMediaPlayer();
+
+	const openWindowNames = getOpenWindowNames(
+		openWindows,
+		minimized,
+		mediaPlayer.isOpen
+	);
+	const minimizedWindowNames = getMinimizedWindowNames(
+		openWindows,
+		minimized,
+		mediaPlayer.isOpen
+	);
 
 	const handleRestoreWindow = (windowName: string) => {
+		if (windowName === 'mediaPlayer') {
+			void restoreMedia();
+			return;
+		}
+
 		const meta = windowTaskbarMeta[windowName];
 		void toggleWindow(windowName as keyof typeof openWindows, {
 			explorerPath: meta?.explorerPath,
@@ -36,19 +79,107 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 	const handlePinnedClick = (app: (typeof taskbarPinnedApps)[number]) => {
 		if (!app.windowName) return;
 
+		if (
+			app.windowName === 'fileExplorer' &&
+			app.explorerPath &&
+			openWindows.fileExplorer
+		) {
+			navigateExplorer(app.explorerPath);
+			return;
+		}
+
 		void toggleWindow(
 			app.windowName as keyof typeof openWindows,
 			app.explorerPath ? { explorerPath: app.explorerPath } : undefined
 		);
 	};
 
-	const isPinnedActive = (app: (typeof taskbarPinnedApps)[number]) => {
-		if (!app.windowName) return false;
+	const handleOpenWindowClick = (windowName: string) => {
+		if (windowName === 'mediaPlayer') {
+			void focusMedia();
+			return;
+		}
+		void focusWindow(windowName);
+	};
+
+	const handleMinimizedClick = (windowName: string) => {
+		if (windowName === 'mediaPlayer') {
+			void restoreMedia();
+			return;
+		}
+		handleRestoreWindow(windowName);
+	};
+
+	const renderPinnedApp = (app: (typeof taskbarPinnedApps)[number]) => {
+		const windowName = app.windowName;
+		if (!windowName) return null;
+
+		const fileExplorerOpen = openWindows.fileExplorer;
+		const pathOpen = isPathPinnedOpen(app, explorerPath, fileExplorerOpen);
+		const isMin = minimized[windowName];
+
+		if (app.pathPin) {
+			if (pathOpen && !isMin) {
+				return (
+					<TaskbarButton
+						key={`open-${app.title}`}
+						label={app.title}
+						icon={app.icon}
+						isActive
+						onClick={() => void focusWindow(windowName)}
+					/>
+				);
+			}
+
+			return (
+				<TaskbarButton
+					key={`pin-${app.title}`}
+					label={app.title}
+					icon={app.icon}
+					onClick={() => handlePinnedClick(app)}
+				/>
+			);
+		}
+
+		const isOpen = openWindows[windowName as keyof typeof openWindows];
+
+		if (isOpen && !isMin) {
+			return (
+				<TaskbarButton
+					key={`open-${app.title}`}
+					label={app.title}
+					icon={app.icon}
+					isActive
+					onClick={() => void focusWindow(windowName)}
+				/>
+			);
+		}
+
+		if (isOpen && isMin) {
+			return (
+				<TaskbarButton
+					key={`min-${app.title}`}
+					label={app.title}
+					icon={app.icon}
+					isMinimized
+					onClick={() => handleRestoreWindow(windowName)}
+				/>
+			);
+		}
+
 		return (
-			openWindows[app.windowName as keyof typeof openWindows] &&
-			!minimized[app.windowName]
+			<TaskbarButton
+				key={`pin-${app.title}`}
+				label={app.title}
+				icon={app.icon}
+				onClick={() => handlePinnedClick(app)}
+			/>
 		);
 	};
+
+	const mediaTaskbarMeta = mediaPlayer.isOpen
+		? getMediaTaskbarMeta(mediaPlayer.kind)
+		: null;
 
 	return (
 		<>
@@ -60,52 +191,40 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 						onClick={handleWinMenu}
 					/>
 				</div>
-				{taskbarPinnedApps.map((app) => {
-					const windowName = app.windowName;
-					const isOpen =
-						windowName &&
-						openWindows[windowName as keyof typeof openWindows];
-					const isMin = windowName && minimized[windowName];
-					const isActive = isPinnedActive(app);
-
-					if (isOpen && !isMin && openWindowNames.includes(windowName!)) {
-						return (
-							<TaskbarButton
-								key={`open-${app.title}`}
-								label={app.title}
-								icon={app.icon}
-								isActive
-								onClick={() => void focusWindow(windowName!)}
-							/>
-						);
-					}
-
-					if (isOpen && isMin) {
-						return (
-							<TaskbarButton
-								key={`min-${app.title}`}
-								label={app.title}
-								icon={app.icon}
-								isMinimized
-								onClick={() => handleRestoreWindow(windowName!)}
-							/>
-						);
-					}
-
-					return (
+				{taskbarPinnedApps.map((app) => renderPinnedApp(app))}
+				{mediaPlayer.isOpen &&
+					mediaTaskbarMeta &&
+					!minimized.mediaPlayer && (
 						<TaskbarButton
-							key={`pin-${app.title}`}
-							label={app.title}
-							icon={app.icon}
-							onClick={() => handlePinnedClick(app)}
+							key="open-mediaPlayer"
+							label={mediaTaskbarMeta.title}
+							icon={mediaTaskbarMeta.icon}
+							isActive
+							onClick={() => {
+								if (minimized.mediaPlayer) {
+									void restoreMedia();
+								} else {
+									void focusMedia();
+								}
+							}}
 						/>
-					);
-				})}
+					)}
+				{mediaPlayer.isOpen && minimized.mediaPlayer && mediaTaskbarMeta && (
+					<TaskbarButton
+						key="min-mediaPlayer"
+						label={mediaTaskbarMeta.title}
+						icon={mediaTaskbarMeta.icon}
+						isMinimized
+						onClick={() => void restoreMedia()}
+					/>
+				)}
 				{openWindowNames
 					.filter(
 						(name) =>
+							name !== 'mediaPlayer' &&
 							!taskbarPinnedApps.some(
-								(app) => app.windowName === name
+								(app) =>
+									app.windowName === name && !app.pathPin
 							)
 					)
 					.map((windowName) => {
@@ -118,16 +237,17 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 								label={meta.title}
 								icon={meta.icon}
 								isActive
-								onClick={() => void focusWindow(windowName)}
+								onClick={() => handleOpenWindowClick(windowName)}
 							/>
 						);
 					})}
 				{minimizedWindowNames
 					.filter(
 						(name) =>
+							name !== 'mediaPlayer' &&
 							!openWindowNames.includes(name) &&
 							!taskbarPinnedApps.some(
-								(app) => app.windowName === name
+								(app) => app.windowName === name && !app.pathPin
 							)
 					)
 					.map((windowName) => {
@@ -140,7 +260,7 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 								label={meta.title}
 								icon={meta.icon}
 								isMinimized
-								onClick={() => handleRestoreWindow(windowName)}
+								onClick={() => handleMinimizedClick(windowName)}
 							/>
 						);
 					})}

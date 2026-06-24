@@ -5,6 +5,8 @@ export type WindowTaskbarMeta = {
 	icon: string;
 	windowName?: string;
 	explorerPath?: string;
+	/** When set, pin is only active at this explorer path (e.g. Pictures). */
+	pathPin?: boolean;
 	external?: boolean;
 	href?: string;
 };
@@ -41,10 +43,17 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 		icon: '/icons/pictures/pictures.png',
 		windowName: 'fileExplorer',
 		explorerPath: '/explorer/pictures',
+		pathPin: true,
 	},
-	mediaPlayer: {
-		title: 'Media Player',
+	mediaPlayerImage: {
+		title: 'Photos',
+		icon: '/icons/pictures/pictures.png',
+		windowName: 'mediaPlayer',
+	},
+	mediaPlayerVideo: {
+		title: 'Videos',
 		icon: '/icons/videos/videos.png',
+		windowName: 'mediaPlayer',
 	},
 	firefox: {
 		title: 'Firefox',
@@ -92,6 +101,12 @@ export const startMenuSocialApps: StartMenuApp[] = [
 		external: true,
 	},
 ];
+
+export function getMediaTaskbarMeta(kind: 'image' | 'video'): WindowTaskbarMeta {
+	return kind === 'video'
+		? windowTaskbarMeta.mediaPlayerVideo
+		: windowTaskbarMeta.mediaPlayerImage;
+}
 
 export function openExternalUrl(url: string) {
 	const opened = window.open(url, '_blank', 'noopener,noreferrer');

@@ -34,18 +34,32 @@ export function hrefToWindow(href: string): {
 
 export function getOpenWindowNames(
 	openWindows: OpenWindows,
-	minimized: Record<string, boolean>
+	minimized: Record<string, boolean>,
+	mediaPlayerOpen = false
 ): string[] {
-	return Object.entries(openWindows)
+	const names = Object.entries(openWindows)
 		.filter(([name, isOpen]) => isOpen && !minimized[name])
 		.map(([name]) => name);
+
+	if (mediaPlayerOpen && !minimized.mediaPlayer) {
+		names.push('mediaPlayer');
+	}
+
+	return names;
 }
 
 export function getMinimizedWindowNames(
 	openWindows: OpenWindows,
-	minimized: Record<string, boolean>
+	minimized: Record<string, boolean>,
+	mediaPlayerOpen = false
 ): string[] {
-	return Object.entries(openWindows)
+	const names = Object.entries(openWindows)
 		.filter(([name, isOpen]) => isOpen && minimized[name])
 		.map(([name]) => name);
+
+	if (mediaPlayerOpen && minimized.mediaPlayer) {
+		names.push('mediaPlayer');
+	}
+
+	return names;
 }
