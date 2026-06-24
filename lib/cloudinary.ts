@@ -11,6 +11,12 @@ type CloudinaryResource = {
 	format: string;
 };
 
+const IMAGE_PREFIX_FALLBACKS = [
+	'portfolio/photos',
+	'portfolio/images',
+	'portfolio',
+] as const;
+
 function authHeader(apiKey: string, apiSecret: string) {
 	return `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`;
 }
@@ -18,7 +24,7 @@ function authHeader(apiKey: string, apiSecret: string) {
 function displayFilename(publicId: string, prefix: string): string {
 	const withoutPrefix = publicId.startsWith(`${prefix}/`)
 		? publicId.slice(prefix.length + 1)
-		: publicId.replace(/^portfolio\/(images|videos)\//, '');
+		: publicId.replace(/^portfolio\/(photos|images|videos)\//, '');
 
 	const base = withoutPrefix.split('/').pop() ?? withoutPrefix;
 	return base.length > 25 ? base.slice(0, 25) : base;
@@ -29,7 +35,12 @@ async function listResources(
 	prefix: string
 ): Promise<CloudinaryResource[] | null> {
 	const credentials = getCloudinaryCredentials();
-	if (!credentials) return null;
+	if (!credentials) {
+		console.warn(
+			'[cloudinary] Missing CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET'
+		);
+		return null;
+	}
 
 	const { apiKey, apiSecret, cloudName } = credentials;
 	const params = new URLSearchParams({
@@ -48,51 +59,88 @@ async function listResources(
 			}
 		);
 
-		if (!res.ok) return null;
+		if (!res.ok) {
+			const body = await res.text();
+			console.error(
+				`[cloudinary] ${resourceType} list failed (${res.status}) prefix="${prefix}": ${body}`
+			);
+			return null;
+		}
 
 		const json = await res.json();
 		if (!Array.isArray(json.resources)) return null;
 
 		return json.resources as CloudinaryResource[];
-	} catch {
+	} catch (error) {
+		console.error('[cloudinary] list request error:', error);
 		return null;
 	}
 }
 
-async function listWithFallback(
+async function listFirstMatch(
 	resourceType: 'image' | 'video',
-	prefix: string
+	prefixes: readonly string[]
 ): Promise<CloudinaryResource[] | null> {
-	const prefixed = await listResources(resourceType, prefix);
-	if (prefixed && prefixed.length > 0) return prefixed;
+	let sawAuthError = false;
 
-	// If the folder is empty, list all uploads (handy while setting up)
-	return listResources(resourceType, 'portfolio');
+	for (const prefix of prefixes) {
+		const resources = await listResources(resourceType, prefix);
+		if (resources === null) {
+			sawAuthError = true;
+			continue;
+		}
+		if (resources.length > 0) return resources;
+	}
+
+	return sawAuthError ? null : [];
+}
+
+function imagePrefixes(): string[] {
+	const configured = CLOUDINARY_IMAGE_PREFIX.trim();
+	const ordered = [
+		configured,
+		...IMAGE_PREFIX_FALLBACKS.filter((p) => p !== configured),
+	];
+	return Array.from(new Set(ordered));
 }
 
 export async function getCloudinaryImages(): Promise<MediaType[] | null> {
-	const resources = await listWithFallback('image', CLOUDINARY_IMAGE_PREFIX);
+	const prefixes = imagePrefixes();
+	const resources = await listFirstMatch('image', prefixes);
 	if (!resources) return null;
+	if (resources.length === 0) return [];
+
+	const prefix =
+		prefixes.find((p) =>
+			resources.some((r) => r.public_id.startsWith(`${p}/`))
+		) ?? prefixes[0];
 
 	return resources.map((image) => ({
 		url: image.secure_url.replace('/upload/', '/upload/q_auto:low/'),
 		secure_url: image.secure_url,
 		thumbnail: image.secure_url,
-		filename: displayFilename(image.public_id, CLOUDINARY_IMAGE_PREFIX),
+		filename: displayFilename(image.public_id, prefix),
 		format: image.format,
 		public_id: image.public_id,
 	}));
 }
 
 export async function getCloudinaryVideos(): Promise<MediaType[]> {
-	const resources = await listWithFallback('video', CLOUDINARY_VIDEO_PREFIX);
-	if (!resources) return [];
+	const prefixes = [CLOUDINARY_VIDEO_PREFIX, 'portfolio/videos', 'portfolio'];
+	const uniquePrefixes = Array.from(new Set(prefixes));
+	const resources = await listFirstMatch('video', uniquePrefixes);
+	if (!resources || resources.length === 0) return [];
+
+	const prefix =
+		uniquePrefixes.find((p) =>
+			resources.some((r) => r.public_id.startsWith(`${p}/`))
+		) ?? CLOUDINARY_VIDEO_PREFIX;
 
 	return resources.map((video) => ({
 		thumbnail: (
 			video.secure_url.split('.').slice(0, -1).join('.') + '.webp'
 		).replace('/upload/', '/upload/q_auto:low/'),
-		filename: displayFilename(video.public_id, CLOUDINARY_VIDEO_PREFIX),
+		filename: displayFilename(video.public_id, prefix),
 		secure_url: video.secure_url,
 		url: video.secure_url,
 		format: video.format,
