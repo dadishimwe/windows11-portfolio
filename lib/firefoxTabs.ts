@@ -1,4 +1,5 @@
 import { FIREFOX_HOME_URL } from '../config/taskbar';
+import { getBlogHostname } from '../config/site';
 
 export type FirefoxTab = {
 	id: string;
@@ -20,7 +21,7 @@ export function createFirefoxTab(url: string, title?: string): FirefoxTab {
 }
 
 export function buildInitialFirefoxTabs(): FirefoxTab[] {
-	return [createFirefoxTab(FIREFOX_HOME_URL, 'dadishimwe.com')];
+	return [createFirefoxTab(FIREFOX_HOME_URL, getBlogHostname())];
 }
 
 export function navigateFirefoxTab(tab: FirefoxTab, url: string): FirefoxTab {

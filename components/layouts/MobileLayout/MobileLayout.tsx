@@ -130,7 +130,7 @@ function MobileLayout() {
 					<button
 						type="button"
 						className={styles.tile}
-						onClick={() => openExternalUrl(site.personalWebsite)}
+						onClick={() => openExternalUrl(site.blogUrl)}
 					>
 						<Image
 							src="/icons/firefox/firefox.png"
@@ -138,7 +138,7 @@ function MobileLayout() {
 							width={32}
 							height={32}
 						/>
-						<span className={styles.tileLabel}>Blog / Site</span>
+						<span className={styles.tileLabel}>Blog</span>
 					</button>
 					<button
 						type="button"

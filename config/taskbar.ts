@@ -19,7 +19,7 @@ export type StartMenuApp = {
 	external?: boolean;
 };
 
-export const FIREFOX_HOME_URL = site.personalWebsite;
+export const FIREFOX_HOME_URL = site.blogUrl;
 
 export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 	fileExplorer: {

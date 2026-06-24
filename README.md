@@ -16,7 +16,8 @@ Open [http://localhost:3000](http://localhost:3000).
 Edit `config/site.ts` for your name, links, and branding. Set your live URL in `.env.local`:
 
 ```
-NEXT_PUBLIC_SITE_URL=https://your-vercel-domain.vercel.app
+NEXT_PUBLIC_SITE_URL=https://dadishimwe.com
+NEXT_PUBLIC_BLOG_URL=https://blog.dadishimwe.com
 ```
 
 ## Deploy on Vercel

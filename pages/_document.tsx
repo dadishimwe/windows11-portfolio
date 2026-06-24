@@ -27,8 +27,20 @@ export default function Document() {
 				<meta property="og:site_name" content={site.ogSiteName} />
 				<meta property="og:type" content="website" />
 				<meta property="og:url" content={siteUrl} />
+				<meta property="og:description" content={site.description} />
 				<meta
 					property="og:image"
+					content={`${siteUrl}${site.ogImage}`}
+				/>
+				<meta property="og:image:alt" content={site.ogImageAlt} />
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta
+					name="twitter:title"
+					content={`${site.name} — Windows Portfolio`}
+				/>
+				<meta name="twitter:description" content={site.description} />
+				<meta
+					name="twitter:image"
 					content={`${siteUrl}${site.ogImage}`}
 				/>
 

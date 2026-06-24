@@ -14,6 +14,7 @@ import {
 	HiRefresh,
 } from 'react-icons/hi';
 import { FIREFOX_HOME_URL } from '../../../config/taskbar';
+import { getBlogHostname } from '../../../config/site';
 import { displayUrl, resolveBrowserTarget } from '../../../lib/browserNavigation';
 import { Context } from '../../../context/ContextProvider';
 import { useWindowManager } from '../../../hooks/useWindowManager';
@@ -76,7 +77,7 @@ function Firefox() {
 	};
 
 	const handleAddTab = () => {
-		const newTab = createFirefoxTab(FIREFOX_HOME_URL, 'dadishimwe.com');
+		const newTab = createFirefoxTab(FIREFOX_HOME_URL, getBlogHostname());
 		setTabs((prev) => [...prev, newTab]);
 		setActiveTabId(newTab.id);
 		setAddressInput(newTab.url);
@@ -84,7 +85,7 @@ function Firefox() {
 
 	const handleCloseTab = (tabId: string) => {
 		if (tabs.length === 1) {
-			const replacement = createFirefoxTab(FIREFOX_HOME_URL, 'dadishimwe.com');
+			const replacement = createFirefoxTab(FIREFOX_HOME_URL, getBlogHostname());
 			setTabs([replacement]);
 			setActiveTabId(replacement.id);
 			setAddressInput(replacement.url);

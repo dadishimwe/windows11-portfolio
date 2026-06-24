@@ -3,7 +3,7 @@ import { buildInitialFirefoxTabs } from '../lib/firefoxTabs';
 import { useWindowManager } from './useWindowManager';
 import { Context } from '../context/ContextProvider';
 
-/** Opens Firefox on dadishimwe.com when the desktop loads (not on mobile). */
+/** Opens Firefox on the blog when the desktop loads (not on mobile). */
 function useAutoOpenFirefox(skip = false) {
 	const { openWindow } = useWindowManager();
 	const { firefoxTabsState, activeFirefoxTabIdState } = useContext(Context);
