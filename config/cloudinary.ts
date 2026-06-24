@@ -3,15 +3,15 @@ export const CLOUDINARY_CLOUD_NAME =
 	process.env.CLOUDINARY_CLOUD_NAME ?? 'drw75019w';
 
 /**
- * Upload images under this folder in Cloudinary Media Library
- * (e.g. portfolio/photos/my-photo.jpg).
+ * Media Library folder for pictures (dynamic folder mode uses asset_folder).
+ * Upload to: portfolio/photos
  */
 export const CLOUDINARY_IMAGE_PREFIX =
 	process.env.CLOUDINARY_IMAGE_PREFIX ?? 'portfolio/photos';
 
 /**
- * Upload videos under this folder
- * (e.g. portfolio/videos/demo.mp4).
+ * Media Library folder for videos (dynamic folder mode uses asset_folder).
+ * Upload to: portfolio/videos
  */
 export const CLOUDINARY_VIDEO_PREFIX =
 	process.env.CLOUDINARY_VIDEO_PREFIX ?? 'portfolio/videos';

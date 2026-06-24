@@ -9,38 +9,84 @@ type CloudinaryResource = {
 	public_id: string;
 	secure_url: string;
 	format: string;
+	display_name?: string;
 };
 
 const IMAGE_PREFIX_FALLBACKS = [
 	'portfolio/photos',
 	'portfolio/images',
-	'portfolio',
 ] as const;
 
 function authHeader(apiKey: string, apiSecret: string) {
 	return `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`;
 }
 
-function displayFilename(publicId: string, prefix: string): string {
-	const withoutPrefix = publicId.startsWith(`${prefix}/`)
-		? publicId.slice(prefix.length + 1)
-		: publicId.replace(/^portfolio\/(photos|images|videos)\//, '');
-
-	const base = withoutPrefix.split('/').pop() ?? withoutPrefix;
-	return base.length > 25 ? base.slice(0, 25) : base;
+function displayFilename(resource: CloudinaryResource): string {
+	const raw =
+		resource.display_name?.trim() ||
+		resource.public_id.split('/').pop() ||
+		resource.public_id;
+	return raw.length > 25 ? raw.slice(0, 25) : raw;
 }
 
-async function listResources(
-	resourceType: 'image' | 'video',
-	prefix: string
-): Promise<CloudinaryResource[] | null> {
+function getCredentialsOrWarn() {
 	const credentials = getCloudinaryCredentials();
 	if (!credentials) {
 		console.warn(
 			'[cloudinary] Missing CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET'
 		);
+	}
+	return credentials;
+}
+
+/** Dynamic folder mode — matches Media Library folders (asset_folder field). */
+async function listByAssetFolder(
+	assetFolder: string
+): Promise<CloudinaryResource[] | null> {
+	const credentials = getCredentialsOrWarn();
+	if (!credentials) return null;
+
+	const { apiKey, apiSecret, cloudName } = credentials;
+	const params = new URLSearchParams({
+		asset_folder: assetFolder,
+		max_results: '100',
+	});
+
+	try {
+		const res = await fetch(
+			`https://api.cloudinary.com/v1_1/${cloudName}/resources/by_asset_folder?${params}`,
+			{
+				headers: {
+					Authorization: authHeader(apiKey, apiSecret),
+				},
+			}
+		);
+
+		if (!res.ok) {
+			const body = await res.text();
+			console.error(
+				`[cloudinary] by_asset_folder failed (${res.status}) folder="${assetFolder}": ${body}`
+			);
+			return null;
+		}
+
+		const json = await res.json();
+		if (!Array.isArray(json.resources)) return null;
+
+		return json.resources as CloudinaryResource[];
+	} catch (error) {
+		console.error('[cloudinary] by_asset_folder error:', error);
 		return null;
 	}
+}
+
+/** Legacy fixed-folder mode — public_id starts with prefix. */
+async function listByPublicIdPrefix(
+	resourceType: 'image' | 'video',
+	prefix: string
+): Promise<CloudinaryResource[] | null> {
+	const credentials = getCredentialsOrWarn();
+	if (!credentials) return null;
 
 	const { apiKey, apiSecret, cloudName } = credentials;
 	const params = new URLSearchParams({
@@ -62,7 +108,7 @@ async function listResources(
 		if (!res.ok) {
 			const body = await res.text();
 			console.error(
-				`[cloudinary] ${resourceType} list failed (${res.status}) prefix="${prefix}": ${body}`
+				`[cloudinary] ${resourceType} prefix list failed (${res.status}) prefix="${prefix}": ${body}`
 			);
 			return null;
 		}
@@ -72,78 +118,91 @@ async function listResources(
 
 		return json.resources as CloudinaryResource[];
 	} catch (error) {
-		console.error('[cloudinary] list request error:', error);
+		console.error('[cloudinary] prefix list error:', error);
 		return null;
 	}
 }
 
-async function listFirstMatch(
+async function listFolderAssets(
 	resourceType: 'image' | 'video',
-	prefixes: readonly string[]
+	folders: readonly string[]
 ): Promise<CloudinaryResource[] | null> {
 	let sawAuthError = false;
 
-	for (const prefix of prefixes) {
-		const resources = await listResources(resourceType, prefix);
-		if (resources === null) {
+	for (const folder of folders) {
+		const byAssetFolder = await listByAssetFolder(folder);
+		if (byAssetFolder === null) {
+			sawAuthError = true;
+		} else if (byAssetFolder.length > 0) {
+			return byAssetFolder;
+		}
+
+		const byPrefix = await listByPublicIdPrefix(resourceType, folder);
+		if (byPrefix === null) {
 			sawAuthError = true;
 			continue;
 		}
-		if (resources.length > 0) return resources;
+		if (byPrefix.length > 0) return byPrefix;
 	}
 
 	return sawAuthError ? null : [];
 }
 
-function imagePrefixes(): string[] {
+function imageFolders(): string[] {
 	const configured = CLOUDINARY_IMAGE_PREFIX.trim();
 	const ordered = [
 		configured,
-		...IMAGE_PREFIX_FALLBACKS.filter((p) => p !== configured),
+		...IMAGE_PREFIX_FALLBACKS.filter((f) => f !== configured),
 	];
 	return Array.from(new Set(ordered));
 }
 
+function videoFolders(): string[] {
+	const configured = CLOUDINARY_VIDEO_PREFIX.trim();
+	return Array.from(
+		new Set([configured, 'portfolio/videos'].filter(Boolean))
+	);
+}
+
+function toImageMedia(resource: CloudinaryResource): MediaType {
+	return {
+		url: resource.secure_url.replace('/upload/', '/upload/q_auto:low/'),
+		secure_url: resource.secure_url,
+		thumbnail: resource.secure_url,
+		filename: displayFilename(resource),
+		format: resource.format,
+		public_id: resource.public_id,
+	};
+}
+
+function toVideoMedia(resource: CloudinaryResource): MediaType {
+	return {
+		thumbnail: (
+			resource.secure_url.split('.').slice(0, -1).join('.') + '.webp'
+		).replace('/upload/', '/upload/q_auto:low/'),
+		filename: displayFilename(resource),
+		secure_url: resource.secure_url,
+		url: resource.secure_url,
+		format: resource.format,
+		public_id: resource.public_id,
+	};
+}
+
 export async function getCloudinaryImages(): Promise<MediaType[] | null> {
-	const prefixes = imagePrefixes();
-	const resources = await listFirstMatch('image', prefixes);
+	const resources = await listFolderAssets('image', imageFolders());
 	if (!resources) return null;
 	if (resources.length === 0) return [];
 
-	const prefix =
-		prefixes.find((p) =>
-			resources.some((r) => r.public_id.startsWith(`${p}/`))
-		) ?? prefixes[0];
-
-	return resources.map((image) => ({
-		url: image.secure_url.replace('/upload/', '/upload/q_auto:low/'),
-		secure_url: image.secure_url,
-		thumbnail: image.secure_url,
-		filename: displayFilename(image.public_id, prefix),
-		format: image.format,
-		public_id: image.public_id,
-	}));
+	return resources
+		.filter((r) => r.secure_url.includes('/image/upload/'))
+		.map(toImageMedia);
 }
 
 export async function getCloudinaryVideos(): Promise<MediaType[]> {
-	const prefixes = [CLOUDINARY_VIDEO_PREFIX, 'portfolio/videos', 'portfolio'];
-	const uniquePrefixes = Array.from(new Set(prefixes));
-	const resources = await listFirstMatch('video', uniquePrefixes);
+	const resources = await listFolderAssets('video', videoFolders());
 	if (!resources || resources.length === 0) return [];
 
-	const prefix =
-		uniquePrefixes.find((p) =>
-			resources.some((r) => r.public_id.startsWith(`${p}/`))
-		) ?? CLOUDINARY_VIDEO_PREFIX;
-
-	return resources.map((video) => ({
-		thumbnail: (
-			video.secure_url.split('.').slice(0, -1).join('.') + '.webp'
-		).replace('/upload/', '/upload/q_auto:low/'),
-		filename: displayFilename(video.public_id, prefix),
-		secure_url: video.secure_url,
-		url: video.secure_url,
-		format: video.format,
-		public_id: video.public_id,
-	}));
+	return resources
+		.filter((r) => r.secure_url.includes('/video/upload/'))
+		.map(toVideoMedia);
 }
