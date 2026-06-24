@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import ExplorerLink from '../../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../../components/explorer/ExplorerPage';
 import { DriveConfig, DriveKey, drives, isDriveKey } from '../../../config/drives';
 import styles from '../../../styles/utils/GridList.module.css';
@@ -18,7 +18,7 @@ function DrivePage({ drive }: Props) {
 			<p className={styles.driveDescription}>{drive.description}</p>
 			{drive.letter === 'D' && (
 				<div className={styles.wrapper}>
-					<Link href="/explorer/documents" passHref>
+					<ExplorerLink href="/explorer/documents" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -33,8 +33,8 @@ function DrivePage({ drive }: Props) {
 								<p>{drive.folderTitle}</p>
 							</div>
 						</div>
-					</Link>
-					<Link href="/explorer/certifications" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/certifications" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -49,7 +49,7 @@ function DrivePage({ drive }: Props) {
 								<p>{drive.folderTitle}</p>
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 				</div>
 			)}
 		</>

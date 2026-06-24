@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
+import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/GridList.module.css';
 
@@ -15,7 +15,7 @@ function ThisPC() {
 					<div />
 				</div>
 				<div className={styles.wrapper}>
-					<Link href="/explorer/desktop" passHref>
+					<ExplorerLink href="/explorer/desktop" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -31,8 +31,8 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
-					<Link href="/explorer/downloads" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/downloads" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -48,9 +48,9 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/documents" passHref>
+					<ExplorerLink href="/explorer/documents" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -66,9 +66,9 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/pictures" passHref>
+					<ExplorerLink href="/explorer/pictures" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -84,9 +84,9 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/videos" passHref>
+					<ExplorerLink href="/explorer/videos" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -102,9 +102,9 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/music" passHref>
+					<ExplorerLink href="/explorer/music" passHref>
 						<div className={styles.item}>
 							<div>
 								<Image
@@ -120,7 +120,7 @@ function ThisPC() {
 								<BsFillPinAngleFill />
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 				</div>
 				<div className={styles.dropdownNav}>
 					<RiArrowDropDownLine />
@@ -129,7 +129,7 @@ function ThisPC() {
 				</div>
 
 				<div className={styles.wrapper}>
-					<Link href="/explorer/drives/C" passHref>
+					<ExplorerLink href="/explorer/drives/C" passHref>
 						<div className={`${styles.item} ${styles.disk}`}>
 							<div>
 								<Image
@@ -145,8 +145,8 @@ function ThisPC() {
 								<p>85.8 GB free of 222 GB</p>
 							</div>
 						</div>
-					</Link>
-					<Link href="/explorer/drives/D" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/drives/D" passHref>
 						<div className={`${styles.item} ${styles.disk}`}>
 							<div>
 								<Image
@@ -162,7 +162,7 @@ function ThisPC() {
 								<p>393 GB free of 465 GB</p>
 							</div>
 						</div>
-					</Link>
+					</ExplorerLink>
 				</div>
 			</>
 		);

@@ -6,11 +6,18 @@ import {
 	MOBILE_BREAKPOINT,
 	useMediaQuery,
 } from '../../../hooks/useMediaQuery';
+import { useRouter } from 'next/router';
 import styles from './Layout.module.css';
 
 function Layout({ children }: { children: React.ReactNode }) {
+	const router = useRouter();
+	const isEmbed = router.query.embed === 'true';
 	const isMobile = useMediaQuery(MOBILE_BREAKPOINT);
 	useAutoOpenFirefox(isMobile);
+
+	if (isEmbed) {
+		return <div className={styles.embedShell}>{children}</div>;
+	}
 
 	if (isMobile) {
 		return (

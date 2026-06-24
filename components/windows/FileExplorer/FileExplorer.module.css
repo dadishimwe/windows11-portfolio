@@ -186,13 +186,17 @@
 }
 
 .content {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
 	width: 100%;
 	border-radius: 0 0 15px;
-	display: flex;
-	flex-direction: column;
 }
 
 .child {
+	flex: 1;
+	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
 	max-width: 100%;

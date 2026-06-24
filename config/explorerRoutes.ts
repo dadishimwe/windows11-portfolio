@@ -47,7 +47,7 @@ export const explorerRoutes: Record<string, ExplorerRouteMeta> = {
 	'/explorer/certifications': {
 		folder: 'Certifications',
 		icon: 'documents',
-		topNav: true,
+		topNav: false,
 	},
 	'/explorer/desktop': {
 		folder: 'Desktop',

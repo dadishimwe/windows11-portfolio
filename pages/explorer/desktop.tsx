@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
 
@@ -26,7 +27,7 @@ function Desktop() {
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
 					</Link>
-					<Link href="/explorer/projects" passHref>
+					<ExplorerLink href="/explorer/projects" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -43,8 +44,8 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
-					<Link href="/explorer/tools" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/tools" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -61,8 +62,8 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
-					<Link href="/explorer/podcasts" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/podcasts" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -79,8 +80,8 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
-					<Link href="/explorer/links" passHref>
+					</ExplorerLink>
+					<ExplorerLink href="/explorer/links" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -97,9 +98,9 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/pictures" passHref>
+					<ExplorerLink href="/explorer/pictures" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -116,9 +117,9 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
+					</ExplorerLink>
 
-					<Link href="/explorer/videos" passHref>
+					<ExplorerLink href="/explorer/videos" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -135,7 +136,7 @@ function Desktop() {
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
+					</ExplorerLink>
 				</div>
 			</>
 		);
