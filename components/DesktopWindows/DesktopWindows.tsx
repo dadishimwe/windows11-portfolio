@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Context } from '../../context/ContextProvider';
-import { useMediaPlayerBridge } from '../../hooks/useMediaPlayerBridge';
+import { useEmbedBridge } from '../../hooks/useEmbedBridge';
 import ExplorerWindow from '../windows/ExplorerWindow/ExplorerWindow';
 import Firefox from '../windows/Firefox/Firefox';
 import NotepadWindow from '../windows/NotepadWindow/NotepadWindow';
@@ -11,7 +11,7 @@ function DesktopWindows() {
 	const { openWindowsState } = useContext(Context);
 	const [openWindows] = openWindowsState;
 
-	useMediaPlayerBridge();
+	useEmbedBridge();
 
 	return (
 		<>

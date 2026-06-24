@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import EmbedAppLink from '../../components/explorer/EmbedAppLink';
 import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/List.module.css';
@@ -9,7 +9,7 @@ function Desktop() {
 		return (
 			<>
 				<div className={styles.listItemContainer}>
-					<Link href="/notepad/about" passHref>
+					<EmbedAppLink windowName="notepad" href="/notepad/about">
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>
 								<Image
@@ -26,7 +26,7 @@ function Desktop() {
 							<p className={styles.listItemType}>Text Document</p>
 							<p className={styles.listItemSize}>2kt</p>
 						</div>
-					</Link>
+					</EmbedAppLink>
 					<ExplorerLink href="/explorer/projects" passHref>
 						<div className={styles.listItem}>
 							<div className={styles.listItemName}>

@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { BsFillPinAngleFill } from 'react-icons/bs';
 import { RiArrowDropDownLine } from 'react-icons/ri';
+import EmbedAppLink from '../../components/explorer/EmbedAppLink';
 import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
 import styles from '../../styles/utils/GridList.module.css';
@@ -134,7 +134,7 @@ function QuickAccess() {
 					className={listItemStyles.listItemContainer}
 					style={{ margin: '0 20px 0 20px' }}
 				>
-					<Link href="/notepad/about" passHref>
+					<EmbedAppLink windowName="notepad" href="/notepad/about">
 						<div className={listItemStyles.listItem}>
 							<div className={listItemStyles.listItemName}>
 								<Image
@@ -152,7 +152,7 @@ function QuickAccess() {
 								This PC/Desktop/About me.txt
 							</p>
 						</div>
-					</Link>
+					</EmbedAppLink>
 				</div>
 			</>
 		);
