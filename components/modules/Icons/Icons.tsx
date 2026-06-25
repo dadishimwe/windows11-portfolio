@@ -191,24 +191,26 @@ function Icons() {
 						</div>
 					</DesktopLink>
 
-					<div className={`${styles.item} selectoItem recycleBin`}>
-						{deleted ? (
-							<Image
-								src="/icons/trash/trash_full.png"
-								alt="icon"
-								width={40}
-								height={40}
-							/>
-						) : (
-							<Image
-								src="/icons/trash/trash_empty.png"
-								alt="icon"
-								width={40}
-								height={40}
-							/>
-						)}
-						<p>Recycle Bin</p>
-					</div>
+					<DesktopLink href="/explorer/recycle-bin">
+						<div className={`${styles.item} selectoItem recycleBin`}>
+							{deleted ? (
+								<Image
+									src="/icons/trash/trash_full.png"
+									alt="icon"
+									width={40}
+									height={40}
+								/>
+							) : (
+								<Image
+									src="/icons/trash/trash_empty.png"
+									alt="icon"
+									width={40}
+									height={40}
+								/>
+							)}
+							<p>Recycle Bin</p>
+						</div>
+					</DesktopLink>
 				</div>
 			</div>
 		</>

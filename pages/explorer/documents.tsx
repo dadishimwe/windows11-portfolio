@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
+import { EXPLORER_ITEM_DATE } from '../../lib/explorerList';
 import styles from '../../styles/utils/List.module.css';
 
 function Documents() {
@@ -18,7 +19,7 @@ function Documents() {
 						<p>Certifications</p>
 					</div>
 					<p className={styles.listItemDateModified}>
-						23/06/2026 12:00
+						{EXPLORER_ITEM_DATE}
 					</p>
 					<p className={styles.listItemType}>File folder</p>
 					<p className={styles.listItemSize}>3 items</p>

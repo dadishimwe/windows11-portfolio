@@ -68,6 +68,17 @@
 	margin-left: 10px;
 }
 
+.toolbarDisabled {
+	opacity: 0.45;
+	pointer-events: none;
+	cursor: default;
+}
+
+.navigateSearch input:disabled {
+	opacity: 0.55;
+	cursor: default;
+}
+
 .navigate {
 	display: flex;
 	justify-content: space-between;

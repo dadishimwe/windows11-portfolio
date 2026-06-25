@@ -85,6 +85,11 @@ const pathMeta: Record<string, ExplorerRouteMeta> = {
 		icon: 'folder',
 		topNav: true,
 	},
+	'/explorer/recycle-bin': {
+		folder: 'Recycle Bin',
+		icon: 'trash',
+		topNav: false,
+	},
 	'/explorer/this-pc': {
 		folder: 'This PC',
 		icon: 'thispc',

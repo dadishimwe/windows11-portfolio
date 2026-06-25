@@ -6,6 +6,7 @@ export const site = {
 	github: 'https://github.com/dadishimwe',
 	githubRepo: 'https://github.com/dadishimwe/windows11-portfolio',
 	linkedin: 'https://www.linkedin.com/in/dadi-ishimwe-473a50275',
+	credly: 'https://www.credly.com/users/dadishimwe',
 	instagram:
 		'https://www.instagram.com/dadishimwe?igsh=dWpnMHN1b2VxcW9n',
 	/** Windows portfolio (this site). */

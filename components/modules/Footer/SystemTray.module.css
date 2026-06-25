@@ -1,0 +1,182 @@
+.tray {
+	position: relative;
+	display: flex;
+	gap: 2px;
+	align-items: center;
+}
+
+.trayButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	border: none;
+	border-radius: 5px;
+	background: transparent;
+	color: inherit;
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: background-color 0.15s ease-in-out;
+}
+
+.trayButton:hover,
+.trayButtonActive {
+	background-color: #2e2e2e;
+}
+
+.trayButtonMuted {
+	color: #f87171;
+}
+
+.trayButtonOffline {
+	color: #9ca3af;
+}
+
+.flyout {
+	position: absolute;
+	right: 0;
+	bottom: calc(100% + 8px);
+	z-index: 999;
+	min-width: 280px;
+	padding: 16px;
+	border: 1px solid rgb(128 128 128 / 25%);
+	border-radius: 8px;
+	background-color: #2b2b2b;
+	background-image: url('/images/darknoice.png');
+	box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+	color: #f9f9f9;
+}
+
+.flyoutTitle {
+	margin: 0 0 12px;
+	font-weight: 600;
+	font-size: 0.85rem;
+}
+
+.wifiHeader {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.wifiIcon {
+	font-size: 2rem;
+	color: #4cc2ff;
+}
+
+.wifiIconOffline {
+	color: #9ca3af;
+}
+
+.wifiSsid {
+	margin: 0;
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+.wifiStatus {
+	margin: 4px 0 0;
+	color: #a3a3a3;
+	font-size: 0.75rem;
+}
+
+.signalBars {
+	display: flex;
+	gap: 3px;
+	align-items: flex-end;
+	height: 18px;
+	margin-top: 8px;
+}
+
+.signalBar {
+	width: 4px;
+	border-radius: 1px;
+	background-color: #4a4a4a;
+}
+
+.signalBarActive {
+	background-color: #4cc2ff;
+}
+
+.signalBar:nth-child(1) {
+	height: 5px;
+}
+
+.signalBar:nth-child(2) {
+	height: 9px;
+}
+
+.signalBar:nth-child(3) {
+	height: 13px;
+}
+
+.signalBar:nth-child(4) {
+	height: 17px;
+}
+
+.wifiLink {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 0;
+	border: none;
+	background: none;
+	color: #4cc2ff;
+	font-size: 0.75rem;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.volumeRow {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+.volumeIcon {
+	flex-shrink: 0;
+	font-size: 1.4rem;
+}
+
+.volumeSlider {
+	flex: 1;
+	height: 4px;
+	border-radius: 2px;
+	background: #4a4a4a;
+	accent-color: #4cc2ff;
+	cursor: pointer;
+}
+
+.volumeValue {
+	min-width: 2.5rem;
+	color: #a3a3a3;
+	font-size: 0.75rem;
+	text-align: right;
+}
+
+.muteRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid rgb(128 128 128 / 20%);
+}
+
+.muteLabel {
+	font-size: 0.8rem;
+}
+
+.muteToggle {
+	padding: 4px 10px;
+	border: 1px solid rgb(128 128 128 / 35%);
+	border-radius: 4px;
+	background: #1a1a1a;
+	color: #f9f9f9;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+
+.muteToggle:hover {
+	background: #353636;
+}

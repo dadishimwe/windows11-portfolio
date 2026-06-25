@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AiOutlineWifi } from 'react-icons/ai';
-import { FiVolume2 } from 'react-icons/fi';
 import FooterTaskbar from './FooterTaskbar';
+import SystemTray from './SystemTray';
 import styles from './Footer.module.css';
 
 function Footer() {
@@ -44,10 +43,7 @@ function Footer() {
 				<div className={styles.language}>
 					<p>ENG</p>
 				</div>
-				<div className={styles.icon}>
-					<AiOutlineWifi />
-					<FiVolume2 />
-				</div>
+				<SystemTray />
 				<div className={styles.dateIcons}>
 					<p>{hourStr}</p>
 					<p>{dateStr}</p>

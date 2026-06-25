@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AiOutlinePoweroff } from 'react-icons/ai';
 import { IoIosArrowForward } from 'react-icons/io';
 import { VscSearch } from 'react-icons/vsc';
@@ -17,6 +17,14 @@ type Props = {
 		explorerPath?: string
 	) => void;
 	onOpenSocial: (href: string) => void;
+};
+
+type PinnedApp = {
+	id: string;
+	label: string;
+	keywords: string[];
+	icon: string;
+	onClick: () => void;
 };
 
 const slideVerticalAnimation = {
@@ -45,6 +53,84 @@ function WindowsMenu({
 	onOpenSocial,
 }: Props) {
 	const node = useRef<HTMLDivElement>(null);
+	const [searchQuery, setSearchQuery] = useState('');
+
+	const pinnedApps: PinnedApp[] = useMemo(
+		() => [
+			{
+				id: 'explorer',
+				label: 'File Explorer',
+				keywords: ['file', 'explorer', 'files', 'folders'],
+				icon: '/icons/explorer/explorer.png',
+				onClick: () =>
+					onOpenApp('fileExplorer', '/explorer/quick-access'),
+			},
+			{
+				id: 'terminal',
+				label: 'Terminal',
+				keywords: ['terminal', 'shell', 'cli', 'bash'],
+				icon: '/icons/terminal/terminal.png',
+				onClick: () => onOpenApp('terminal'),
+			},
+			{
+				id: 'photos',
+				label: 'Photos',
+				keywords: ['photos', 'pictures', 'images', 'gallery'],
+				icon: '/icons/pictures/pictures.png',
+				onClick: () =>
+					onOpenApp('fileExplorer', '/explorer/pictures'),
+			},
+			{
+				id: 'firefox',
+				label: 'Firefox',
+				keywords: ['firefox', 'browser', 'web', 'blog'],
+				icon: '/icons/firefox/firefox.png',
+				onClick: () => onOpenApp('firefox'),
+			},
+		],
+		[onOpenApp]
+	);
+
+	const connectApps: PinnedApp[] = useMemo(
+		() => [
+			...startMenuSocialApps.map((app) => ({
+				id: app.id,
+				label: app.label,
+				keywords: [app.id, app.label.toLowerCase()],
+				icon: app.icon,
+				onClick: () => onOpenSocial(app.href),
+			})),
+			{
+				id: 'email',
+				label: 'Email',
+				keywords: ['email', 'mail', 'contact'],
+				icon: '/svg/email.svg',
+				onClick: () => onOpenSocial(`mailto:${site.email}`),
+			},
+		],
+		[onOpenSocial]
+	);
+
+	const matchesSearch = (label: string, keywords: string[]) => {
+		const query = searchQuery.trim().toLowerCase();
+		if (!query) return true;
+		const haystack = [label, ...keywords].join(' ').toLowerCase();
+		return haystack.includes(query);
+	};
+
+	const visiblePinned = pinnedApps.filter((app) =>
+		matchesSearch(app.label, app.keywords)
+	);
+	const visibleConnect = connectApps.filter((app) =>
+		matchesSearch(app.label, app.keywords)
+	);
+	const hasResults = visiblePinned.length > 0 || visibleConnect.length > 0;
+
+	useEffect(() => {
+		if (!winMenu) {
+			setSearchQuery('');
+		}
+	}, [winMenu]);
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
@@ -71,6 +157,23 @@ function WindowsMenu({
 		};
 	}, [handleWinMenu, winMenu]);
 
+	const renderAppTile = (app: PinnedApp) => (
+		<div
+			key={app.id}
+			role="button"
+			tabIndex={0}
+			onClick={app.onClick}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					app.onClick();
+				}
+			}}
+		>
+			<Image src={app.icon} alt={app.label} width={30} height={30} />
+			<p>{app.label}</p>
+		</div>
+	);
+
 	return (
 		<motion.div
 			initial="close"
@@ -86,166 +189,47 @@ function WindowsMenu({
 							<input
 								type="text"
 								placeholder="Type here to search"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								aria-label="Search apps"
 							/>
 						</div>
 					</div>
 					<div className={styles.winMenuPinned}>
-						<div className={styles.winMenuPinnedContainer}>
-							<div className={styles.winMenuPinnedTop}>
-								<h2>Pinned</h2>
-								<div>
-									<p>All apps</p>
-									<IoIosArrowForward />
-								</div>
-							</div>
-							<div className={styles.winMenuPinnedBottom}>
-								<div
-									role="button"
-									tabIndex={0}
-									onClick={() =>
-										onOpenApp(
-											'fileExplorer',
-											'/explorer/quick-access'
-										)
-									}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											onOpenApp(
-												'fileExplorer',
-												'/explorer/quick-access'
-											);
-										}
-									}}
-								>
-									<Image
-										src="/icons/explorer/explorer.png"
-										alt="File Explorer"
-										width={30}
-										height={30}
-									/>
-									<p>File Explorer</p>
-								</div>
-								<div
-									role="button"
-									tabIndex={0}
-									onClick={() => onOpenApp('terminal')}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											onOpenApp('terminal');
-										}
-									}}
-								>
-									<Image
-										src="/icons/terminal/terminal.png"
-										alt="Terminal"
-										width={30}
-										height={30}
-									/>
-									<p>Terminal</p>
-								</div>
-								<div
-									role="button"
-									tabIndex={0}
-									onClick={() =>
-										onOpenApp(
-											'fileExplorer',
-											'/explorer/pictures'
-										)
-									}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											onOpenApp(
-												'fileExplorer',
-												'/explorer/pictures'
-											);
-										}
-									}}
-								>
-									<Image
-										src="/icons/pictures/pictures.png"
-										alt="Photos"
-										width={30}
-										height={30}
-									/>
-									<p>Photos</p>
-								</div>
-								<div
-									role="button"
-									tabIndex={0}
-									onClick={() => onOpenApp('firefox')}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											onOpenApp('firefox');
-										}
-									}}
-								>
-									<Image
-										src="/icons/firefox/firefox.png"
-										alt="Firefox"
-										width={30}
-										height={30}
-									/>
-									<p>Firefox</p>
-								</div>
-							</div>
-						</div>
-						<div className={styles.winMenuPinnedContainer}>
-							<div className={styles.winMenuPinnedTop}>
-								<h2>Connect</h2>
-								<div>
-									<p>Social</p>
-									<IoIosArrowForward />
-								</div>
-							</div>
-							<div className={styles.winMenuPinnedBottom}>
-								{startMenuSocialApps.map((app) => (
-									<div
-										key={app.id}
-										role="button"
-										tabIndex={0}
-										onClick={() => onOpenSocial(app.href)}
-										onKeyDown={(e) => {
-											if (
-												e.key === 'Enter' ||
-												e.key === ' '
-											) {
-												onOpenSocial(app.href);
-											}
-										}}
-									>
-										<Image
-											src={app.icon}
-											alt={app.label}
-											width={30}
-											height={30}
-										/>
-										<p>{app.label}</p>
+						{searchQuery.trim() && !hasResults && (
+							<p className={styles.searchEmpty}>
+								No apps match &ldquo;{searchQuery.trim()}
+								&rdquo;
+							</p>
+						)}
+						{visiblePinned.length > 0 && (
+							<div className={styles.winMenuPinnedContainer}>
+								<div className={styles.winMenuPinnedTop}>
+									<h2>Pinned</h2>
+									<div className={styles.decorativeHeader}>
+										<p>All apps</p>
+										<IoIosArrowForward />
 									</div>
-								))}
-								<div
-									role="button"
-									tabIndex={0}
-									onClick={() =>
-										onOpenSocial(`mailto:${site.email}`)
-									}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											onOpenSocial(
-												`mailto:${site.email}`
-											);
-										}
-									}}
-								>
-									<Image
-										src="/svg/email.svg"
-										alt="Email"
-										width={30}
-										height={30}
-									/>
-									<p>Email</p>
+								</div>
+								<div className={styles.winMenuPinnedBottom}>
+									{visiblePinned.map(renderAppTile)}
 								</div>
 							</div>
-						</div>
+						)}
+						{visibleConnect.length > 0 && (
+							<div className={styles.winMenuPinnedContainer}>
+								<div className={styles.winMenuPinnedTop}>
+									<h2>Connect</h2>
+									<div className={styles.decorativeHeader}>
+										<p>Social</p>
+										<IoIosArrowForward />
+									</div>
+								</div>
+								<div className={styles.winMenuPinnedBottom}>
+									{visibleConnect.map(renderAppTile)}
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 				<div className={styles.winMenuFooter}>
@@ -258,7 +242,10 @@ function WindowsMenu({
 						/>
 						<p>{site.username}</p>
 					</div>
-					<div>
+					<div
+						className={styles.decorativeHeader}
+						title="Sign out (decorative)"
+					>
 						<AiOutlinePoweroff />
 					</div>
 				</div>

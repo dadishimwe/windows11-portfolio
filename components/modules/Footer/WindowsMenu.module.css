@@ -99,6 +99,24 @@
 	font-size: 0.8rem;
 }
 
+.winMenuPinnedTop div:nth-child(2).decorativeHeader {
+	opacity: 0.45;
+	pointer-events: none;
+	cursor: default;
+}
+
+.searchEmpty {
+	margin: 16px 20px 0;
+	color: #a3a3a3;
+	font-size: 0.75rem;
+}
+
+.winMenuFooter div.decorativeHeader {
+	opacity: 0.45;
+	pointer-events: none;
+	cursor: default;
+}
+
 .winMenuRecommendedBottom {
 	display: flex;
 	flex-direction: column;

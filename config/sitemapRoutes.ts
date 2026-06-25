@@ -17,5 +17,5 @@ export const sitemapRoutes: { path: string; changefreq?: string; priority?: numb
 		{ path: '/explorer/downloads', changefreq: 'monthly', priority: 0.5 },
 		{ path: '/explorer/this-pc', changefreq: 'monthly', priority: 0.4 },
 		{ path: '/explorer/drives/C', changefreq: 'yearly', priority: 0.3 },
-		{ path: '/explorer/drives/D', changefreq: 'yearly', priority: 0.3 },
+		{ path: '/explorer/recycle-bin', changefreq: 'yearly', priority: 0.2 },
 	];

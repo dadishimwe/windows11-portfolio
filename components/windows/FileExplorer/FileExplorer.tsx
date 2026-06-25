@@ -167,7 +167,7 @@ function FileExplorer(props: Props) {
 		>
 			<div className={styles.top}>
 				<section className={styles.manage}>
-					<div className={styles.manageNew}>
+					<div className={`${styles.manageNew} ${styles.toolbarDisabled}`}>
 						<div className={styles.icon}>
 							<AiOutlinePlusCircle />
 							<p>New</p>
@@ -223,7 +223,7 @@ function FileExplorer(props: Props) {
 							<BsTrash />
 						</div>
 					</div>
-					<div className={styles.manageSort}>
+					<div className={`${styles.manageSort} ${styles.toolbarDisabled}`}>
 						<div className={styles.icon}>
 							{' '}
 							<BiSortAlt2 />
@@ -254,7 +254,7 @@ function FileExplorer(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className={styles.manageView}>
+					<div className={`${styles.manageView} ${styles.toolbarDisabled}`}>
 						<div className={styles.icon}>
 							{' '}
 							<GiHamburgerMenu />
@@ -304,7 +304,7 @@ function FileExplorer(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className={styles.manageMore}>
+					<div className={`${styles.manageMore} ${styles.toolbarDisabled}`}>
 						<div className={styles.icon}>
 							<FiMoreHorizontal />
 							<div className={styles.manageDropdown}>
@@ -389,7 +389,12 @@ function FileExplorer(props: Props) {
 				</div>
 				<div className={styles.navigateSearch}>
 					<VscSearch />
-					<input placeholder={`Search: ${props.folder}`} />
+					<input
+						placeholder={`Search: ${props.folder}`}
+						disabled
+						title="Search coming in a future update"
+						aria-disabled
+					/>
 				</div>
 			</section>
 			<section className={styles.contentArea}>

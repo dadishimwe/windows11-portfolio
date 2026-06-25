@@ -2,6 +2,7 @@ import Image from 'next/image';
 import EmbedAppLink from '../../components/explorer/EmbedAppLink';
 import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
+import { EXPLORER_ITEM_DATE } from '../../lib/explorerList';
 import styles from '../../styles/utils/List.module.css';
 
 function Desktop() {
@@ -21,7 +22,7 @@ function Desktop() {
 								<p>About me.txt</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Text Document</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -39,7 +40,7 @@ function Desktop() {
 								<p>Projects</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -57,7 +58,7 @@ function Desktop() {
 								<p>Tools</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -75,7 +76,7 @@ function Desktop() {
 								<p>Podcasts I listen to</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.01.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -93,7 +94,7 @@ function Desktop() {
 								<p>Links</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -112,7 +113,7 @@ function Desktop() {
 								<p>Pictures</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
@@ -131,7 +132,7 @@ function Desktop() {
 								<p>Videos</p>
 							</div>
 							<p className={styles.listItemDateModified}>
-								30.12.2021 04:02
+								{EXPLORER_ITEM_DATE}
 							</p>
 							<p className={styles.listItemType}>Folder</p>
 							<p className={styles.listItemSize}>2kt</p>
