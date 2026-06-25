@@ -93,9 +93,33 @@ export default async function handler(
 		if (!response.ok) {
 			const details = await response.text();
 			console.error('[send-email] Resend error:', details);
+
+			let userMessage = 'Failed to send email. Please try again.';
+			let code = 'DELIVERY_FAILED';
+
+			try {
+				const parsed = JSON.parse(details) as {
+					message?: string;
+					name?: string;
+				};
+				const msg = parsed.message?.toLowerCase() ?? '';
+				if (
+					response.status === 403 &&
+					(msg.includes('domain') || msg.includes('verify'))
+				) {
+					userMessage =
+						'Sender domain is not verified in Resend. Use MAIL_FROM=Portfolio Contact <onboarding@resend.dev> for testing, or verify dadishimwe.com in Resend → Domains.';
+					code = 'DOMAIN_NOT_VERIFIED';
+				} else if (parsed.message) {
+					userMessage = parsed.message;
+				}
+			} catch {
+				// keep generic message
+			}
+
 			return res.status(502).json({
-				error: 'Failed to send email. Please try again.',
-				code: 'DELIVERY_FAILED',
+				error: userMessage,
+				code,
 			});
 		}
 
