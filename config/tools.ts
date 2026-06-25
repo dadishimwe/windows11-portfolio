@@ -6,10 +6,21 @@ export type ToolShortcut = {
 	dateModified: string;
 	type: string;
 	size: string;
+	windowName?: 'snake';
 };
 
 /** Explorer → Tools folder — real destinations for Dadi's stack. */
 export const toolShortcuts: ToolShortcut[] = [
+	{
+		id: 'packet-snake',
+		name: 'Packet Snake',
+		icon: '/svg/snake.svg',
+		href: '/snake',
+		windowName: 'snake',
+		dateModified: '25/06/2026 18:00',
+		type: 'Application',
+		size: '48 KB',
+	},
 	{
 		id: 'vscode',
 		name: 'Visual Studio Code',

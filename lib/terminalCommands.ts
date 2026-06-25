@@ -8,6 +8,7 @@ import {
 	resolveDirectory,
 	resolvePath,
 } from '../config/filesystem';
+import { formatSnakeLog } from './snakeSession';
 import { site } from '../config/site';
 
 export type TerminalState = {
@@ -37,6 +38,8 @@ const HELP_TEXT = [
 	'certs         — list certifications',
 	'contact       — email and social links',
 	'mail          — open Mail app',
+	'play snake    — open Packet Snake game',
+	'games.exe     — launch Packet Snake',
 	'skills        — technical skills',
 	'ip / ifconfig — network interfaces (public IP)',
 	'ping <host>   — simulated ping',
@@ -205,6 +208,9 @@ export async function runTerminalCommand(
 			if (!filePath) {
 				return { response: `cat: ${argLine}: No such file or directory` };
 			}
+			if (filePath === '/var/games/snake.log') {
+				return { response: formatSnakeLog().replace(/\n/g, '<br/>') };
+			}
 			const content = readFile(filePath);
 			if (content === null) {
 				return { response: `cat: ${argLine}: Is a directory` };
@@ -233,6 +239,21 @@ export async function runTerminalCommand(
 			return {
 				response: 'Opening Mail...',
 				openWindow: 'mail',
+			};
+
+		case 'play':
+			if (args[0] === 'snake') {
+				return {
+					response: 'Opening Packet Snake...',
+					openWindow: 'snake',
+				};
+			}
+			return { response: 'usage: play snake' };
+
+		case 'games.exe':
+			return {
+				response: 'Launching Packet Snake...',
+				openWindow: 'snake',
 			};
 
 		case 'skills':

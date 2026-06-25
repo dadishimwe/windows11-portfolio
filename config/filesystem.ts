@@ -4,6 +4,8 @@ import { site } from './site';
 export const HOME_DIR = `/home/${site.username}`;
 
 const directories: Record<string, string[]> = {
+	'/var': ['games'],
+	'/var/games': ['snake.log'],
 	[HOME_DIR]: [
 		'Desktop',
 		'Documents',
@@ -27,6 +29,8 @@ const directories: Record<string, string[]> = {
 };
 
 const files: Record<string, string> = {
+	['/var/games/snake.log']:
+		'Packet Snake high scores (session). Run: cat /var/games/snake.log',
 	[`${HOME_DIR}/about.txt`]: `${site.name} — network engineer and data scientist.
 Passionate about infrastructure, cybersecurity, and machine learning.
 Fortinet NSE certified (FCF, FCA, FortiGate Operator).`,

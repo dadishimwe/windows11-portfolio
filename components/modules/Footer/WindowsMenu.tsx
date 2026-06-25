@@ -94,6 +94,13 @@ function WindowsMenu({
 				icon: '/svg/email.svg',
 				onClick: () => onOpenApp('mail'),
 			},
+			{
+				id: 'snake',
+				label: 'Packet Snake',
+				keywords: ['snake', 'game', 'play', 'packet', 'games'],
+				icon: '/svg/snake.svg',
+				onClick: () => onOpenApp('snake'),
+			},
 		],
 		[onOpenApp]
 	);

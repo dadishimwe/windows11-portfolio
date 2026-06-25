@@ -65,6 +65,11 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 		icon: '/svg/email.svg',
 		windowName: 'mail',
 	},
+	snake: {
+		title: 'Packet Snake',
+		icon: '/svg/snake.svg',
+		windowName: 'snake',
+	},
 };
 
 /** Always-visible taskbar shortcuts for portfolio apps */
