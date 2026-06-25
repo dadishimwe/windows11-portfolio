@@ -43,3 +43,22 @@ textarea::-webkit-scrollbar-thumb {
 	background-color: #a9a9a9;
 	outline: 1px solid #708090;
 }
+
+/* react-rnd resize handles — larger bottom hit area above taskbar */
+.react-resizable-handle {
+	z-index: 1001 !important;
+}
+
+.react-resizable-handle-s {
+	height: 14px !important;
+	bottom: -4px !important;
+	left: 0 !important;
+	right: 0 !important;
+	width: 100% !important;
+}
+
+.react-resizable-handle-se,
+.react-resizable-handle-sw {
+	width: 14px !important;
+	height: 14px !important;
+}

@@ -1,7 +1,5 @@
 import Image from 'next/image';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { BiBold, BiItalic, BiLink } from 'react-icons/bi';
-import { HiPaperClip } from 'react-icons/hi';
 import { VscSearch } from 'react-icons/vsc';
 import {
 	mailComposeTo,
@@ -22,6 +20,8 @@ import {
 } from '../../../lib/mailSession';
 import { sendContactEmail } from '../../../lib/sendEmail';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
+import MailComposePopover from './MailComposePopover';
+import { LogLine } from './mailTypes';
 import styles from './Mail.module.css';
 
 type ComposeFields = {
@@ -39,8 +39,6 @@ const initialCompose: ComposeFields = {
 	message: '',
 	website: '',
 };
-
-type LogLine = { text: string; kind: 'ok' | 'err' };
 
 function Mail({ onClose }: { onClose?: () => void }) {
 	const sortedInbox = useMemo(
@@ -339,53 +337,46 @@ function Mail({ onClose }: { onClose?: () => void }) {
 											} ${unread ? styles.emailRowUnread : ''}`}
 											onClick={() => openRead(email.id)}
 										>
-											<span
-												className={`${styles.unreadDot} ${
-													unread
-														? ''
-														: styles.unreadDotRead
-												}`}
-												aria-hidden
-											/>
-											<span
-												className={styles.avatar}
-												style={{
-													background:
-														inboxEmail?.avatarColor ??
-														'#4cc2ff',
-													color: '#fff',
-												}}
-											>
-												{inboxEmail?.avatar ?? 'ME'}
-											</span>
-											<span className={styles.emailFrom}>
-												{email.from}
-											</span>
-											<button
-												type="button"
-												className={`${styles.starButton} ${
-													starred
-														? styles.starButtonStarred
-														: ''
-												}`}
-												onClick={(e) =>
-													handleStar(e, email.id)
-												}
-												aria-label={
-													starred ? 'Unstar' : 'Star'
-												}
-											>
-												{starred ? '★' : '☆'}
-											</button>
-											<span className={styles.emailSubject}>
-												{email.subject}
-											</span>
-											<span className={styles.emailPreview}>
-												{email.preview}
-											</span>
-											<span className={styles.emailDate}>
-												{email.date}
-											</span>
+											<div className={styles.emailRowTop}>
+												<span
+													className={`${styles.unreadDot} ${
+														unread
+															? ''
+															: styles.unreadDotRead
+													}`}
+													aria-hidden
+												/>
+												<span className={styles.emailFrom}>
+													{email.from}
+												</span>
+												<span className={styles.emailDate}>
+													{email.date}
+												</span>
+												<button
+													type="button"
+													className={`${styles.starButton} ${
+														starred
+															? styles.starButtonStarred
+															: ''
+													}`}
+													onClick={(e) =>
+														handleStar(e, email.id)
+													}
+													aria-label={
+														starred ? 'Unstar' : 'Star'
+													}
+												>
+													{starred ? '★' : '☆'}
+												</button>
+											</div>
+											<div className={styles.emailRowBottom}>
+												<span className={styles.emailSubject}>
+													{email.subject}
+												</span>
+												<span className={styles.emailPreview}>
+													— {email.preview}
+												</span>
+											</div>
 										</button>
 									);
 								})}
@@ -401,30 +392,25 @@ function Mail({ onClose }: { onClose?: () => void }) {
 										}`}
 										onClick={() => setSelectedId(msg.id)}
 									>
-										<span
-											className={`${styles.unreadDot} ${styles.unreadDotRead}`}
-										/>
-										<span
-											className={styles.avatar}
-											style={{
-												background: '#4cc2ff',
-												color: '#0a1628',
-											}}
-										>
-											ME
-										</span>
-										<span className={styles.emailFrom}>
-											To: {msg.to}
-										</span>
-										<span className={styles.emailSubject}>
-											{msg.subject}
-										</span>
-										<span className={styles.emailPreview}>
-											{msg.preview}
-										</span>
-										<span className={styles.emailDate}>
-											{msg.date}
-										</span>
+										<div className={styles.emailRowTop}>
+											<span
+												className={`${styles.unreadDot} ${styles.unreadDotRead}`}
+											/>
+											<span className={styles.emailFrom}>
+												To: {msg.to}
+											</span>
+											<span className={styles.emailDate}>
+												{msg.date}
+											</span>
+										</div>
+										<div className={styles.emailRowBottom}>
+											<span className={styles.emailSubject}>
+												{msg.subject}
+											</span>
+											<span className={styles.emailPreview}>
+												— {msg.preview}
+											</span>
+										</div>
 									</button>
 								))}
 						</div>
@@ -507,168 +493,19 @@ function Mail({ onClose }: { onClose?: () => void }) {
 				</div>
 
 				{composeOpen && (
-					<form
-						className={styles.composePopover}
-						onSubmit={handleSend}
-					>
-						<div className={styles.composeTitleBar}>
-							<span>New Message</span>
-							<button
-								type="button"
-								className={styles.composeClose}
-								onClick={closeCompose}
-								aria-label="Close compose"
-							>
-								×
-							</button>
-						</div>
-
-						<div className={styles.honeypot} aria-hidden>
-							<input
-								tabIndex={-1}
-								autoComplete="off"
-								value={compose.website}
-								onChange={(e) =>
-									setCompose((p) => ({
-										...p,
-										website: e.target.value,
-									}))
-								}
-							/>
-						</div>
-
-						<div className={styles.composeHeaderFields}>
-							<div className={styles.headerLine}>
-								<label>To</label>
-								<span className={styles.headerLineLocked}>
-									{mailComposeTo}
-								</span>
-							</div>
-							<div className={styles.headerLine}>
-								<label>From</label>
-								<input
-									type="email"
-									required
-									placeholder="your@email.com"
-									value={compose.email}
-									onChange={(e) =>
-										setCompose((p) => ({
-											...p,
-											email: e.target.value,
-										}))
-									}
-								/>
-							</div>
-							<div className={styles.headerLine}>
-								<label>Name</label>
-								<input
-									placeholder="Your name"
-									value={compose.name}
-									onChange={(e) =>
-										setCompose((p) => ({
-											...p,
-											name: e.target.value,
-										}))
-									}
-								/>
-							</div>
-							<div className={styles.headerLine}>
-								<label>Subject</label>
-								<input
-									placeholder="Say hello"
-									value={compose.subject}
-									onChange={(e) =>
-										setCompose((p) => ({
-											...p,
-											subject: e.target.value,
-										}))
-									}
-								/>
-							</div>
-						</div>
-
-						<div className={styles.composeToolbar}>
-							<div className={styles.formatIcons}>
-								<span title="Bold (cosmetic)">
-									<BiBold />
-								</span>
-								<span title="Italic (cosmetic)">
-									<BiItalic />
-								</span>
-								<span title="Link (cosmetic)">
-									<BiLink />
-								</span>
-								<span title="Attach (cosmetic)">
-									<HiPaperClip />
-								</span>
-							</div>
-							<button
-								type="submit"
-								className={styles.toolbarSend}
-								disabled={isSending}
-							>
-								{isSending ? 'Sending…' : 'Send'}
-							</button>
-						</div>
-
-						<textarea
-							className={styles.composeBody}
-							required
-							placeholder="Write your message…"
-							value={compose.message}
-							onChange={(e) =>
-								setCompose((p) => ({
-									...p,
-									message: e.target.value,
-								}))
-							}
-						/>
-
-						<div className={styles.composeFooter}>
-							<button
-								type="button"
-								className={styles.logToggle}
-								onClick={() => setShowLog((v) => !v)}
-							>
-								{showLog ? '▼' : '▶'} Show connection log
-							</button>
-							{showLog && logLines.length > 0 && (
-								<div className={styles.logPanel} aria-live="polite">
-									{logLines.map((line, i) => (
-										<p
-											key={`${line.text}-${i}`}
-											className={
-												line.kind === 'err'
-													? styles.logLineErr
-													: styles.logLineOk
-											}
-										>
-											{line.text}
-										</p>
-									))}
-									{sendFailed && (
-										<button
-											type="button"
-											className={styles.retryButton}
-											onClick={() => void handleSend()}
-										>
-											[retry]
-										</button>
-									)}
-								</div>
-							)}
-							{sendDone && (
-								<p className={styles.statusSuccess} role="status">
-									250 OK — Message delivered.
-								</p>
-							)}
-							{sendFailed && sendError && (
-								<p className={styles.logLineErr} role="alert">
-									{sendError}
-								</p>
-							)}
-						</div>
-					</form>
+					<MailComposePopover
+						compose={compose}
+						isSending={isSending}
+						showLog={showLog}
+						logLines={logLines}
+						sendDone={sendDone}
+						sendFailed={sendFailed}
+						sendError={sendError}
+						onChange={setCompose}
+						onClose={closeCompose}
+						onSend={handleSend}
+						onToggleLog={() => setShowLog((v) => !v)}
+					/>
 				)}
 
 				{showShortcuts && (

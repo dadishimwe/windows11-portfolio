@@ -23,12 +23,25 @@ import styles from './DraggableWindow.module.css';
 const handleStyles = {
 	bottom: {
 		cursor: 'ns-resize',
+		height: '14px',
+		bottom: '-6px',
+		left: '0',
+		right: '0',
+		width: '100%',
 	},
 	bottomLeft: {
 		cursor: 'nesw-resize',
+		width: '12px',
+		height: '12px',
+		left: '-4px',
+		bottom: '-4px',
 	},
 	bottomRight: {
 		cursor: 'nwse-resize',
+		width: '12px',
+		height: '12px',
+		right: '-4px',
+		bottom: '-4px',
 	},
 	left: {
 		cursor: 'ew-resize',
@@ -173,12 +186,6 @@ function DraggableWindow({
 	};
 
 	useEffect(() => {
-		if (!loading) {
-			onReady?.();
-		}
-	}, [loading, onReady]);
-
-	useEffect(() => {
 		(async () => {
 			const getCenter = async () => {
 				let width = window.innerWidth;
@@ -255,6 +262,12 @@ function DraggableWindow({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [maximized[windowName]]);
 
+	useEffect(() => {
+		if (!loading) {
+			onReady?.();
+		}
+	}, [loading, onReady]);
+
 	if (minimized[windowName]) {
 		return null;
 	}
@@ -309,12 +322,23 @@ function DraggableWindow({
 						y: position[windowName].y,
 					}}
 					minWidth={880}
-					minHeight={550}
+					minHeight={400}
+					bounds="window"
 					className={`${
 						isDragging || isResizing || loading
 							? ''
 							: styles.animatedWindow
 					}`}
+					enableResizing={{
+						top: true,
+						right: true,
+						bottom: true,
+						left: true,
+						topRight: true,
+						bottomRight: true,
+						bottomLeft: true,
+						topLeft: true,
+					}}
 					style={
 						isDragging || isResizing || loading
 							? { zIndex: 997 }
