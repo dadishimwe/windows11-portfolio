@@ -117,6 +117,46 @@
 	font-size: 0.75rem;
 }
 
+.speedControl {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 8px;
+	align-items: center;
+}
+
+.speedButtons {
+	display: flex;
+	gap: 4px;
+}
+
+.speedButton {
+	padding: 4px 8px;
+	border: 1px solid rgb(128 128 128 / 25%);
+	border-radius: 4px;
+	background: #1e1e1e;
+	color: #aaa;
+	font-size: 0.68rem;
+	cursor: pointer;
+}
+
+.speedButton:hover {
+	border-color: rgb(85 255 255 / 35%);
+	color: #ddd;
+}
+
+.speedButtonActive {
+	border-color: #55ffff;
+	background: rgb(85 255 255 / 12%);
+	color: #55ffff;
+	font-weight: 600;
+}
+
+.speedMeta {
+	color: #666;
+	font-family: 'Cascadia Mono', 'Consolas', monospace;
+	font-size: 0.65rem;
+}
+
 .board {
 	position: relative;
 	display: flex;

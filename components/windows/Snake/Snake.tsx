@@ -9,14 +9,20 @@ import {
 import { certifications } from '../../../config/certifications';
 import {
 	certPickupInterval,
+	getSnakeTickMs,
 	lanFirewallBlocks,
 	snakeAppMeta,
 	snakeGrid,
+	snakeSpeedPresets,
+	SnakeSpeedId,
 } from '../../../config/apps/snake';
 import {
 	getSnakeHighScore,
+	getSnakeSpeedId,
 	getUnlockedCertIds,
 	recordSnakeGame,
+	setSnakeSpeedId,
+	stepSnakeSpeed,
 	unlockCert,
 } from '../../../lib/snakeSession';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
@@ -27,7 +33,6 @@ type Direction = 'up' | 'down' | 'left' | 'right';
 type Food = { x: number; y: number; kind: 'packet' | 'cert'; certId?: string };
 type GameStatus = 'idle' | 'playing' | 'paused' | 'gameover';
 
-const TICK_MS = 110;
 const OPPOSITE: Record<Direction, Direction> = {
 	up: 'down',
 	down: 'up',
@@ -81,6 +86,13 @@ function Snake({ onClose }: { onClose?: () => void }) {
 	const [highScore, setHighScore] = useState(0);
 	const [unlockedCerts, setUnlockedCerts] = useState<string[]>([]);
 	const [gameOverMessage, setGameOverMessage] = useState('');
+	const [speedId, setSpeedId] = useState<SnakeSpeedId>(() => getSnakeSpeedId());
+
+	const tickMs = useMemo(() => getSnakeTickMs(speedId), [speedId]);
+	const activeSpeed = useMemo(
+		() => snakeSpeedPresets.find((preset) => preset.id === speedId),
+		[speedId]
+	);
 
 	const certRewards = useMemo(
 		() =>
@@ -100,6 +112,11 @@ function Snake({ onClose }: { onClose?: () => void }) {
 	useEffect(() => {
 		refreshMeta();
 	}, [refreshMeta]);
+
+	const changeSpeed = useCallback((nextId: SnakeSpeedId) => {
+		setSpeedId(nextId);
+		setSnakeSpeedId(nextId);
+	}, []);
 
 	const spawnFood = useCallback((snake: Point[], packetsEaten: number) => {
 		const lockedCerts = certifications
@@ -308,9 +325,9 @@ function Snake({ onClose }: { onClose?: () => void }) {
 	useEffect(() => {
 		if (status !== 'playing') return undefined;
 
-		const id = window.setInterval(tick, TICK_MS);
+		const id = window.setInterval(tick, tickMs);
 		return () => window.clearInterval(id);
-	}, [status, tick]);
+	}, [status, tick, tickMs]);
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		const key = event.key.toLowerCase();
@@ -335,6 +352,16 @@ function Snake({ onClose }: { onClose?: () => void }) {
 		if (key === 'enter' && (status === 'idle' || status === 'gameover')) {
 			event.preventDefault();
 			startGame();
+		}
+
+		if (key === '[') {
+			event.preventDefault();
+			setSpeedId(stepSnakeSpeed('slower'));
+		}
+
+		if (key === ']') {
+			event.preventDefault();
+			setSpeedId(stepSnakeSpeed('faster'));
 		}
 	};
 
@@ -414,6 +441,35 @@ function Snake({ onClose }: { onClose?: () => void }) {
 							<span className={styles.hudLabel}>Best</span>
 							<strong>{highScore}</strong>
 						</div>
+						<div className={styles.speedControl}>
+							<span className={styles.hudLabel}>Speed</span>
+							<div
+								className={styles.speedButtons}
+								role="group"
+								aria-label="Game speed"
+							>
+								{snakeSpeedPresets.map((preset) => (
+									<button
+										key={preset.id}
+										type="button"
+										className={`${styles.speedButton} ${
+											speedId === preset.id
+												? styles.speedButtonActive
+												: ''
+										}`}
+										onClick={() => changeSpeed(preset.id)}
+										aria-pressed={speedId === preset.id}
+									>
+										{preset.label}
+									</button>
+								))}
+							</div>
+							{activeSpeed && (
+								<span className={styles.speedMeta}>
+									{activeSpeed.tickMs}ms/tick
+								</span>
+							)}
+						</div>
 						<p className={styles.statusLine}>{statusLabel}</p>
 					</div>
 
@@ -464,7 +520,7 @@ function Snake({ onClose }: { onClose?: () => void }) {
 							Restart
 						</button>
 						<span className={styles.keyHint}>
-							WASD / arrows · P pause · Enter start
+							WASD / arrows · P pause · [ ] speed · Enter start
 						</span>
 					</div>
 				</div>

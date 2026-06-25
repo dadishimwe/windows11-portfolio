@@ -1,6 +1,13 @@
+import {
+	defaultSnakeSpeedId,
+	SnakeSpeedId,
+	snakeSpeedPresets,
+} from '../config/apps/snake';
+
 const HIGH_SCORE_KEY = 'portfolio-snake-high-score';
 const UNLOCKED_CERTS_KEY = 'portfolio-snake-unlocked-certs';
 const LAST_GAME_KEY = 'portfolio-snake-last-game';
+const SPEED_KEY = 'portfolio-snake-speed';
 
 export type SnakeLastGame = {
 	score: number;
@@ -72,6 +79,32 @@ export function recordSnakeGame(score: number): SnakeLastGame {
 	return result;
 }
 
+export function getSnakeSpeedId(): SnakeSpeedId {
+	if (typeof window === 'undefined') return defaultSnakeSpeedId;
+	const raw = window.sessionStorage.getItem(SPEED_KEY);
+	if (snakeSpeedPresets.some((preset) => preset.id === raw)) {
+		return raw as SnakeSpeedId;
+	}
+	return defaultSnakeSpeedId;
+}
+
+export function setSnakeSpeedId(speedId: SnakeSpeedId): void {
+	if (typeof window === 'undefined') return;
+	window.sessionStorage.setItem(SPEED_KEY, speedId);
+}
+
+export function stepSnakeSpeed(direction: 'slower' | 'faster'): SnakeSpeedId {
+	const current = getSnakeSpeedId();
+	const index = snakeSpeedPresets.findIndex((preset) => preset.id === current);
+	const nextIndex =
+		direction === 'faster'
+			? Math.min(index + 1, snakeSpeedPresets.length - 1)
+			: Math.max(index - 1, 0);
+	const nextId = snakeSpeedPresets[nextIndex].id;
+	setSnakeSpeedId(nextId);
+	return nextId;
+}
+
 export function formatSnakeLog(): string {
 	const best = getSnakeHighScore();
 	const last = getLastGame();
@@ -93,6 +126,7 @@ export function formatSnakeLog(): string {
 	}
 
 	lines.push(
+		`speed=${getSnakeSpeedId()}`,
 		`unlocked_certs=${unlocked.length ? unlocked.join(',') : 'none'}`,
 		'',
 		'# Tip: play snake from Tools or type: play snake'
