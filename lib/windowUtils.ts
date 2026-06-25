@@ -12,6 +12,7 @@ export function routeToWindow(path: string): keyof OpenWindows | null {
 	if (normalized.startsWith('/explorer')) return 'fileExplorer';
 	if (normalized.startsWith('/notepad')) return 'notepad';
 	if (normalized === '/terminal') return 'terminal';
+	if (normalized === '/mail') return 'mail';
 	return null;
 }
 
@@ -28,6 +29,9 @@ export function hrefToWindow(href: string): {
 	}
 	if (normalized === '/terminal') {
 		return { windowName: 'terminal' };
+	}
+	if (normalized === '/mail') {
+		return { windowName: 'mail' };
 	}
 	return null;
 }

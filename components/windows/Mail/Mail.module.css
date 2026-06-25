@@ -1,0 +1,310 @@
+.shell {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background-color: #191919;
+	color: #f3f3f3;
+}
+
+.toolbar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	padding: 8px 12px;
+	border-bottom: 1px solid rgb(128 128 128 / 15%);
+	background-color: #202020;
+}
+
+.toolbarTitle {
+	font-weight: 600;
+	font-size: 0.85rem;
+}
+
+.body {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+}
+
+.sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 200px;
+	padding: 12px;
+	border-right: 1px solid rgb(128 128 128 / 15%);
+	background-color: #1e1e1e;
+}
+
+.composeButton {
+	padding: 10px 14px;
+	border: none;
+	border-radius: 6px;
+	background: linear-gradient(135deg, #4cc2ff 0%, #2a9fd6 100%);
+	color: #0a1628;
+	font-weight: 600;
+	font-size: 0.8rem;
+	cursor: pointer;
+}
+
+.composeButton:hover {
+	filter: brightness(1.05);
+}
+
+.composeButton:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.navItem {
+	padding: 8px 10px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: #e5e5e5;
+	font-size: 0.8rem;
+	text-align: left;
+	cursor: pointer;
+}
+
+.navItem:hover,
+.navItemActive {
+	background-color: #2e2e2e;
+}
+
+.listPane {
+	display: flex;
+	flex-direction: column;
+	width: 280px;
+	border-right: 1px solid rgb(128 128 128 / 15%);
+	background-color: #1a1a1a;
+	overflow-y: auto;
+}
+
+.listHeader {
+	padding: 12px 14px;
+	border-bottom: 1px solid rgb(128 128 128 / 12%);
+	font-weight: 600;
+	font-size: 0.8rem;
+}
+
+.emailRow {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px 14px;
+	border: none;
+	border-bottom: 1px solid rgb(128 128 128 / 10%);
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.emailRow:hover {
+	background-color: #252525;
+}
+
+.emailRowActive {
+	background-color: #2a2a2a;
+	border-left: 3px solid #4cc2ff;
+}
+
+.emailRowUnread .emailSubject {
+	font-weight: 700;
+}
+
+.emailFrom {
+	font-size: 0.78rem;
+}
+
+.emailSubject {
+	font-size: 0.82rem;
+}
+
+.emailPreview {
+	overflow: hidden;
+	color: #a3a3a3;
+	font-size: 0.72rem;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.emailDate {
+	color: #888;
+	font-size: 0.68rem;
+}
+
+.detailPane {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+	overflow-y: auto;
+}
+
+.readView {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 20px 24px;
+}
+
+.readHeader h2 {
+	margin: 0 0 8px;
+	font-size: 1.1rem;
+}
+
+.readMeta {
+	color: #a3a3a3;
+	font-size: 0.78rem;
+	line-height: 1.5;
+}
+
+.readBody {
+	margin: 0;
+	color: #e8e8e8;
+	font-size: 0.85rem;
+	line-height: 1.6;
+	white-space: pre-wrap;
+}
+
+.composeView {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px 20px;
+}
+
+.composeFields {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.fieldRow {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.fieldRow label {
+	flex-shrink: 0;
+	width: 56px;
+	color: #a3a3a3;
+	font-size: 0.75rem;
+}
+
+.fieldRow input,
+.fieldRow textarea {
+	flex: 1;
+	padding: 8px 10px;
+	border: 1px solid rgb(128 128 128 / 25%);
+	border-radius: 4px;
+	background-color: #121212;
+	color: #f3f3f3;
+	font-family: inherit;
+	font-size: 0.82rem;
+}
+
+.fieldRow textarea {
+	min-height: 140px;
+	resize: vertical;
+}
+
+.fieldRow input:focus,
+.fieldRow textarea:focus {
+	border-color: #4cc2ff;
+	outline: none;
+}
+
+.honeypot {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.sendButton {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	background-color: #4cc2ff;
+	color: #0a1628;
+	font-weight: 600;
+	font-size: 0.8rem;
+	cursor: pointer;
+}
+
+.sendButton:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.secondaryButton {
+	padding: 8px 12px;
+	border: 1px solid rgb(128 128 128 / 30%);
+	border-radius: 4px;
+	background: transparent;
+	color: #e5e5e5;
+	font-size: 0.78rem;
+	cursor: pointer;
+}
+
+.logPanel {
+	margin-top: 8px;
+	padding: 12px;
+	border-radius: 6px;
+	background-color: #0d0d0d;
+	font-family: 'Cascadia Mono', 'Consolas', monospace;
+	font-size: 0.72rem;
+	line-height: 1.55;
+}
+
+.logLine {
+	margin: 0;
+	color: #7dd3a8;
+}
+
+.logLinePending {
+	color: #666;
+}
+
+.statusSuccess {
+	color: #7dd3a8;
+	font-size: 0.8rem;
+}
+
+.statusError {
+	color: #f87171;
+	font-size: 0.8rem;
+}
+
+.emptyDetail {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	color: #888;
+	font-size: 0.85rem;
+	text-align: center;
+}
+
+@media (max-width: 900px) {
+	.listPane {
+		width: 220px;
+	}
+
+	.sidebar {
+		width: 160px;
+	}
+}

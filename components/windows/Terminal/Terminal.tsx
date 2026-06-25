@@ -9,6 +9,7 @@ import {
 import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
+import { useWindowManager } from '../../../hooks/useWindowManager';
 import {
 	createTerminalSession,
 	getInitialTerminalState,
@@ -31,6 +32,7 @@ function focusTerminalInput(input: HTMLInputElement | null) {
 }
 
 function Terminal({ onClose }: { onClose?: () => void }) {
+	const { openWindow } = useWindowManager();
 	const [initial] = useState(getInitialTerminalState);
 	const [sessions, setSessions] = useState<TerminalSession[]>(
 		initial.sessions
@@ -118,6 +120,10 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 				})
 			);
 
+			if (result.openWindow) {
+				void openWindow(result.openWindow);
+			}
+
 			if (trimmed) {
 				const previous = commandHistoryRef.current;
 				if (previous[previous.length - 1] !== trimmed) {
@@ -125,7 +131,7 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 				}
 			}
 		},
-		[activeSessionId, sessions]
+		[activeSessionId, openWindow, sessions]
 	);
 
 	const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {

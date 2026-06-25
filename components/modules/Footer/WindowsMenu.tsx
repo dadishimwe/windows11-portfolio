@@ -87,6 +87,13 @@ function WindowsMenu({
 				icon: '/icons/firefox/firefox.png',
 				onClick: () => onOpenApp('firefox'),
 			},
+			{
+				id: 'mail',
+				label: 'Mail',
+				keywords: ['mail', 'email', 'contact', 'compose'],
+				icon: '/svg/email.svg',
+				onClick: () => onOpenApp('mail'),
+			},
 		],
 		[onOpenApp]
 	);
@@ -100,13 +107,6 @@ function WindowsMenu({
 				icon: app.icon,
 				onClick: () => onOpenSocial(app.href),
 			})),
-			{
-				id: 'email',
-				label: 'Email',
-				keywords: ['email', 'mail', 'contact'],
-				icon: '/svg/email.svg',
-				onClick: () => onOpenSocial(`mailto:${site.email}`),
-			},
 		],
 		[onOpenSocial]
 	);

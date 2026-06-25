@@ -34,6 +34,7 @@ export function isOpenWindowMessage(
 		(win === 'fileExplorer' ||
 			win === 'notepad' ||
 			win === 'terminal' ||
-			win === 'firefox')
+			win === 'firefox' ||
+			win === 'mail')
 	);
 }

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import {
@@ -8,10 +9,11 @@ import {
 import { getAboutNotepadText } from '../../../config/notepadContent';
 import { site } from '../../../config/site';
 import { startMenuSocialApps, openExternalUrl } from '../../../config/taskbar';
+import ContactForm from '../../../components/contact/ContactForm';
 import { FiExternalLink } from 'react-icons/fi';
 import styles from './MobileLayout.module.css';
 
-type Panel = 'about' | 'certifications' | 'links' | null;
+type Panel = 'about' | 'certifications' | 'links' | 'contact' | null;
 
 const PATH_PANEL: Record<string, Panel> = {
 	'/notepad/about': 'about',
@@ -117,6 +119,19 @@ function MobileLayout() {
 					<button
 						type="button"
 						className={styles.tile}
+						onClick={() => setPanel('contact')}
+					>
+						<Image
+							src="/svg/email.svg"
+							alt=""
+							width={32}
+							height={32}
+						/>
+						<span className={styles.tileLabel}>Mail</span>
+					</button>
+					<button
+						type="button"
+						className={styles.tile}
 						onClick={() => setPanel('links')}
 					>
 						<Image
@@ -172,6 +187,16 @@ function MobileLayout() {
 							/>
 						</a>
 					))}
+					<Link href="/mail" aria-label="Mail app" passHref>
+						<a>
+							<Image
+								src="/svg/email.svg"
+								alt="Mail"
+								width={22}
+								height={22}
+							/>
+						</a>
+					</Link>
 					<a
 						href={`mailto:${site.email}`}
 						aria-label="Email"
@@ -208,6 +233,7 @@ function MobileLayout() {
 								{panel === 'about' && 'About me'}
 								{panel === 'certifications' && 'Certifications'}
 								{panel === 'links' && 'Links'}
+								{panel === 'contact' && 'Mail'}
 							</h2>
 							<button
 								type="button"
@@ -278,6 +304,17 @@ function MobileLayout() {
 							</div>
 						)}
 
+						{panel === 'contact' && (
+							<div className={styles.panelBody}>
+								<p className={styles.contactIntro}>
+									Send a message to {site.name}. On desktop,
+									open Mail from the Start menu for the full
+									inbox experience.
+								</p>
+								<ContactForm compact />
+							</div>
+						)}
+
 						{panel === 'links' && (
 							<div className={styles.linkList}>
 								<a
@@ -322,6 +359,17 @@ function MobileLayout() {
 									/>
 									Instagram
 								</a>
+								<Link href="/mail" passHref>
+									<a className={styles.linkRow}>
+										<Image
+											src="/svg/email.svg"
+											alt=""
+											width={20}
+											height={20}
+										/>
+										Mail
+									</a>
+								</Link>
 								<a
 									className={styles.linkRow}
 									href={`mailto:${site.email}`}
@@ -332,7 +380,7 @@ function MobileLayout() {
 										width={20}
 										height={20}
 									/>
-									Email
+									Email (mailto)
 								</a>
 							</div>
 						)}

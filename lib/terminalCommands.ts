@@ -1,4 +1,5 @@
 import { certifications } from '../config/certifications';
+import { OpenWindows } from '../config/openWindows';
 import {
 	HOME_DIR,
 	isDirectory,
@@ -19,6 +20,7 @@ export type CommandResult = {
 	newCwd?: string;
 	clear?: boolean;
 	cachedPublicIp?: string;
+	openWindow?: keyof OpenWindows;
 };
 
 const HELP_TEXT = [
@@ -34,6 +36,7 @@ const HELP_TEXT = [
 	'echo <text>   — print text',
 	'certs         — list certifications',
 	'contact       — email and social links',
+	'mail          — open Mail app',
 	'skills        — technical skills',
 	'ip / ifconfig — network interfaces (public IP)',
 	'ping <host>   — simulated ping',
@@ -222,7 +225,14 @@ export async function runTerminalCommand(
 					`Email: ${site.email}`,
 					`GitHub: ${site.github}`,
 					`LinkedIn: ${site.linkedin}`,
+					'Tip: type mail to open the Mail app',
 				].join('<br/>'),
+			};
+
+		case 'mail':
+			return {
+				response: 'Opening Mail...',
+				openWindow: 'mail',
 			};
 
 		case 'skills':

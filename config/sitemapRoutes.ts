@@ -2,7 +2,7 @@
 export const sitemapRoutes: { path: string; changefreq?: string; priority?: number }[] =
 	[
 		{ path: '/', changefreq: 'weekly', priority: 1 },
-		{ path: '/notepad/about', changefreq: 'monthly', priority: 0.8 },
+		{ path: '/mail', changefreq: 'monthly', priority: 0.7 },
 		{ path: '/terminal', changefreq: 'monthly', priority: 0.5 },
 		{ path: '/explorer/quick-access', changefreq: 'monthly', priority: 0.6 },
 		{ path: '/explorer/desktop', changefreq: 'monthly', priority: 0.6 },

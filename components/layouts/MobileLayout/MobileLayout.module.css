@@ -170,6 +170,14 @@
 	white-space: pre-wrap;
 }
 
+.contactIntro {
+	margin: 0 0 16px;
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 0.8rem;
+	line-height: 1.45;
+	white-space: normal;
+}
+
 .certList {
 	display: flex;
 	flex-direction: column;

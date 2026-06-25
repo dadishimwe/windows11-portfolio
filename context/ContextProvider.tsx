@@ -67,6 +67,7 @@ const initialMaximized = {
 	notepad: null,
 	terminal: null,
 	firefox: null,
+	mail: null,
 };
 
 const initialPosition = {
@@ -100,6 +101,12 @@ const initialPosition = {
 		width: 960,
 		height: 600,
 	},
+	mail: {
+		x: 0,
+		y: 0,
+		width: 1000,
+		height: 620,
+	},
 };
 
 const initialLastPos = {
@@ -115,6 +122,7 @@ const initialMinimized = {
 	notepad: false,
 	terminal: false,
 	firefox: false,
+	mail: false,
 };
 
 const initialFirefoxTabs = buildInitialFirefoxTabs();

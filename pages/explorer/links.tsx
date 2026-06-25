@@ -1,6 +1,7 @@
 import Image from 'next/image';
-import ExplorerPage from '../../components/explorer/ExplorerPage';
+import EmbedAppLink from '../../components/explorer/EmbedAppLink';
 import ExplorerExternalLink from '../../components/explorer/ExplorerExternalLink';
+import ExplorerPage from '../../components/explorer/ExplorerPage';
 import { site } from '../../config/site';
 import { EXPLORER_ITEM_DATE } from '../../lib/explorerList';
 import styles from '../../styles/utils/List.module.css';
@@ -10,6 +11,7 @@ type LinkItem = {
 	icon: string;
 	href: string;
 	size: string;
+	windowName?: 'mail';
 };
 
 const linkItems: LinkItem[] = [
@@ -50,35 +52,43 @@ const linkItems: LinkItem[] = [
 		size: '2 KB',
 	},
 	{
-		label: 'Email',
+		label: 'Mail',
 		icon: '/svg/email.svg',
-		href: `mailto:${site.email}`,
-		size: '1 KB',
+		href: '/mail',
+		size: '2 KB',
+		windowName: 'mail',
 	},
 ];
+
+function LinkRow({ item }: { item: LinkItem }) {
+	const row = (
+		<div className={styles.listItem}>
+			<div className={styles.listItemName}>
+				<Image src={item.icon} alt="" width={18} height={18} />
+				<p>{item.label}</p>
+			</div>
+			<p className={styles.listItemDateModified}>{EXPLORER_ITEM_DATE}</p>
+			<p className={styles.listItemType}>Shortcut</p>
+			<p className={styles.listItemSize}>{item.size}</p>
+		</div>
+	);
+
+	if (item.windowName) {
+		return (
+			<EmbedAppLink windowName={item.windowName} href={item.href}>
+				{row}
+			</EmbedAppLink>
+		);
+	}
+
+	return <ExplorerExternalLink href={item.href}>{row}</ExplorerExternalLink>;
+}
 
 function Links() {
 	const content = () => (
 		<div className={styles.listItemContainer}>
 			{linkItems.map((item) => (
-				<ExplorerExternalLink key={item.label} href={item.href}>
-					<div className={styles.listItem}>
-						<div className={styles.listItemName}>
-							<Image
-								src={item.icon}
-								alt=""
-								width={18}
-								height={18}
-							/>
-							<p>{item.label}</p>
-						</div>
-						<p className={styles.listItemDateModified}>
-							{EXPLORER_ITEM_DATE}
-						</p>
-						<p className={styles.listItemType}>Shortcut</p>
-						<p className={styles.listItemSize}>{item.size}</p>
-					</div>
-				</ExplorerExternalLink>
+				<LinkRow key={item.label} item={item} />
 			))}
 		</div>
 	);
@@ -89,7 +99,7 @@ function Links() {
 			head={{
 				title: 'Links',
 				description:
-					'Portfolio, blog, Credly, LinkedIn, GitHub, Instagram, and email.',
+					'Portfolio, blog, Credly, socials, and Mail to contact Dadi.',
 				path: '/explorer/links',
 			}}
 			content={content}

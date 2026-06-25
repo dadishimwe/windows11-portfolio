@@ -60,6 +60,11 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 		icon: '/icons/firefox/firefox.png',
 		windowName: 'firefox',
 	},
+	mail: {
+		title: 'Mail',
+		icon: '/svg/email.svg',
+		windowName: 'mail',
+	},
 };
 
 /** Always-visible taskbar shortcuts for portfolio apps */
