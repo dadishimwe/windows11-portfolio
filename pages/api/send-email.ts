@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { buildContactEmailHtml } from '../../lib/mailEmailTemplate';
 import { site } from '../../config/site';
 
 type Body = {
@@ -74,6 +75,8 @@ export default async function handler(
 		`— Sent from ${site.portfolioUrl}`,
 	].join('\n');
 
+	const html = buildContactEmailHtml({ name, email, subject, message });
+
 	try {
 		const response = await fetch('https://api.resend.com/emails', {
 			method: 'POST',
@@ -87,6 +90,7 @@ export default async function handler(
 				reply_to: email,
 				subject: `[Portfolio] ${subject}`,
 				text,
+				html,
 			}),
 		});
 

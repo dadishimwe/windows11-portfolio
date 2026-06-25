@@ -71,6 +71,7 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 export const taskbarPinnedApps: WindowTaskbarMeta[] = [
 	windowTaskbarMeta.fileExplorer,
 	windowTaskbarMeta.terminal,
+	windowTaskbarMeta.mail,
 	windowTaskbarMeta.pictures,
 	windowTaskbarMeta.firefox,
 ];
