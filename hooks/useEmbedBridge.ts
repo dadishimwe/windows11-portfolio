@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { isOpenWindowMessage } from '../lib/embedBridge';
 import { isOpenMediaMessage } from '../lib/mediaPlayerMessages';
+import { isOpenPdfMessage } from '../lib/pdfViewerMessages';
 import { useMediaPlayer } from './useMediaPlayer';
+import { usePdfViewer } from './usePdfViewer';
 import { useWindowManager } from './useWindowManager';
 
 export function useEmbedBridge() {
 	const { openMedia } = useMediaPlayer();
+	const { openPdf } = usePdfViewer();
 	const { openWindow } = useWindowManager();
 
 	useEffect(() => {
@@ -15,6 +18,12 @@ export function useEmbedBridge() {
 			if (isOpenMediaMessage(event.data)) {
 				const { media, kind } = event.data.payload;
 				void openMedia(media, kind);
+				return;
+			}
+
+			if (isOpenPdfMessage(event.data)) {
+				const { document } = event.data.payload;
+				void openPdf(document);
 				return;
 			}
 
@@ -29,5 +38,5 @@ export function useEmbedBridge() {
 
 		window.addEventListener('message', onMessage);
 		return () => window.removeEventListener('message', onMessage);
-	}, [openMedia, openWindow]);
+	}, [openMedia, openPdf, openWindow]);
 }

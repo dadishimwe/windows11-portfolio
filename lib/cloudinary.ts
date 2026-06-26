@@ -1,9 +1,13 @@
 import {
+	CLOUDINARY_CERT_MIT_ONLINE_PREFIX,
+	CLOUDINARY_CERT_MIT_PREFIX,
+	CLOUDINARY_CERT_PEPLINK_PREFIX,
 	CLOUDINARY_IMAGE_PREFIX,
+	CLOUDINARY_RESUME_PREFIX,
 	CLOUDINARY_VIDEO_PREFIX,
 	getCloudinaryCredentials,
 } from '../config/cloudinary';
-import { MediaType } from '../typings';
+import { MediaType, PdfDocument } from '../typings';
 
 type CloudinaryResource = {
 	public_id: string;
@@ -82,7 +86,7 @@ async function listByAssetFolder(
 
 /** Legacy fixed-folder mode — public_id starts with prefix. */
 async function listByPublicIdPrefix(
-	resourceType: 'image' | 'video',
+	resourceType: 'image' | 'video' | 'raw',
 	prefix: string
 ): Promise<CloudinaryResource[] | null> {
 	const credentials = getCredentialsOrWarn();
@@ -205,4 +209,86 @@ export async function getCloudinaryVideos(): Promise<MediaType[]> {
 	return resources
 		.filter((r) => r.secure_url.includes('/video/upload/'))
 		.map(toVideoMedia);
+}
+
+function isPdfResource(resource: CloudinaryResource): boolean {
+	return (
+		resource.format === 'pdf' ||
+		resource.secure_url.toLowerCase().includes('.pdf')
+	);
+}
+
+function pdfViewUrl(secureUrl: string): string {
+	if (secureUrl.includes('/raw/upload/')) {
+		return secureUrl;
+	}
+	return secureUrl.replace('/upload/', '/upload/fl_inline/');
+}
+
+function pdfDownloadUrl(secureUrl: string): string {
+	return secureUrl.replace('/upload/', '/upload/fl_attachment/');
+}
+
+function pdfThumbnailUrl(secureUrl: string): string | undefined {
+	if (!secureUrl.includes('/image/upload/')) return undefined;
+	const base = secureUrl.replace('/upload/', '/upload/pg_1,w_64,h_64,c_fill/');
+	return base.replace(/\.pdf$/i, '.jpg');
+}
+
+function toPdfDocument(resource: CloudinaryResource): PdfDocument {
+	const title = displayFilename(resource);
+	return {
+		title,
+		fileName:
+			resource.format === 'pdf'
+				? `${title}.pdf`
+				: `${title}.${resource.format}`,
+		pdfUrl: pdfViewUrl(resource.secure_url),
+		downloadUrl: pdfDownloadUrl(resource.secure_url),
+		public_id: resource.public_id,
+		format: resource.format,
+		thumbnailUrl: pdfThumbnailUrl(resource.secure_url),
+	};
+}
+
+async function listPdfsInAssetFolder(
+	assetFolder: string
+): Promise<PdfDocument[]> {
+	const seen = new Set<string>();
+	const results: PdfDocument[] = [];
+
+	const byFolder = await listByAssetFolder(assetFolder);
+	if (byFolder) {
+		for (const resource of byFolder) {
+			if (!isPdfResource(resource) || seen.has(resource.public_id)) continue;
+			seen.add(resource.public_id);
+			results.push(toPdfDocument(resource));
+		}
+	}
+
+	for (const resourceType of ['image', 'raw'] as const) {
+		const byPrefix = await listByPublicIdPrefix(resourceType, assetFolder);
+		if (!byPrefix) continue;
+		for (const resource of byPrefix) {
+			if (!isPdfResource(resource) || seen.has(resource.public_id)) continue;
+			seen.add(resource.public_id);
+			results.push(toPdfDocument(resource));
+		}
+	}
+
+	return results.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+export async function getCloudinaryPdfs(
+	assetFolder: string
+): Promise<PdfDocument[] | null> {
+	const credentials = getCloudinaryCredentials();
+	if (!credentials) return null;
+	return listPdfsInAssetFolder(assetFolder);
+}
+
+export async function getCloudinaryResume(): Promise<PdfDocument | null> {
+	const docs = await getCloudinaryPdfs(CLOUDINARY_RESUME_PREFIX);
+	if (!docs || docs.length === 0) return null;
+	return docs[0];
 }

@@ -5,6 +5,10 @@ import {
 	initialMediaPlayerState,
 	MediaPlayerState,
 } from '../config/mediaPlayer';
+import {
+	initialPdfViewerState,
+	PdfViewerState,
+} from '../config/pdfViewer';
 import { buildInitialFirefoxTabs, FirefoxTab } from '../lib/firefoxTabs';
 
 type LastPos = {
@@ -55,6 +59,7 @@ type ContextType = {
 		MediaPlayerState,
 		Dispatch<SetStateAction<MediaPlayerState>>,
 	];
+	pdfViewerState: [PdfViewerState, Dispatch<SetStateAction<PdfViewerState>>];
 };
 
 const initialPriority = {
@@ -69,6 +74,7 @@ const initialMaximized = {
 	firefox: null,
 	mail: null,
 	snake: null,
+	pdfViewer: null,
 };
 
 const initialPosition = {
@@ -114,6 +120,12 @@ const initialPosition = {
 		width: 720,
 		height: 520,
 	},
+	pdfViewer: {
+		x: 0,
+		y: 0,
+		width: 880,
+		height: 620,
+	},
 };
 
 const initialLastPos = {
@@ -131,6 +143,7 @@ const initialMinimized = {
 	firefox: false,
 	mail: false,
 	snake: false,
+	pdfViewer: false,
 };
 
 const initialFirefoxTabs = buildInitialFirefoxTabs();
@@ -149,6 +162,7 @@ const initialState: ContextType = {
 	windowPriorityState: [initialPriority, () => {}],
 	lastPosState: [initialLastPos, () => {}],
 	mediaPlayerState: [initialMediaPlayerState, () => {}],
+	pdfViewerState: [initialPdfViewerState, () => {}],
 };
 
 export const Context = createContext<ContextType>(initialState);
@@ -173,6 +187,8 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [lastPos, setLastPos] = useState<LastPos>(initialLastPos);
 	const [mediaPlayer, setMediaPlayer] =
 		useState<MediaPlayerState>(initialMediaPlayerState);
+	const [pdfViewer, setPdfViewer] =
+		useState<PdfViewerState>(initialPdfViewerState);
 
 	const appContext: ContextType = {
 		maximizedState: [maximized, setMaximized],
@@ -188,6 +204,7 @@ const ContextProvider = ({ children }: { children: React.ReactNode }) => {
 		windowPriorityState: [windowPriority, setWindowPriority],
 		lastPosState: [lastPos, setLastPos],
 		mediaPlayerState: [mediaPlayer, setMediaPlayer],
+		pdfViewerState: [pdfViewer, setPdfViewer],
 	};
 
 	return <Context.Provider value={appContext}>{children}</Context.Provider>;

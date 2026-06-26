@@ -22,7 +22,25 @@ function Documents() {
 						{EXPLORER_ITEM_DATE}
 					</p>
 					<p className={styles.listItemType}>File folder</p>
-					<p className={styles.listItemSize}>3 items</p>
+					<p className={styles.listItemSize}>4 folders</p>
+				</div>
+			</ExplorerLink>
+			<ExplorerLink href="/explorer/resume" passHref>
+				<div className={styles.listItem}>
+					<div className={styles.listItemName}>
+						<Image
+							src="/icons/documents/documents_small.png"
+							alt="icon"
+							width={16}
+							height={16}
+						/>
+						<p>Resume</p>
+					</div>
+					<p className={styles.listItemDateModified}>
+						{EXPLORER_ITEM_DATE}
+					</p>
+					<p className={styles.listItemType}>File folder</p>
+					<p className={styles.listItemSize}>—</p>
 				</div>
 			</ExplorerLink>
 		</div>
@@ -34,7 +52,7 @@ function Documents() {
 			head={{
 				title: 'Documents',
 				description:
-					'Documents folder — certifications and personal files.',
+					'Documents folder — certifications, résumé, and personal files.',
 				path: '/explorer/documents',
 			}}
 			content={content}

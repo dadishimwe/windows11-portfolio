@@ -49,3 +49,15 @@
 	width: 10%;
 	padding-right: 5px;
 }
+
+.emptyFolder {
+	padding: 16px 8px;
+	color: #aaa;
+	font-size: 0.85rem;
+}
+
+.pdfThumb {
+	flex-shrink: 0;
+	border-radius: 2px;
+	object-fit: cover;
+}

@@ -1,72 +1,35 @@
 import Image from 'next/image';
+import ExplorerLink from '../../components/explorer/ExplorerLink';
 import ExplorerPage from '../../components/explorer/ExplorerPage';
-import {
-	certifications,
-	getCertificationHref,
-} from '../../config/certifications';
-import styles from '../../styles/utils/Certifications.module.css';
-import { FiExternalLink } from 'react-icons/fi';
+import { certExplorerFolders } from '../../config/documents';
+import { EXPLORER_ITEM_DATE } from '../../lib/explorerList';
+import styles from '../../styles/utils/List.module.css';
 
-function Certifications() {
+function CertificationsHub() {
 	const content = () => (
-		<div className={styles.badgeGrid}>
-			{certifications.map((cert) => {
-				const href = getCertificationHref(cert);
-				const card = (
-					<div className={styles.badgeCard}>
-						<div className={styles.badgeImageWrap}>
-							{cert.badgeImageUrl ? (
-								<Image
-									src={cert.badgeImageUrl}
-									alt={`${cert.name} badge`}
-									width={96}
-									height={96}
-									className={styles.badgeImage}
-								/>
-							) : (
-								<Image
-									src="/icons/documents/documents.png"
-									alt=""
-									width={64}
-									height={64}
-								/>
-							)}
+		<div className={styles.listItemContainer}>
+			{certExplorerFolders.map((folder) => (
+				<ExplorerLink key={folder.id} href={folder.explorerPath} passHref>
+					<div className={styles.listItem}>
+						<div className={styles.listItemName}>
+							<Image
+								src={folder.icon}
+								alt=""
+								width={16}
+								height={16}
+							/>
+							<p>{folder.name}</p>
 						</div>
-						<div className={styles.badgeInfo}>
-							<p className={styles.badgeName}>{cert.name}</p>
-							<p className={styles.badgeMeta}>
-								{cert.issuer} · {cert.dateModified}
-							</p>
-							{href && (
-								<span className={styles.badgeLinkHint}>
-									View on Credly{' '}
-									<FiExternalLink aria-hidden />
-								</span>
-							)}
-						</div>
+						<p className={styles.listItemDateModified}>
+							{EXPLORER_ITEM_DATE}
+						</p>
+						<p className={styles.listItemType}>File folder</p>
+						<p className={styles.listItemSize}>
+							{folder.kind === 'credly' ? 'Credly' : 'PDF'}
+						</p>
 					</div>
-				);
-
-				if (!href) {
-					return (
-						<div key={cert.id} className={styles.badgeItem}>
-							{card}
-						</div>
-					);
-				}
-
-				return (
-					<a
-						key={cert.id}
-						className={styles.badgeItem}
-						href={href}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{card}
-					</a>
-				);
-			})}
+				</ExplorerLink>
+			))}
 		</div>
 	);
 
@@ -76,7 +39,7 @@ function Certifications() {
 			head={{
 				title: 'Certifications',
 				description:
-					'Fortinet NSE, FCF, FCA, and FortiGate Operator certifications on Credly.',
+					'Fortinet (Credly), Peplink, MIT, and MIT Online / edX certificates.',
 				path: '/explorer/certifications',
 			}}
 			content={content}
@@ -84,4 +47,4 @@ function Certifications() {
 	);
 }
 
-export default Certifications;
+export default CertificationsHub;

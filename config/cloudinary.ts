@@ -16,6 +16,23 @@ export const CLOUDINARY_IMAGE_PREFIX =
 export const CLOUDINARY_VIDEO_PREFIX =
 	process.env.CLOUDINARY_VIDEO_PREFIX ?? 'portfolio/videos';
 
+/** Résumé PDF(s) — Media Library asset_folder */
+export const CLOUDINARY_RESUME_PREFIX =
+	process.env.CLOUDINARY_RESUME_PREFIX ?? 'portfolio/resume';
+
+/** Certificate PDF folders (asset_folder) */
+export const CLOUDINARY_CERT_PEPLINK_PREFIX =
+	process.env.CLOUDINARY_CERT_PEPLINK_PREFIX ??
+	'portfolio/certifications/peplink';
+
+export const CLOUDINARY_CERT_MIT_PREFIX =
+	process.env.CLOUDINARY_CERT_MIT_PREFIX ??
+	'portfolio/certifications/mit';
+
+export const CLOUDINARY_CERT_MIT_ONLINE_PREFIX =
+	process.env.CLOUDINARY_CERT_MIT_ONLINE_PREFIX ??
+	'portfolio/certifications/mit-online';
+
 export function getCloudinaryCredentials() {
 	const cloudinaryUrl = process.env.CLOUDINARY_URL;
 	if (cloudinaryUrl) {

@@ -22,10 +22,13 @@ const directories: Record<string, string[]> = {
 		'Videos',
 		'Certifications',
 	],
-	[`${HOME_DIR}/Documents`]: ['Certifications'],
-	[`${HOME_DIR}/Documents/Certifications`]: certifications.map(
-		(cert) => `${cert.id}.txt`
-	),
+	[`${HOME_DIR}/Documents`]: ['Certifications', 'Resume'],
+	[`${HOME_DIR}/Documents/Certifications`]: [
+		'Fortinet',
+		'Peplink',
+		'MIT',
+		'MIT Online & edX',
+	],
 };
 
 const files: Record<string, string> = {

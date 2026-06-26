@@ -43,7 +43,8 @@ export function hrefToWindow(href: string): {
 export function getOpenWindowNames(
 	openWindows: OpenWindows,
 	minimized: Record<string, boolean>,
-	mediaPlayerOpen = false
+	mediaPlayerOpen = false,
+	pdfViewerOpen = false
 ): string[] {
 	const names = Object.entries(openWindows)
 		.filter(([name, isOpen]) => isOpen && !minimized[name])
@@ -53,13 +54,18 @@ export function getOpenWindowNames(
 		names.push('mediaPlayer');
 	}
 
+	if (pdfViewerOpen && !minimized.pdfViewer) {
+		names.push('pdfViewer');
+	}
+
 	return names;
 }
 
 export function getMinimizedWindowNames(
 	openWindows: OpenWindows,
 	minimized: Record<string, boolean>,
-	mediaPlayerOpen = false
+	mediaPlayerOpen = false,
+	pdfViewerOpen = false
 ): string[] {
 	const names = Object.entries(openWindows)
 		.filter(([name, isOpen]) => isOpen && minimized[name])
@@ -67,6 +73,10 @@ export function getMinimizedWindowNames(
 
 	if (mediaPlayerOpen && minimized.mediaPlayer) {
 		names.push('mediaPlayer');
+	}
+
+	if (pdfViewerOpen && minimized.pdfViewer) {
+		names.push('pdfViewer');
 	}
 
 	return names;

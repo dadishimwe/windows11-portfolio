@@ -8,6 +8,7 @@ import {
 	WindowTaskbarMeta,
 } from '../../../config/taskbar';
 import { useMediaPlayer } from '../../../hooks/useMediaPlayer';
+import { usePdfViewer } from '../../../hooks/usePdfViewer';
 import { useWindowManager } from '../../../hooks/useWindowManager';
 import {
 	getMinimizedWindowNames,
@@ -39,8 +40,9 @@ function isPathPinnedOpen(
 }
 
 function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
-	const { mediaPlayerState } = useContext(Context);
+	const { mediaPlayerState, pdfViewerState } = useContext(Context);
 	const [mediaPlayer] = mediaPlayerState;
+	const [pdfViewer] = pdfViewerState;
 
 	const {
 		openWindows,
@@ -52,21 +54,29 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 	} = useWindowManager();
 
 	const { focusMedia, restoreMedia } = useMediaPlayer();
+	const { focusPdf, restorePdf } = usePdfViewer();
 
 	const openWindowNames = getOpenWindowNames(
 		openWindows,
 		minimized,
-		mediaPlayer.isOpen
+		mediaPlayer.isOpen,
+		pdfViewer.isOpen
 	);
 	const minimizedWindowNames = getMinimizedWindowNames(
 		openWindows,
 		minimized,
-		mediaPlayer.isOpen
+		mediaPlayer.isOpen,
+		pdfViewer.isOpen
 	);
 
 	const handleRestoreWindow = (windowName: string) => {
 		if (windowName === 'mediaPlayer') {
 			void restoreMedia();
+			return;
+		}
+
+		if (windowName === 'pdfViewer') {
+			void restorePdf();
 			return;
 		}
 
@@ -99,12 +109,20 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 			void focusMedia();
 			return;
 		}
+		if (windowName === 'pdfViewer') {
+			void focusPdf();
+			return;
+		}
 		void focusWindow(windowName);
 	};
 
 	const handleMinimizedClick = (windowName: string) => {
 		if (windowName === 'mediaPlayer') {
 			void restoreMedia();
+			return;
+		}
+		if (windowName === 'pdfViewer') {
+			void restorePdf();
 			return;
 		}
 		handleRestoreWindow(windowName);
@@ -180,6 +198,7 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 	const mediaTaskbarMeta = mediaPlayer.isOpen
 		? getMediaTaskbarMeta(mediaPlayer.kind)
 		: null;
+	const pdfTaskbarTitle = pdfViewer.document?.title ?? 'Document';
 
 	return (
 		<>
@@ -218,10 +237,35 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 						onClick={() => void restoreMedia()}
 					/>
 				)}
+				{pdfViewer.isOpen && !minimized.pdfViewer && (
+					<TaskbarButton
+						key="open-pdfViewer"
+						label={pdfTaskbarTitle}
+						icon="/icons/documents/documents.png"
+						isActive
+						onClick={() => {
+							if (minimized.pdfViewer) {
+								void restorePdf();
+							} else {
+								void focusPdf();
+							}
+						}}
+					/>
+				)}
+				{pdfViewer.isOpen && minimized.pdfViewer && (
+					<TaskbarButton
+						key="min-pdfViewer"
+						label={pdfTaskbarTitle}
+						icon="/icons/documents/documents.png"
+						isMinimized
+						onClick={() => void restorePdf()}
+					/>
+				)}
 				{openWindowNames
 					.filter(
 						(name) =>
 							name !== 'mediaPlayer' &&
+							name !== 'pdfViewer' &&
 							!taskbarPinnedApps.some(
 								(app) =>
 									app.windowName === name && !app.pathPin
@@ -245,6 +289,7 @@ function FooterTaskbar({ winMenu, handleWinMenu }: Props) {
 					.filter(
 						(name) =>
 							name !== 'mediaPlayer' &&
+							name !== 'pdfViewer' &&
 							!openWindowNames.includes(name) &&
 							!taskbarPinnedApps.some(
 								(app) => app.windowName === name && !app.pathPin

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import Selecto from 'react-selecto';
 import { Context } from '../../../context/ContextProvider';
@@ -14,13 +15,17 @@ type DesktopLinkProps = {
 };
 
 function DesktopLink({ href, children }: DesktopLinkProps) {
+	const router = useRouter();
 	const { minimizedState } = useContext(Context);
 	const [minimized, setMinimized] = minimizedState;
 	const { openWindow, openWindows } = useWindowManager();
 
 	const handleClick = () => {
 		const target = hrefToWindow(href);
-		if (!target) return;
+		if (!target) {
+			void router.push(href);
+			return;
+		}
 
 		if (
 			openWindows[target.windowName] &&
@@ -110,6 +115,17 @@ function Icons() {
 								height={40}
 							/>
 							<p>About me</p>
+						</div>
+					</DesktopLink>
+					<DesktopLink href="/resume">
+						<div className={`${styles.item} selectoItem`}>
+							<Image
+								src="/icons/documents/documents.png"
+								alt="icon"
+								width={40}
+								height={40}
+							/>
+							<p>Résumé</p>
 						</div>
 					</DesktopLink>
 					<DesktopLink href="/explorer/projects">

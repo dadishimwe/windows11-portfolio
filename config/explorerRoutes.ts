@@ -49,6 +49,31 @@ export const explorerRoutes: Record<string, ExplorerRouteMeta> = {
 		icon: 'documents',
 		topNav: false,
 	},
+	'/explorer/certifications/fortinet': {
+		folder: 'Fortinet',
+		icon: 'documents',
+		topNav: true,
+	},
+	'/explorer/certifications/peplink': {
+		folder: 'Peplink',
+		icon: 'documents',
+		topNav: true,
+	},
+	'/explorer/certifications/mit': {
+		folder: 'MIT',
+		icon: 'documents',
+		topNav: true,
+	},
+	'/explorer/certifications/mit-online': {
+		folder: 'MIT Online & edX',
+		icon: 'documents',
+		topNav: true,
+	},
+	'/explorer/resume': {
+		folder: 'Resume',
+		icon: 'documents',
+		topNav: false,
+	},
 	'/explorer/desktop': {
 		folder: 'Desktop',
 		icon: 'desktop',

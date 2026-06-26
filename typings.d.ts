@@ -7,6 +7,16 @@ export type MediaType = {
 	url: string;
 };
 
+export type PdfDocument = {
+	title: string;
+	fileName: string;
+	pdfUrl: string;
+	downloadUrl: string;
+	public_id: string;
+	format: string;
+	thumbnailUrl?: string;
+};
+
 export type ErrorType = {
 	error: string;
 	index: number;

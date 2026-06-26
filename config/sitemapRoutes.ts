@@ -9,6 +9,28 @@ export const sitemapRoutes: { path: string; changefreq?: string; priority?: numb
 		{ path: '/explorer/desktop', changefreq: 'monthly', priority: 0.6 },
 		{ path: '/explorer/documents', changefreq: 'monthly', priority: 0.6 },
 		{ path: '/explorer/certifications', changefreq: 'monthly', priority: 0.8 },
+		{
+			path: '/explorer/certifications/fortinet',
+			changefreq: 'monthly',
+			priority: 0.7,
+		},
+		{
+			path: '/explorer/certifications/peplink',
+			changefreq: 'monthly',
+			priority: 0.7,
+		},
+		{
+			path: '/explorer/certifications/mit',
+			changefreq: 'monthly',
+			priority: 0.7,
+		},
+		{
+			path: '/explorer/certifications/mit-online',
+			changefreq: 'monthly',
+			priority: 0.7,
+		},
+		{ path: '/explorer/resume', changefreq: 'monthly', priority: 0.8 },
+		{ path: '/resume', changefreq: 'monthly', priority: 0.8 },
 		{ path: '/explorer/projects', changefreq: 'weekly', priority: 0.8 },
 		{ path: '/explorer/pictures', changefreq: 'weekly', priority: 0.7 },
 		{ path: '/explorer/videos', changefreq: 'weekly', priority: 0.7 },
