@@ -101,6 +101,13 @@ function WindowsMenu({
 				icon: '/svg/snake.svg',
 				onClick: () => onOpenApp('snake'),
 			},
+			{
+				id: 'code-studio',
+				label: 'Visual Studio Code',
+				keywords: ['code', 'vscode', 'python', 'editor', 'ide'],
+				icon: '/icons/vscode/vscode.png',
+				onClick: () => onOpenApp('codeStudio'),
+			},
 		],
 		[onOpenApp]
 	);

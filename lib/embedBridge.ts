@@ -36,6 +36,7 @@ export function isOpenWindowMessage(
 			win === 'terminal' ||
 			win === 'firefox' ||
 			win === 'mail' ||
-			win === 'snake')
+			win === 'snake' ||
+			win === 'codeStudio')
 	);
 }

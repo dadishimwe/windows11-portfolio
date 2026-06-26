@@ -9,6 +9,7 @@ import {
 	resolvePath,
 } from '../config/filesystem';
 import { formatSnakeLog } from './snakeSession';
+import { findFileInWorkspaces } from './codeStudio/workspace';
 import { site } from '../config/site';
 
 export type TerminalState = {
@@ -22,6 +23,7 @@ export type CommandResult = {
 	clear?: boolean;
 	cachedPublicIp?: string;
 	openWindow?: keyof OpenWindows;
+	codeStudio?: { workspaceId?: string; fileName?: string };
 };
 
 const HELP_TEXT = [
@@ -40,6 +42,7 @@ const HELP_TEXT = [
 	'mail          — open Mail app',
 	'play snake    — open Packet Snake game',
 	'games.exe     — launch Packet Snake',
+	'code [file]   — open Code Studio (VS Code)',
 	'skills        — technical skills',
 	'ip / ifconfig — network interfaces (public IP)',
 	'ping <host>   — simulated ping',
@@ -255,6 +258,27 @@ export async function runTerminalCommand(
 				response: 'Launching Packet Snake...',
 				openWindow: 'snake',
 			};
+
+		case 'code': {
+			const fileName = args[0];
+			if (fileName) {
+				const location = findFileInWorkspaces(fileName);
+				if (!location) {
+					return {
+						response: `code: file not found in workspaces: ${fileName}`,
+					};
+				}
+				return {
+					response: `Opening ${fileName} in Code Studio...`,
+					openWindow: 'codeStudio',
+					codeStudio: location,
+				};
+			}
+			return {
+				response: 'Opening Visual Studio Code...',
+				openWindow: 'codeStudio',
+			};
+		}
 
 		case 'skills':
 			return { response: readFile(`${HOME_DIR}/skills.txt`) };

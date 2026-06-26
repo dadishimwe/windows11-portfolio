@@ -7,6 +7,7 @@ import NotepadWindow from '../windows/NotepadWindow/NotepadWindow';
 import TerminalWindow from '../windows/TerminalWindow/TerminalWindow';
 import MailWindow from '../windows/MailWindow/MailWindow';
 import SnakeWindow from '../windows/SnakeWindow/SnakeWindow';
+import CodeStudioWindow from '../windows/CodeStudioWindow/CodeStudioWindow';
 import PdfViewerWindow from './PdfViewerWindow';
 import MediaPlayerWindow from './MediaPlayerWindow';
 
@@ -24,6 +25,7 @@ function DesktopWindows() {
 			{openWindows.firefox && <Firefox />}
 			{openWindows.mail && <MailWindow />}
 			{openWindows.snake && <SnakeWindow />}
+			{openWindows.codeStudio && <CodeStudioWindow />}
 			<PdfViewerWindow />
 			<MediaPlayerWindow />
 		</>

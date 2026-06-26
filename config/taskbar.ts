@@ -70,6 +70,11 @@ export const windowTaskbarMeta: Record<string, WindowTaskbarMeta> = {
 		icon: '/svg/snake.svg',
 		windowName: 'snake',
 	},
+	codeStudio: {
+		title: 'Visual Studio Code',
+		icon: '/icons/vscode/vscode.png',
+		windowName: 'codeStudio',
+	},
 };
 
 /** Always-visible taskbar shortcuts for portfolio apps */
@@ -102,13 +107,6 @@ export const startMenuSocialApps: StartMenuApp[] = [
 		label: 'GitHub',
 		icon: '/svg/github.svg',
 		href: site.github,
-		external: true,
-	},
-	{
-		id: 'vscode',
-		label: 'Visual Studio Code',
-		icon: '/icons/vscode/vscode.png',
-		href: site.githubRepo,
 		external: true,
 	},
 ];

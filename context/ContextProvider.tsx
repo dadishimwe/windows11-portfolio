@@ -74,6 +74,7 @@ const initialMaximized = {
 	firefox: null,
 	mail: null,
 	snake: null,
+	codeStudio: null,
 	pdfViewer: null,
 };
 
@@ -120,6 +121,12 @@ const initialPosition = {
 		width: 720,
 		height: 520,
 	},
+	codeStudio: {
+		x: 40,
+		y: 24,
+		width: 1020,
+		height: 640,
+	},
 	pdfViewer: {
 		x: 0,
 		y: 0,
@@ -143,6 +150,7 @@ const initialMinimized = {
 	firefox: false,
 	mail: false,
 	snake: false,
+	codeStudio: false,
 	pdfViewer: false,
 };
 

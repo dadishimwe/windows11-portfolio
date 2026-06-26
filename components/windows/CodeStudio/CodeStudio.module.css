@@ -1,0 +1,298 @@
+.shell {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: #1e1e1e;
+	color: #cccccc;
+	font-family: 'Segoe UI', system-ui, sans-serif;
+	font-size: 13px;
+	overflow: hidden;
+}
+
+.body {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+}
+
+.activityBar {
+	width: 48px;
+	background: #333333;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 8px;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.activityButton {
+	width: 48px;
+	height: 48px;
+	border: none;
+	background: transparent;
+	color: #858585;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-left: 2px solid transparent;
+}
+
+.activityButtonActive {
+	color: #ffffff;
+	border-left-color: #ffffff;
+}
+
+.sidebar {
+	width: 260px;
+	background: #252526;
+	border-right: 1px solid #1e1e1e;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	flex-shrink: 0;
+}
+
+.sidebarSection {
+	padding: 10px 12px 6px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	color: #bbbbbb;
+}
+
+.workspaceSelect {
+	margin: 0 8px 8px;
+	padding: 4px 8px;
+	background: #3c3c3c;
+	border: 1px solid #3c3c3c;
+	color: #cccccc;
+	border-radius: 2px;
+	width: calc(100% - 16px);
+	font-size: 12px;
+}
+
+.fileList {
+	list-style: none;
+	margin: 0;
+	padding: 0 0 8px;
+	overflow-y: auto;
+}
+
+.fileItem {
+	padding: 4px 20px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.fileItem:hover {
+	background: #2a2d2e;
+}
+
+.fileItemActive {
+	background: #37373d;
+	color: #ffffff;
+}
+
+.fileDirty::before {
+	content: '●';
+	color: #cccccc;
+	font-size: 10px;
+	margin-right: 2px;
+}
+
+.main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+}
+
+.menuBar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 4px 12px;
+	background: #3c3c3c;
+	border-bottom: 1px solid #252526;
+	font-size: 12px;
+}
+
+.menuRun {
+	margin-left: auto;
+	background: #0e639c;
+	border: none;
+	color: #fff;
+	padding: 4px 12px;
+	border-radius: 2px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.menuRun:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.menuRun:hover:not(:disabled) {
+	background: #1177bb;
+}
+
+.tabs {
+	display: flex;
+	background: #2d2d2d;
+	border-bottom: 1px solid #252526;
+	overflow-x: auto;
+	min-height: 35px;
+}
+
+.tab {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 12px;
+	border-right: 1px solid #252526;
+	background: #2d2d2d;
+	color: #969696;
+	cursor: pointer;
+	font-size: 13px;
+	white-space: nowrap;
+}
+
+.tabActive {
+	background: #1e1e1e;
+	color: #ffffff;
+	border-top: 1px solid #007acc;
+}
+
+.tabDirty::after {
+	content: '●';
+	font-size: 10px;
+	margin-left: 4px;
+}
+
+.editorArea {
+	flex: 1;
+	min-height: 0;
+	position: relative;
+}
+
+.panel {
+	height: 180px;
+	border-top: 1px solid #252526;
+	display: flex;
+	flex-direction: column;
+	background: #1e1e1e;
+	flex-shrink: 0;
+}
+
+.panelTabs {
+	display: flex;
+	gap: 0;
+	background: #252526;
+	border-bottom: 1px solid #1e1e1e;
+}
+
+.panelTab {
+	padding: 6px 12px;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #969696;
+	cursor: pointer;
+	border: none;
+	background: transparent;
+}
+
+.panelTabActive {
+	color: #ffffff;
+	border-bottom: 1px solid #007acc;
+}
+
+.panelBody {
+	flex: 1;
+	overflow: auto;
+	padding: 8px 12px;
+	font-family: 'Cascadia Code', 'Consolas', monospace;
+	font-size: 12px;
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+.problemsList {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.problemItem {
+	padding: 6px 8px;
+	cursor: pointer;
+	border-bottom: 1px solid #2d2d2d;
+}
+
+.problemItem:hover {
+	background: #2a2d2e;
+}
+
+.problemMessage {
+	color: #f48771;
+}
+
+.terminalInputRow {
+	display: flex;
+	gap: 8px;
+	padding: 4px 0;
+}
+
+.terminalInput {
+	flex: 1;
+	background: #1e1e1e;
+	border: 1px solid #3c3c3c;
+	color: #cccccc;
+	padding: 4px 8px;
+	font-family: inherit;
+	font-size: 12px;
+}
+
+.statusBar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 0 12px;
+	height: 22px;
+	background: #007acc;
+	color: #ffffff;
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.statusItem {
+	white-space: nowrap;
+}
+
+.statusSpacer {
+	flex: 1;
+}
+
+.banner {
+	padding: 4px 12px;
+	background: #264f78;
+	color: #ffffff;
+	font-size: 11px;
+}
+
+.emptyEditor {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: #858585;
+}

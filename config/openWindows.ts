@@ -5,6 +5,7 @@ export type OpenWindows = {
 	firefox: boolean;
 	mail: boolean;
 	snake: boolean;
+	codeStudio: boolean;
 };
 
 export const initialOpenWindows: OpenWindows = {
@@ -14,4 +15,5 @@ export const initialOpenWindows: OpenWindows = {
 	firefox: false,
 	mail: false,
 	snake: false,
+	codeStudio: false,
 };

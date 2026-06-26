@@ -6,7 +6,7 @@ export type ToolShortcut = {
 	dateModified: string;
 	type: string;
 	size: string;
-	windowName?: 'snake';
+	windowName?: 'snake' | 'codeStudio';
 };
 
 /** Explorer → Tools folder — real destinations for Dadi's stack. */
@@ -25,10 +25,11 @@ export const toolShortcuts: ToolShortcut[] = [
 		id: 'vscode',
 		name: 'Visual Studio Code',
 		icon: '/icons/vscode/vscode.png',
-		href: 'https://code.visualstudio.com/',
+		href: '/code',
+		windowName: 'codeStudio',
 		dateModified: '23/06/2026 10:00',
-		type: 'Shortcut',
-		size: '2 KB',
+		type: 'Application',
+		size: '2.4 MB',
 	},
 	{
 		id: 'github-desktop',

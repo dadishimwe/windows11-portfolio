@@ -9,6 +9,7 @@ import {
 import { site } from '../../../config/site';
 import { HOME_DIR } from '../../../config/filesystem';
 import { runTerminalCommand } from '../../../lib/terminalCommands';
+import { dispatchCodeStudioOpen } from '../../../lib/codeStudio/openCodeStudio';
 import { useWindowManager } from '../../../hooks/useWindowManager';
 import {
 	createTerminalSession,
@@ -122,6 +123,12 @@ function Terminal({ onClose }: { onClose?: () => void }) {
 
 			if (result.openWindow) {
 				void openWindow(result.openWindow);
+				if (result.codeStudio) {
+					window.setTimeout(
+						() => dispatchCodeStudioOpen(result.codeStudio),
+						120
+					);
+				}
 			}
 
 			if (trimmed) {
