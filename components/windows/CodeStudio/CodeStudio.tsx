@@ -7,21 +7,13 @@ import {
 	useMemo,
 	useRef,
 	useState,
+	type MouseEvent as ReactMouseEvent,
 } from 'react';
-import {
-	VscChevronDown,
-	VscChevronRight,
-	VscClose,
-	VscError,
-	VscFiles,
-	VscPlay,
-	VscRunAll,
-	VscSearch,
-	VscSettingsGear,
-	VscTrash,
-	VscWarning,
-} from 'react-icons/vsc';
+import Codicon from './Codicon';
+import CodeStudioMenuBar, { MenuSection } from './CodeStudioMenuBar';
+import CodeStudioSidebar, { SidebarView } from './CodeStudioSidebar';
 import FileTypeIcon from './FileTypeIcon';
+import { usePanelResize } from './usePanelResize';
 import { codeStudioAppMeta } from '../../../config/apps/codeStudio';
 import { getReplayScript } from '../../../config/codeStudio/replays';
 import {
@@ -57,12 +49,12 @@ import {
 } from '../../../lib/codeStudio/problemsParser';
 import {
 	isDefaultContent,
-	listWorkspaceFiles,
 	loadPersistedState,
 	OpenFile,
 	restoreWorkspace,
 	savePersistedState,
 } from '../../../lib/codeStudio/workspace';
+import { searchWorkspaceFiles } from '../../../lib/codeStudio/search';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './CodeStudio.module.css';
 
@@ -105,6 +97,12 @@ function CodeStudio({ onClose }: Props) {
 	const [pyodideStatus, setPyodideStatus] = useState<PyodideStatus>('idle');
 	const [cursor, setCursor] = useState({ line: 1, column: 1 });
 	const [explorerOpen, setExplorerOpen] = useState(true);
+	const [sidebarView, setSidebarView] = useState<SidebarView>('explorer');
+	const [searchQuery, setSearchQuery] = useState('');
+	const [showMinimap, setShowMinimap] = useState(false);
+	const [panelVisible, setPanelVisible] = useState(true);
+	const { panelHeight, onResizeStart } = usePanelResize({ initial: 200 });
+	const [resizeActive, setResizeActive] = useState(false);
 
 	const cancelReplayRef = useRef<(() => void) | null>(null);
 	const workspace = getWorkspaceById(workspaceId) ?? initialWorkspace;
@@ -425,6 +423,11 @@ function CodeStudio({ onClose }: Props) {
 			if (event.key === 'F5') {
 				event.preventDefault();
 				void handleRun();
+				return;
+			}
+			if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'f') {
+				event.preventDefault();
+				setSidebarView('search');
 			}
 		};
 		window.addEventListener('keydown', onKeyDown);
@@ -491,10 +494,163 @@ function CodeStudio({ onClose }: Props) {
 							: 'Python 3.11 (Pyodide)'
 				: 'Plain Text';
 
+	const searchResults = useMemo(
+		() => searchWorkspaceFiles(workspace, searchQuery),
+		[workspace, searchQuery]
+	);
+
+	const windowTitle = activeOpenFile
+		? `${activeOpenFile.path} — ${workspace.name} — Visual Studio Code`
+		: `Welcome — Visual Studio Code`;
+
+	const menuSections = useMemo<MenuSection[]>(
+		() => [
+			{
+				id: 'file',
+				label: 'File',
+				items: [
+					{
+						id: 'open-explorer',
+						label: 'Open File…',
+						onSelect: () => {
+							setSidebarView('explorer');
+							setExplorerOpen(true);
+						},
+					},
+					{
+						id: 'close-editor',
+						label: 'Close Editor',
+						disabled: !activeOpenFile,
+						onSelect: () => {
+							if (activeOpenFile) closeFile(activeOpenFile.path);
+						},
+					},
+					{
+						id: 'file-run',
+						label: 'Run',
+						shortcut: 'F5',
+						disabled: !activeOpenFile || isRunning,
+						onSelect: () => void handleRun(),
+					},
+				],
+			},
+			{
+				id: 'edit',
+				label: 'Edit',
+				items: [
+					{
+						id: 'find',
+						label: 'Find in Files',
+						shortcut: 'Ctrl+Shift+F',
+						onSelect: () => setSidebarView('search'),
+					},
+				],
+			},
+			{
+				id: 'view',
+				label: 'View',
+				items: [
+					{
+						id: 'minimap',
+						label: 'Minimap',
+						checked: showMinimap,
+						onSelect: () => setShowMinimap((value) => !value),
+					},
+					{
+						id: 'panel',
+						label: 'Panel',
+						checked: panelVisible,
+						onSelect: () => setPanelVisible((value) => !value),
+					},
+					{
+						id: 'explorer-view',
+						label: 'Explorer',
+						checked: sidebarView === 'explorer',
+						onSelect: () => setSidebarView('explorer'),
+					},
+					{
+						id: 'search-view',
+						label: 'Search',
+						checked: sidebarView === 'search',
+						onSelect: () => setSidebarView('search'),
+					},
+				],
+			},
+			{
+				id: 'run',
+				label: 'Run',
+				items: [
+					{
+						id: 'start-run',
+						label: 'Start Debugging',
+						shortcut: 'F5',
+						disabled: !activeOpenFile || isRunning,
+						onSelect: () => void handleRun(),
+					},
+				],
+			},
+			{
+				id: 'terminal',
+				label: 'Terminal',
+				items: [
+					{
+						id: 'show-terminal',
+						label: 'Show Integrated Terminal',
+						onSelect: () => {
+							setPanelVisible(true);
+							setPanelTab('terminal');
+						},
+					},
+				],
+			},
+			{
+				id: 'help',
+				label: 'Help',
+				items: [
+					{
+						id: 'shortcuts',
+						label: 'Keyboard Shortcuts',
+						onSelect: () => {
+							setPanelVisible(true);
+							setPanelTab('output');
+							setOutputText(
+								[
+									'F5 — Run active file',
+									'Ctrl+Shift+F — Search in files',
+									'Terminal: python <file>, gcc <file.c>, run',
+								].join('\n')
+							);
+						},
+					},
+				],
+			},
+		],
+		[
+			activeOpenFile,
+			closeFile,
+			handleRun,
+			isRunning,
+			panelVisible,
+			showMinimap,
+			sidebarView,
+		]
+	);
+
+	const handleResizeStart = (event: ReactMouseEvent) => {
+		setResizeActive(true);
+		onResizeStart(event);
+	};
+
+	useEffect(() => {
+		const onMouseUp = () => setResizeActive(false);
+		window.addEventListener('mouseup', onMouseUp);
+		return () => window.removeEventListener('mouseup', onMouseUp);
+	}, []);
+
 	return (
 		<DraggableWindow
 			windowName="codeStudio"
-			topTitle={codeStudioAppMeta.title}
+			topTitle=" "
 			topIcon={
 				<Image
 					src={codeStudioAppMeta.icon}
@@ -506,6 +662,19 @@ function CodeStudio({ onClose }: Props) {
 			onClose={onClose}
 		>
 			<div className={styles.shell}>
+				<div className={styles.customTitleBar}>
+					<div className={styles.titleBarLeft}>
+						<Image
+							src={codeStudioAppMeta.icon}
+							alt=""
+							width={16}
+							height={16}
+						/>
+						<span className={styles.titleBarMuted}>Portfolio</span>
+					</div>
+					<div className={styles.titleBarCenter}>{windowTitle}</div>
+					<div className={styles.titleBarRight} />
+				</div>
 				{bannerMessage && (
 					<div
 						className={`${styles.banner} ${
@@ -519,17 +688,27 @@ function CodeStudio({ onClose }: Props) {
 					<aside className={styles.activityBar}>
 						<button
 							type="button"
-							className={`${styles.activityButton} ${styles.activityButtonActive}`}
+							className={`${styles.activityButton} ${
+								sidebarView === 'explorer'
+									? styles.activityButtonActive
+									: ''
+							}`}
 							title="Explorer"
+							onClick={() => setSidebarView('explorer')}
 						>
-							<VscFiles size={22} />
+							<Codicon name="files" size="md" />
 						</button>
 						<button
 							type="button"
-							className={styles.activityButton}
+							className={`${styles.activityButton} ${
+								sidebarView === 'search'
+									? styles.activityButtonActive
+									: ''
+							}`}
 							title="Search"
+							onClick={() => setSidebarView('search')}
 						>
-							<VscSearch size={22} />
+							<Codicon name="search" size="md" />
 						</button>
 						<div className={styles.activitySpacer} />
 						<button
@@ -538,104 +717,35 @@ function CodeStudio({ onClose }: Props) {
 							title="Run and Debug"
 							onClick={() => void handleRun()}
 						>
-							<VscRunAll size={22} />
+							<Codicon name="run-all" size="md" />
 						</button>
 						<button
 							type="button"
 							className={styles.activityButton}
 							title="Settings"
 						>
-							<VscSettingsGear size={22} />
+							<Codicon name="settings-gear" size="md" />
 						</button>
 					</aside>
 
-					<aside className={styles.sidebar}>
-						<div className={styles.sidebarHeader}>
-							<span>Workspaces</span>
-						</div>
-						<div className={styles.workspaceBlock}>
-							<select
-								className={styles.workspaceSelect}
-								value={workspaceId}
-								onChange={(event) =>
-									switchWorkspace(event.target.value)
-								}
-							>
-								{codeWorkspaces.map((item) => (
-									<option key={item.id} value={item.id}>
-										{item.name}
-									</option>
-								))}
-							</select>
-							<p className={styles.workspaceHint}>
-								{workspace.description}
-							</p>
-						</div>
-						<div className={styles.sidebarHeader}>
-							<span>Explorer</span>
-							<button
-								type="button"
-								className={styles.sidebarHeaderButton}
-								title={
-									explorerOpen
-										? 'Collapse folder'
-										: 'Expand folder'
-								}
-								onClick={() => setExplorerOpen((open) => !open)}
-							>
-								{explorerOpen ? (
-									<VscChevronDown size={14} />
-								) : (
-									<VscChevronRight size={14} />
-								)}
-							</button>
-						</div>
-						{explorerOpen && (
-							<>
-								<div className={styles.explorerRoot}>
-									<VscChevronDown size={14} />
-									<span>{workspace.name}</span>
-								</div>
-								<ul className={styles.fileList}>
-									{listWorkspaceFiles(workspace).map((filePath) => {
-										const open = openFiles.find(
-											(file) => file.path === filePath
-										);
-										const isActive = activeFile === filePath;
-										return (
-											<li key={filePath}>
-												<button
-													type="button"
-													className={`${styles.fileItem} ${
-														isActive ? styles.fileItemActive : ''
-													} ${open?.isDirty ? styles.fileItemDirty : ''}`}
-													onClick={() =>
-														openFileInEditor(filePath)
-													}
-												>
-													<FileTypeIcon fileName={filePath} />
-													<span className={styles.fileItemLabel}>
-														{filePath}
-													</span>
-												</button>
-											</li>
-										);
-									})}
-								</ul>
-							</>
-						)}
-					</aside>
+					<CodeStudioSidebar
+						view={sidebarView}
+						workspace={workspace}
+						workspaceId={workspaceId}
+						workspaceOptions={codeWorkspaces}
+						explorerOpen={explorerOpen}
+						openFiles={openFiles}
+						activeFile={activeFile}
+						searchQuery={searchQuery}
+						searchResults={searchResults}
+						onSwitchWorkspace={switchWorkspace}
+						onToggleExplorer={() => setExplorerOpen((open) => !open)}
+						onSearchQueryChange={setSearchQuery}
+						onOpenFile={openFileInEditor}
+					/>
 
 					<section className={styles.main}>
-						<div className={styles.menuBar}>
-							{['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'].map(
-								(item) => (
-									<span key={item} className={styles.menuItem}>
-										{item}
-									</span>
-								)
-							)}
-						</div>
+						<CodeStudioMenuBar menus={menuSections} />
 
 						<div className={styles.tabs}>
 							{openFiles.map((file) => (
@@ -664,7 +774,7 @@ function CodeStudio({ onClose }: Props) {
 											closeFile(file.path);
 										}}
 									>
-										<VscClose size={14} />
+										<Codicon name="close" />
 									</button>
 								</div>
 							))}
@@ -688,7 +798,7 @@ function CodeStudio({ onClose }: Props) {
 								onClick={() => void handleRun()}
 								title="Run (F5)"
 							>
-								<VscPlay size={14} />
+								<Codicon name="play" />
 								Run
 							</button>
 						</div>
@@ -717,7 +827,7 @@ function CodeStudio({ onClose }: Props) {
 											"'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
 										fontLigatures: true,
 										lineHeight: 20,
-										minimap: { enabled: false },
+										minimap: { enabled: showMinimap },
 										scrollBeyondLastLine: false,
 										automaticLayout: true,
 										padding: { top: 8 },
@@ -758,7 +868,24 @@ function CodeStudio({ onClose }: Props) {
 							)}
 						</div>
 
-						<div className={styles.panel}>
+						{panelVisible && (
+							<div
+								className={`${styles.panelResizeHandle} ${
+									resizeActive ? styles.panelResizeHandleActive : ''
+								}`}
+								onMouseDown={handleResizeStart}
+								title="Drag to resize panel"
+							/>
+						)}
+
+						<div
+							className={`${styles.panel} ${
+								panelVisible ? '' : styles.panelHidden
+							}`}
+							style={
+								panelVisible ? { height: panelHeight } : undefined
+							}
+						>
 							<div className={styles.panelHeader}>
 								<div className={styles.panelTabs}>
 									{(
@@ -789,7 +916,7 @@ function CodeStudio({ onClose }: Props) {
 											title="Clear output"
 											onClick={() => setOutputText('')}
 										>
-											<VscTrash size={14} />
+											<Codicon name="trash" />
 										</button>
 									)}
 								</div>
@@ -833,14 +960,14 @@ function CodeStudio({ onClose }: Props) {
 												}
 											>
 												{problem.severity === 'warning' ? (
-													<VscWarning
+													<Codicon
+														name="warning"
 														className={styles.problemIconWarning}
-														size={14}
 													/>
 												) : (
-													<VscError
+													<Codicon
+														name="error"
 														className={styles.problemIcon}
-														size={14}
 													/>
 												)}
 												<div>

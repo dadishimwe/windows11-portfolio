@@ -1,10 +1,4 @@
-import {
-	VscFile,
-	VscMarkdown,
-	VscJson,
-	VscCode,
-	VscSettingsGear,
-} from 'react-icons/vsc';
+import Codicon from './Codicon';
 import styles from './CodeStudio.module.css';
 
 type Props = {
@@ -12,58 +6,35 @@ type Props = {
 	size?: number;
 };
 
+const COLORS: Record<string, string> = {
+	py: '#4ec9b0',
+	c: '#569cd6',
+	h: '#569cd6',
+	md: '#519aba',
+	json: '#dcdcaa',
+	txt: '#9cdcfe',
+};
+
+function iconName(fileName: string): string {
+	const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+	if (ext === 'md') return 'markdown';
+	if (ext === 'json') return 'json';
+	if (ext === 'py' || ext === 'c' || ext === 'h') return 'file-code';
+	return 'file';
+}
+
 export default function FileTypeIcon({ fileName, size = 16 }: Props) {
 	const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+	const color = COLORS[ext];
 
-	switch (ext) {
-		case 'py':
-			return (
-				<VscCode
-					className={styles.fileTypeIcon}
-					size={size}
-					style={{ color: '#4ec9b0' }}
-					aria-hidden
-				/>
-			);
-		case 'c':
-		case 'h':
-			return (
-				<VscCode
-					className={styles.fileTypeIcon}
-					size={size}
-					style={{ color: '#569cd6' }}
-					aria-hidden
-				/>
-			);
-		case 'md':
-			return (
-				<VscMarkdown
-					className={styles.fileTypeIcon}
-					size={size}
-					style={{ color: '#519aba' }}
-					aria-hidden
-				/>
-			);
-		case 'json':
-		case 'txt':
-			return ext === 'json' ? (
-				<VscJson
-					className={styles.fileTypeIcon}
-					size={size}
-					style={{ color: '#dcdcaa' }}
-					aria-hidden
-				/>
-			) : (
-				<VscSettingsGear
-					className={styles.fileTypeIcon}
-					size={size}
-					style={{ color: '#9cdcfe' }}
-					aria-hidden
-				/>
-			);
-		default:
-			return (
-				<VscFile className={styles.fileTypeIcon} size={size} aria-hidden />
-			);
-	}
+	return (
+		<Codicon
+			name={iconName(fileName)}
+			className={styles.fileTypeIcon}
+			style={{
+				color,
+				fontSize: size,
+			}}
+		/>
+	);
 }

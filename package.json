@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@monaco-editor/react": "^4.7.0",
+		"@vscode/codicons": "^0.0.45",
 		"framer-motion": "^6.2.6",
 		"monaco-editor": "^0.55.1",
 		"next": "^12.1.0",
