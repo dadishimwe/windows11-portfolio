@@ -17,13 +17,13 @@
 
 .activityBar {
 	width: 48px;
-	background: #333333;
+	background: #181818;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top: 8px;
-	gap: 12px;
+	padding-top: 4px;
 	flex-shrink: 0;
+	border-right: 1px solid #2b2b2b;
 }
 
 .activityButton {
@@ -36,16 +36,34 @@
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	border-left: 2px solid transparent;
+	position: relative;
+}
+
+.activityButton:hover {
+	color: #ffffff;
 }
 
 .activityButtonActive {
 	color: #ffffff;
-	border-left-color: #ffffff;
+}
+
+.activityButtonActive::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: #ffffff;
+}
+
+.activitySpacer {
+	flex: 1;
+	min-height: 8px;
 }
 
 .sidebar {
-	width: 260px;
+	width: 268px;
 	background: #252526;
 	border-right: 1px solid #1e1e1e;
 	display: flex;
@@ -54,23 +72,69 @@
 	flex-shrink: 0;
 }
 
-.sidebarSection {
-	padding: 10px 12px 6px;
+.sidebarHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px 4px;
 	font-size: 11px;
 	font-weight: 600;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.06em;
 	color: #bbbbbb;
+	text-transform: uppercase;
+}
+
+.sidebarHeaderButton {
+	border: none;
+	background: transparent;
+	color: #cccccc;
+	cursor: pointer;
+	padding: 2px;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sidebarHeaderButton:hover {
+	background: #3c3c3c;
+}
+
+.workspaceBlock {
+	padding: 0 8px 8px;
+	border-bottom: 1px solid #1e1e1e;
 }
 
 .workspaceSelect {
-	margin: 0 8px 8px;
-	padding: 4px 8px;
+	width: 100%;
+	padding: 5px 8px;
 	background: #3c3c3c;
 	border: 1px solid #3c3c3c;
 	color: #cccccc;
 	border-radius: 2px;
-	width: calc(100% - 16px);
 	font-size: 12px;
+	cursor: pointer;
+}
+
+.workspaceSelect:hover {
+	border-color: #505050;
+}
+
+.workspaceHint {
+	margin: 6px 4px 0;
+	font-size: 11px;
+	line-height: 1.4;
+	color: #858585;
+}
+
+.explorerRoot {
+	padding: 4px 8px 2px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #cccccc;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .fileList {
@@ -78,10 +142,13 @@
 	margin: 0;
 	padding: 0 0 8px;
 	overflow-y: auto;
+	flex: 1;
+	min-height: 0;
 }
 
 .fileItem {
-	padding: 4px 20px;
+	width: 100%;
+	padding: 3px 8px 3px 20px;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -89,6 +156,11 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	border: none;
+	background: transparent;
+	color: #cccccc;
+	font-size: 13px;
+	text-align: left;
 }
 
 .fileItem:hover {
@@ -100,11 +172,17 @@
 	color: #ffffff;
 }
 
-.fileDirty::before {
-	content: '●';
-	color: #cccccc;
-	font-size: 10px;
-	margin-right: 2px;
+.fileItemLabel {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.fileItemDirty .fileItemLabel {
+	font-style: italic;
+}
+
+.fileTypeIcon {
+	flex-shrink: 0;
 }
 
 .main {
@@ -118,97 +196,198 @@
 .menuBar {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 4px 12px;
+	gap: 2px;
+	padding: 0 8px;
+	height: 30px;
 	background: #3c3c3c;
 	border-bottom: 1px solid #252526;
-	font-size: 12px;
+	font-size: 13px;
+	flex-shrink: 0;
 }
 
-.menuRun {
-	margin-left: auto;
-	background: #0e639c;
+.menuItem {
+	padding: 2px 8px;
+	border-radius: 4px;
+	cursor: default;
+	color: #cccccc;
+}
+
+.menuItem:hover {
+	background: #505050;
+}
+
+.breadcrumbBar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 16px;
+	height: 22px;
+	background: #1e1e1e;
+	border-bottom: 1px solid #2b2b2b;
+	font-size: 12px;
+	color: #858585;
+	flex-shrink: 0;
+}
+
+.breadcrumbActive {
+	color: #cccccc;
+}
+
+.editorToolbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 4px;
+	padding: 4px 8px;
+	background: #252526;
+	border-bottom: 1px solid #1e1e1e;
+	flex-shrink: 0;
+}
+
+.toolbarButton {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
 	border: none;
-	color: #fff;
-	padding: 4px 12px;
-	border-radius: 2px;
+	background: transparent;
+	color: #cccccc;
+	border-radius: 4px;
 	cursor: pointer;
 	font-size: 12px;
 }
 
-.menuRun:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+.toolbarButton:hover:not(:disabled) {
+	background: #3c3c3c;
 }
 
-.menuRun:hover:not(:disabled) {
+.toolbarButtonPrimary {
+	background: #0e639c;
+	color: #ffffff;
+}
+
+.toolbarButtonPrimary:hover:not(:disabled) {
 	background: #1177bb;
+}
+
+.toolbarButton:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
 }
 
 .tabs {
 	display: flex;
-	background: #2d2d2d;
-	border-bottom: 1px solid #252526;
+	background: #252526;
 	overflow-x: auto;
 	min-height: 35px;
+	flex-shrink: 0;
 }
 
 .tab {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 0 12px;
-	border-right: 1px solid #252526;
+	padding: 0 4px 0 10px;
+	min-width: 0;
+	max-width: 200px;
+	border-right: 1px solid #1e1e1e;
 	background: #2d2d2d;
 	color: #969696;
 	cursor: pointer;
 	font-size: 13px;
 	white-space: nowrap;
+	border-top: 1px solid transparent;
+}
+
+.tab:hover {
+	background: #1f1f1f;
 }
 
 .tabActive {
 	background: #1e1e1e;
 	color: #ffffff;
-	border-top: 1px solid #007acc;
+	border-top-color: #007acc;
 }
 
-.tabDirty::after {
-	content: '●';
-	font-size: 10px;
-	margin-left: 4px;
+.tabLabel {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tabDirty .tabLabel {
+	font-style: italic;
+}
+
+.tabClose {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background: transparent;
+	color: #858585;
+	border-radius: 4px;
+	cursor: pointer;
+	flex-shrink: 0;
+	opacity: 0;
+	padding: 0;
+}
+
+.tab:hover .tabClose,
+.tabActive .tabClose {
+	opacity: 1;
+}
+
+.tabClose:hover {
+	background: #3c3c3c;
+	color: #ffffff;
 }
 
 .editorArea {
 	flex: 1;
 	min-height: 0;
 	position: relative;
+	background: #1e1e1e;
 }
 
 .panel {
-	height: 180px;
-	border-top: 1px solid #252526;
+	height: 200px;
+	border-top: 1px solid #2b2b2b;
 	display: flex;
 	flex-direction: column;
 	background: #1e1e1e;
 	flex-shrink: 0;
 }
 
+.panelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #252526;
+	border-bottom: 1px solid #1e1e1e;
+	min-height: 30px;
+	padding-right: 4px;
+}
+
 .panelTabs {
 	display: flex;
 	gap: 0;
-	background: #252526;
-	border-bottom: 1px solid #1e1e1e;
 }
 
 .panelTab {
-	padding: 6px 12px;
+	padding: 7px 12px;
 	font-size: 11px;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.03em;
 	color: #969696;
 	cursor: pointer;
 	border: none;
 	background: transparent;
+	text-transform: capitalize;
+}
+
+.panelTab:hover {
+	color: #cccccc;
 }
 
 .panelTabActive {
@@ -216,11 +395,31 @@
 	border-bottom: 1px solid #007acc;
 }
 
+.panelActions {
+	display: flex;
+	gap: 2px;
+}
+
+.panelAction {
+	border: none;
+	background: transparent;
+	color: #cccccc;
+	padding: 4px;
+	border-radius: 4px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+}
+
+.panelAction:hover {
+	background: #3c3c3c;
+}
+
 .panelBody {
 	flex: 1;
 	overflow: auto;
 	padding: 8px 12px;
-	font-family: 'Cascadia Code', 'Consolas', monospace;
+	font-family: 'Cascadia Code', 'Consolas', 'Menlo', monospace;
 	font-size: 12px;
 	line-height: 1.5;
 	white-space: pre-wrap;
@@ -236,50 +435,97 @@
 	padding: 6px 8px;
 	cursor: pointer;
 	border-bottom: 1px solid #2d2d2d;
+	display: flex;
+	gap: 8px;
+	align-items: flex-start;
 }
 
 .problemItem:hover {
 	background: #2a2d2e;
 }
 
+.problemIcon {
+	color: #f48771;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.problemIconWarning {
+	color: #cca700;
+}
+
+.problemMeta {
+	font-size: 12px;
+	color: #cccccc;
+}
+
 .problemMessage {
 	color: #f48771;
+	font-size: 12px;
 }
 
 .terminalInputRow {
 	display: flex;
 	gap: 8px;
 	padding: 4px 0;
+	align-items: center;
+}
+
+.terminalPrompt {
+	color: #4ec9b0;
 }
 
 .terminalInput {
 	flex: 1;
-	background: #1e1e1e;
-	border: 1px solid #3c3c3c;
+	background: transparent;
+	border: none;
 	color: #cccccc;
-	padding: 4px 8px;
+	padding: 4px 0;
 	font-family: inherit;
 	font-size: 12px;
+	outline: none;
 }
 
 .statusBar {
 	display: flex;
 	align-items: center;
-	gap: 16px;
-	padding: 0 12px;
 	height: 22px;
-	background: #007acc;
-	color: #ffffff;
 	font-size: 12px;
 	flex-shrink: 0;
 }
 
+.statusLeft,
+.statusRight {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	height: 100%;
+}
+
+.statusLeft {
+	background: #007acc;
+	color: #ffffff;
+	padding-left: 8px;
+	flex: 1;
+}
+
+.statusRight {
+	background: #0078d4;
+	color: #ffffff;
+	padding-right: 8px;
+}
+
 .statusItem {
+	padding: 0 10px;
+	height: 100%;
+	display: inline-flex;
+	align-items: center;
 	white-space: nowrap;
 }
 
-.statusSpacer {
-	flex: 1;
+.statusItem:hover {
+	background: rgba(255, 255, 255, 0.12);
+	cursor: default;
 }
 
 .banner {
@@ -296,8 +542,37 @@
 
 .emptyEditor {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	height: 100%;
 	color: #858585;
+	gap: 12px;
+	padding: 24px;
+	text-align: center;
+}
+
+.welcomeTitle {
+	font-size: 26px;
+	font-weight: 300;
+	color: #cccccc;
+}
+
+.welcomeShortcuts {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	font-size: 13px;
+}
+
+.welcomeShortcut {
+	display: flex;
+	gap: 16px;
+	justify-content: center;
+}
+
+.welcomeKey {
+	color: #cccccc;
+	min-width: 140px;
+	text-align: right;
 }

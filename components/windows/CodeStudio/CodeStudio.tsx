@@ -9,12 +9,19 @@ import {
 	useState,
 } from 'react';
 import {
+	VscChevronDown,
+	VscChevronRight,
+	VscClose,
+	VscError,
 	VscFiles,
 	VscPlay,
 	VscRunAll,
 	VscSearch,
 	VscSettingsGear,
+	VscTrash,
+	VscWarning,
 } from 'react-icons/vsc';
+import FileTypeIcon from './FileTypeIcon';
 import { codeStudioAppMeta } from '../../../config/apps/codeStudio';
 import { getReplayScript } from '../../../config/codeStudio/replays';
 import {
@@ -97,6 +104,7 @@ function CodeStudio({ onClose }: Props) {
 	const [runAfterOpen, setRunAfterOpen] = useState<string | null>(null);
 	const [pyodideStatus, setPyodideStatus] = useState<PyodideStatus>('idle');
 	const [cursor, setCursor] = useState({ line: 1, column: 1 });
+	const [explorerOpen, setExplorerOpen] = useState(true);
 
 	const cancelReplayRef = useRef<(() => void) | null>(null);
 	const workspace = getWorkspaceById(workspaceId) ?? initialWorkspace;
@@ -174,6 +182,28 @@ function CodeStudio({ onClose }: Props) {
 			persist(workspaceId, nextFiles, filePath);
 		},
 		[openFiles, persist, workspace.files, workspaceId]
+	);
+
+	const closeFile = useCallback(
+		(filePath: string) => {
+			const index = openFiles.findIndex((file) => file.path === filePath);
+			if (index === -1) return;
+
+			const nextFiles = openFiles.filter((file) => file.path !== filePath);
+			let nextActive = activeFile;
+
+			if (activeFile === filePath) {
+				const fallback =
+					nextFiles[Math.min(index, nextFiles.length - 1)] ??
+					nextFiles[nextFiles.length - 1];
+				nextActive = fallback?.path ?? '';
+			}
+
+			setOpenFiles(nextFiles);
+			setActiveFile(nextActive);
+			persist(workspaceId, nextFiles, nextActive);
+		},
+		[activeFile, openFiles, persist, workspaceId]
 	);
 
 	const applyCodeStudioOpen = useCallback(
@@ -492,99 +522,175 @@ function CodeStudio({ onClose }: Props) {
 							className={`${styles.activityButton} ${styles.activityButtonActive}`}
 							title="Explorer"
 						>
-							<VscFiles size={24} />
+							<VscFiles size={22} />
 						</button>
 						<button
 							type="button"
 							className={styles.activityButton}
 							title="Search"
 						>
-							<VscSearch size={24} />
+							<VscSearch size={22} />
 						</button>
+						<div className={styles.activitySpacer} />
 						<button
 							type="button"
 							className={styles.activityButton}
-							title="Run"
+							title="Run and Debug"
 							onClick={() => void handleRun()}
 						>
-							<VscRunAll size={24} />
+							<VscRunAll size={22} />
 						</button>
 						<button
 							type="button"
 							className={styles.activityButton}
 							title="Settings"
 						>
-							<VscSettingsGear size={24} />
+							<VscSettingsGear size={22} />
 						</button>
 					</aside>
 
 					<aside className={styles.sidebar}>
-						<div className={styles.sidebarSection}>WORKSPACES</div>
-						<select
-							className={styles.workspaceSelect}
-							value={workspaceId}
-							onChange={(event) => switchWorkspace(event.target.value)}
-						>
-							{codeWorkspaces.map((item) => (
-								<option key={item.id} value={item.id}>
-									{item.name}
-								</option>
-							))}
-						</select>
-						<div className={styles.sidebarSection}>EXPLORER</div>
-						<ul className={styles.fileList}>
-							{listWorkspaceFiles(workspace).map((filePath) => {
-								const open = openFiles.find(
-									(file) => file.path === filePath
-								);
-								const isActive = activeFile === filePath;
-								return (
-									<li key={filePath}>
-										<button
-											type="button"
-											className={`${styles.fileItem} ${
-												isActive ? styles.fileItemActive : ''
-											} ${open?.isDirty ? styles.fileDirty : ''}`}
-											onClick={() => openFileInEditor(filePath)}
-										>
-											{filePath}
-										</button>
-									</li>
-								);
-							})}
-						</ul>
+						<div className={styles.sidebarHeader}>
+							<span>Workspaces</span>
+						</div>
+						<div className={styles.workspaceBlock}>
+							<select
+								className={styles.workspaceSelect}
+								value={workspaceId}
+								onChange={(event) =>
+									switchWorkspace(event.target.value)
+								}
+							>
+								{codeWorkspaces.map((item) => (
+									<option key={item.id} value={item.id}>
+										{item.name}
+									</option>
+								))}
+							</select>
+							<p className={styles.workspaceHint}>
+								{workspace.description}
+							</p>
+						</div>
+						<div className={styles.sidebarHeader}>
+							<span>Explorer</span>
+							<button
+								type="button"
+								className={styles.sidebarHeaderButton}
+								title={
+									explorerOpen
+										? 'Collapse folder'
+										: 'Expand folder'
+								}
+								onClick={() => setExplorerOpen((open) => !open)}
+							>
+								{explorerOpen ? (
+									<VscChevronDown size={14} />
+								) : (
+									<VscChevronRight size={14} />
+								)}
+							</button>
+						</div>
+						{explorerOpen && (
+							<>
+								<div className={styles.explorerRoot}>
+									<VscChevronDown size={14} />
+									<span>{workspace.name}</span>
+								</div>
+								<ul className={styles.fileList}>
+									{listWorkspaceFiles(workspace).map((filePath) => {
+										const open = openFiles.find(
+											(file) => file.path === filePath
+										);
+										const isActive = activeFile === filePath;
+										return (
+											<li key={filePath}>
+												<button
+													type="button"
+													className={`${styles.fileItem} ${
+														isActive ? styles.fileItemActive : ''
+													} ${open?.isDirty ? styles.fileItemDirty : ''}`}
+													onClick={() =>
+														openFileInEditor(filePath)
+													}
+												>
+													<FileTypeIcon fileName={filePath} />
+													<span className={styles.fileItemLabel}>
+														{filePath}
+													</span>
+												</button>
+											</li>
+										);
+									})}
+								</ul>
+							</>
+						)}
 					</aside>
 
 					<section className={styles.main}>
 						<div className={styles.menuBar}>
-							<span>File</span>
-							<span>Edit</span>
-							<span>Selection</span>
-							<span>View</span>
-							<span>Run</span>
-							<button
-								type="button"
-								className={styles.menuRun}
-								disabled={isRunning}
-								onClick={() => void handleRun()}
-							>
-								<VscPlay style={{ verticalAlign: 'middle' }} /> Run
-							</button>
+							{['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'].map(
+								(item) => (
+									<span key={item} className={styles.menuItem}>
+										{item}
+									</span>
+								)
+							)}
 						</div>
 
 						<div className={styles.tabs}>
 							{openFiles.map((file) => (
-								<button
+								<div
 									key={file.path}
-									type="button"
+									role="tab"
+									tabIndex={0}
 									className={`${styles.tab} ${
 										file.path === activeFile ? styles.tabActive : ''
 									} ${file.isDirty ? styles.tabDirty : ''}`}
 									onClick={() => setActiveFile(file.path)}
+									onKeyDown={(event) => {
+										if (event.key === 'Enter' || event.key === ' ') {
+											setActiveFile(file.path);
+										}
+									}}
 								>
-									{file.path}
-								</button>
+									<FileTypeIcon fileName={file.path} size={14} />
+									<span className={styles.tabLabel}>{file.path}</span>
+									<button
+										type="button"
+										className={styles.tabClose}
+										title="Close"
+										onClick={(event) => {
+											event.stopPropagation();
+											closeFile(file.path);
+										}}
+									>
+										<VscClose size={14} />
+									</button>
+								</div>
 							))}
+						</div>
+
+						{activeOpenFile && (
+							<div className={styles.breadcrumbBar}>
+								<span>{workspace.name}</span>
+								<span>›</span>
+								<span className={styles.breadcrumbActive}>
+									{activeOpenFile.path}
+								</span>
+							</div>
+						)}
+
+						<div className={styles.editorToolbar}>
+							<button
+								type="button"
+								className={`${styles.toolbarButton} ${styles.toolbarButtonPrimary}`}
+								disabled={isRunning || !activeOpenFile}
+								onClick={() => void handleRun()}
+								title="Run (F5)"
+							>
+								<VscPlay size={14} />
+								Run
+							</button>
 						</div>
 
 						<div className={styles.editorArea}>
@@ -607,28 +713,64 @@ function CodeStudio({ onClose }: Props) {
 									}}
 									options={{
 										fontSize: 13,
+										fontFamily:
+											"'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
+										fontLigatures: true,
+										lineHeight: 20,
 										minimap: { enabled: false },
 										scrollBeyondLastLine: false,
 										automaticLayout: true,
 										padding: { top: 8 },
+										renderLineHighlight: 'line',
+										bracketPairColorization: { enabled: true },
+										folding: true,
+										lineNumbers: 'on',
+										scrollbar: {
+											verticalScrollbarSize: 10,
+											horizontalScrollbarSize: 10,
+										},
 									}}
 								/>
 							) : (
 								<div className={styles.emptyEditor}>
-									Open a file from the explorer
+									<p className={styles.welcomeTitle}>
+										Portfolio Code Studio
+									</p>
+									<div className={styles.welcomeShortcuts}>
+										<div className={styles.welcomeShortcut}>
+											<span className={styles.welcomeKey}>
+												Open file
+											</span>
+											<span>Explorer sidebar</span>
+										</div>
+										<div className={styles.welcomeShortcut}>
+											<span className={styles.welcomeKey}>Run</span>
+											<span>F5</span>
+										</div>
+										<div className={styles.welcomeShortcut}>
+											<span className={styles.welcomeKey}>
+												Terminal
+											</span>
+											<span>python &lt;file&gt;</span>
+										</div>
+									</div>
 								</div>
 							)}
 						</div>
 
 						<div className={styles.panel}>
-							<div className={styles.panelTabs}>
-								{(['output', 'terminal', 'problems'] as PanelTab[]).map(
-									(tab) => (
+							<div className={styles.panelHeader}>
+								<div className={styles.panelTabs}>
+									{(
+										['output', 'terminal', 'problems'] as PanelTab[]
+									).map((tab) => (
 										<button
 											key={tab}
 											type="button"
 											className={`${styles.panelTab} ${
-												panelTab === tab ? styles.panelTabActive : ''
+												panelTab === tab
+													? styles.panelTabActive
+													: ''
 											}`}
 											onClick={() => setPanelTab(tab)}
 										>
@@ -637,8 +779,20 @@ function CodeStudio({ onClose }: Props) {
 												? ` (${problems.length})`
 												: ''}
 										</button>
-									)
-								)}
+									))}
+								</div>
+								<div className={styles.panelActions}>
+									{panelTab === 'output' && (
+										<button
+											type="button"
+											className={styles.panelAction}
+											title="Clear output"
+											onClick={() => setOutputText('')}
+										>
+											<VscTrash size={14} />
+										</button>
+									)}
+								</div>
 							</div>
 							<div className={styles.panelBody}>
 								{panelTab === 'output' && (
@@ -650,7 +804,9 @@ function CodeStudio({ onClose }: Props) {
 											<div key={`${line}-${index}`}>{line}</div>
 										))}
 										<div className={styles.terminalInputRow}>
-											<span>$</span>
+											<span className={styles.terminalPrompt}>
+												$
+											</span>
 											<input
 												className={styles.terminalInput}
 												value={terminalInput}
@@ -672,13 +828,29 @@ function CodeStudio({ onClose }: Props) {
 											<li
 												key={`${problem.file}-${problem.line}-${index}`}
 												className={styles.problemItem}
-												onClick={() => openFileInEditor(problem.file)}
+												onClick={() =>
+													openFileInEditor(problem.file)
+												}
 											>
+												{problem.severity === 'warning' ? (
+													<VscWarning
+														className={styles.problemIconWarning}
+														size={14}
+													/>
+												) : (
+													<VscError
+														className={styles.problemIcon}
+														size={14}
+													/>
+												)}
 												<div>
-													{problem.file} [{problem.line},{problem.column}]
-												</div>
-												<div className={styles.problemMessage}>
-													{problem.message}
+													<div className={styles.problemMeta}>
+														{problem.file} [{problem.line},
+														{problem.column}]
+													</div>
+													<div className={styles.problemMessage}>
+														{problem.message}
+													</div>
 												</div>
 											</li>
 										))}
@@ -690,14 +862,17 @@ function CodeStudio({ onClose }: Props) {
 				</div>
 
 				<footer className={styles.statusBar}>
-					<span className={styles.statusItem}>⎇ main</span>
-					<span className={styles.statusItem}>{runtimeLabel}</span>
-					<span className={styles.statusSpacer} />
-					<span className={styles.statusItem}>UTF-8</span>
-					<span className={styles.statusItem}>Spaces: 4</span>
-					<span className={styles.statusItem}>
-						Ln {cursor.line}, Col {cursor.column}
-					</span>
+					<div className={styles.statusLeft}>
+						<span className={styles.statusItem}>⎇ main</span>
+						<span className={styles.statusItem}>{runtimeLabel}</span>
+					</div>
+					<div className={styles.statusRight}>
+						<span className={styles.statusItem}>UTF-8</span>
+						<span className={styles.statusItem}>Spaces: 4</span>
+						<span className={styles.statusItem}>
+							Ln {cursor.line}, Col {cursor.column}
+						</span>
+					</div>
 				</footer>
 			</div>
 		</DraggableWindow>
