@@ -18,6 +18,10 @@ import {
 import { codeStudioAppMeta } from '../../../config/apps/codeStudio';
 import { getReplayScript } from '../../../config/codeStudio/replays';
 import {
+	formatPistonOutput,
+	runPistonCode,
+} from '../../../lib/codeStudio/execution/pistonRunner';
+import {
 	isRunnableLanguage,
 	languageFromFileName,
 	monacoLanguageId,
@@ -37,8 +41,13 @@ import {
 import {
 	CODE_STUDIO_OPEN_EVENT,
 	parseCodeStudioOpenDetail,
+	type CodeStudioOpenDetail,
 } from '../../../lib/codeStudio/openCodeStudio';
-import { parseRunError, type CodeProblem } from '../../../lib/codeStudio/problemsParser';
+import {
+	parseGccProblems,
+	parseRunError,
+	type CodeProblem,
+} from '../../../lib/codeStudio/problemsParser';
 import {
 	isDefaultContent,
 	listWorkspaceFiles,
@@ -55,6 +64,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 });
 
 type PanelTab = 'output' | 'terminal' | 'problems';
+type RunMode = 'idle' | 'replay' | 'live' | 'fallback';
 
 type Props = {
 	onClose?: () => void;
@@ -82,12 +92,48 @@ function CodeStudio({ onClose }: Props) {
 	const [terminalInput, setTerminalInput] = useState('');
 	const [problems, setProblems] = useState<CodeProblem[]>([]);
 	const [isRunning, setIsRunning] = useState(false);
-	const [runMode, setRunMode] = useState<'idle' | 'replay' | 'live'>('idle');
+	const [runMode, setRunMode] = useState<RunMode>('idle');
+	const [bannerMessage, setBannerMessage] = useState<string | null>(null);
+	const [runAfterOpen, setRunAfterOpen] = useState<string | null>(null);
 	const [pyodideStatus, setPyodideStatus] = useState<PyodideStatus>('idle');
 	const [cursor, setCursor] = useState({ line: 1, column: 1 });
 
 	const cancelReplayRef = useRef<(() => void) | null>(null);
 	const workspace = getWorkspaceById(workspaceId) ?? initialWorkspace;
+
+	const mapReplayProblems = useCallback(
+		(script: NonNullable<ReturnType<typeof getReplayScript>>) =>
+			(script.problems ?? []).map((problem) => ({
+				...problem,
+				severity: problem.severity ?? 'error',
+			})),
+		[]
+	);
+
+	const startReplay = useCallback(
+		(
+			script: NonNullable<ReturnType<typeof getReplayScript>>,
+			mode: 'replay' | 'fallback',
+			banner?: string
+		) => {
+			setIsRunning(true);
+			setRunMode(mode);
+			setBannerMessage(banner ?? (mode === 'replay' ? 'Demo replay — sample output' : null));
+			setPanelTab('output');
+			setOutputText('');
+			setProblems(mapReplayProblems(script));
+			cancelReplayRef.current?.();
+			cancelReplayRef.current = runReplay(script, {
+				onUpdate: setOutputText,
+				onComplete: () => {
+					setIsRunning(false);
+					setRunMode('idle');
+					setBannerMessage(null);
+				},
+			});
+		},
+		[mapReplayProblems]
+	);
 
 	const activeOpenFile = openFiles.find((file) => file.path === activeFile);
 	const activeLanguage = activeOpenFile
@@ -130,6 +176,51 @@ function CodeStudio({ onClose }: Props) {
 		[openFiles, persist, workspace.files, workspaceId]
 	);
 
+	const applyCodeStudioOpen = useCallback(
+		(detail: CodeStudioOpenDetail) => {
+			if (detail.workspaceId && detail.workspaceId !== workspaceId) {
+				const nextWorkspace = getWorkspaceById(detail.workspaceId);
+				if (!nextWorkspace) return;
+
+				const built = restoreWorkspace(detail.workspaceId, null);
+				let nextFiles = built.openFiles;
+				let nextActive = built.activeFile;
+
+				if (detail.fileName) {
+					const source = nextWorkspace.files.find(
+						(file) => file.path === detail.fileName
+					);
+					if (source) {
+						if (!nextFiles.some((file) => file.path === detail.fileName)) {
+							nextFiles = [
+								...nextFiles,
+								{
+									path: detail.fileName,
+									content: source.content,
+									isDirty: false,
+								},
+							];
+						}
+						nextActive = detail.fileName;
+					}
+				}
+
+				setWorkspaceId(detail.workspaceId);
+				setOpenFiles(nextFiles);
+				setActiveFile(nextActive);
+				persist(detail.workspaceId, nextFiles, nextActive);
+				if (detail.run) setRunAfterOpen(nextActive);
+				return;
+			}
+
+			if (detail.fileName) openFileInEditor(detail.fileName);
+			if (detail.run) {
+				setRunAfterOpen(detail.fileName ?? activeFile);
+			}
+		},
+		[activeFile, openFileInEditor, persist, workspaceId]
+	);
+
 	const switchWorkspace = useCallback(
 		(nextWorkspaceId: string) => {
 			const nextWorkspace = getWorkspaceById(nextWorkspaceId);
@@ -155,17 +246,22 @@ function CodeStudio({ onClose }: Props) {
 
 	useEffect(() => {
 		const handleOpen = (event: Event) => {
-			const detail = parseCodeStudioOpenDetail(
-				(event as CustomEvent).detail
+			applyCodeStudioOpen(
+				parseCodeStudioOpenDetail((event as CustomEvent).detail)
 			);
-			if (detail.workspaceId) switchWorkspace(detail.workspaceId);
-			if (detail.fileName) openFileInEditor(detail.fileName);
 		};
 
 		window.addEventListener(CODE_STUDIO_OPEN_EVENT, handleOpen);
 		return () =>
 			window.removeEventListener(CODE_STUDIO_OPEN_EVENT, handleOpen);
-	}, [openFileInEditor, switchWorkspace]);
+	}, [applyCodeStudioOpen]);
+
+	useEffect(() => {
+		if (!runAfterOpen || activeFile !== runAfterOpen || isRunning) return;
+		setRunAfterOpen(null);
+		void handleRun();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [runAfterOpen, activeFile]);
 
 	const updateActiveContent = useCallback(
 		(content: string) => {
@@ -196,97 +292,103 @@ function CodeStudio({ onClose }: Props) {
 			return;
 		}
 
-		if (language === 'c') {
-			const replay = getReplayScript(workspaceId, activeOpenFile.path);
-			if (replay) {
-				setIsRunning(true);
-				setRunMode('replay');
-				setPanelTab('output');
-				setOutputText('');
-				setProblems(
-					(replay.problems ?? []).map((problem) => ({
-						...problem,
-						severity: problem.severity ?? 'error',
-					}))
-				);
-				cancelReplayRef.current?.();
-				cancelReplayRef.current = runReplay(replay, {
-					onUpdate: setOutputText,
-					onComplete: () => {
-						setIsRunning(false);
-						setRunMode('idle');
-					},
-				});
-				return;
-			}
-			setOutputText(
-				'Live C compilation ships in Phase 3. Edit and run Python samples for now.'
-			);
-			setPanelTab('output');
-			return;
-		}
-
+		const replay = getReplayScript(workspaceId, activeOpenFile.path);
 		const useReplay =
 			isDefaultContent(
 				workspaceId,
 				activeOpenFile.path,
 				activeOpenFile.content
-			) && getReplayScript(workspaceId, activeOpenFile.path);
+			) && replay;
+
+		if (useReplay) {
+			startReplay(replay, 'replay');
+			return;
+		}
 
 		setIsRunning(true);
+		setRunMode('live');
+		setBannerMessage(null);
 		setPanelTab('output');
 		setProblems([]);
 		setOutputText('');
 
-		if (useReplay) {
-			setRunMode('replay');
-			cancelReplayRef.current?.();
-			cancelReplayRef.current = runReplay(useReplay, {
-				onUpdate: setOutputText,
-				onComplete: () => {
-					setIsRunning(false);
-					setRunMode('idle');
-					if (useReplay.problems?.length) {
-						setProblems(
-							useReplay.problems.map((problem) => ({
-								...problem,
-								severity: problem.severity ?? 'error',
-							}))
-						);
-						setPanelTab('problems');
-					}
-				},
-			});
+		if (language === 'python') {
+			setOutputText('Loading Python runtime...\n');
+			const prefix = `$ python ${activeOpenFile.path}\n`;
+			const result = await runPythonCode(activeOpenFile.content);
+			const combined = [
+				prefix,
+				result.stdout,
+				result.stderr,
+				result.error ? `Error: ${result.error}` : '',
+			]
+				.filter(Boolean)
+				.join('\n');
+			setOutputText(combined);
+
+			if (result.error || result.stderr) {
+				const parsed = parseRunError(
+					activeOpenFile.path,
+					result.error || result.stderr,
+					'python'
+				);
+				setProblems(parsed);
+				if (parsed.length > 0) setPanelTab('problems');
+			}
+
+			setIsRunning(false);
+			setRunMode('idle');
 			return;
 		}
 
-		setRunMode('live');
-		setOutputText('Loading Python runtime...\n');
-		const prefix = `$ python ${activeOpenFile.path}\n`;
-		const result = await runPythonCode(activeOpenFile.content);
-		const combined = [
-			prefix,
-			result.stdout,
-			result.stderr,
-			result.error ? `Error: ${result.error}` : '',
-		]
-			.filter(Boolean)
-			.join('\n');
-		setOutputText(combined);
+		if (language === 'c') {
+			setOutputText(`Compiling ${activeOpenFile.path}...\n`);
+			const piston = await runPistonCode({
+				language: 'c',
+				fileName: activeOpenFile.path,
+				content: activeOpenFile.content,
+			});
 
-		if (result.error || result.stderr) {
-			const parsed = parseRunError(
+			if (piston.ok) {
+				setOutputText(
+					formatPistonOutput(activeOpenFile.path, 'gcc', piston)
+				);
+				const diagnostics = piston.compileStderr || piston.stderr;
+				if (piston.compileExitCode !== 0 || diagnostics) {
+					const parsed = parseGccProblems(
+						activeOpenFile.path,
+						diagnostics
+					);
+					setProblems(parsed);
+					if (parsed.length > 0) setPanelTab('problems');
+				}
+				setIsRunning(false);
+				setRunMode('idle');
+				return;
+			}
+
+			if (piston.fallback && replay) {
+				startReplay(
+					replay,
+					'fallback',
+					'Demo mode — live compiler busy. Showing sample output.'
+				);
+				return;
+			}
+
+			setOutputText(
+				formatPistonOutput(activeOpenFile.path, 'gcc', piston)
+			);
+			const parsed = parseGccProblems(
 				activeOpenFile.path,
-				result.error || result.stderr,
-				'python'
+				piston.compileStderr || piston.error || 'Compilation failed'
 			);
 			setProblems(parsed);
 			if (parsed.length > 0) setPanelTab('problems');
+			setIsRunning(false);
+			setRunMode('idle');
 		}
-
-		setIsRunning(false);
-		setRunMode('idle');
-	}, [activeOpenFile, isRunning, workspaceId]);
+	}, [activeOpenFile, isRunning, startReplay, workspaceId]);
 
 	useEffect(() => {
 		const onKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -306,7 +408,9 @@ function CodeStudio({ onClose }: Props) {
 		const nextLines = [...terminalLines, `$ ${trimmed}`];
 
 		if (trimmed === 'help') {
-			nextLines.push('Commands: help, clear, python <file>, run');
+			nextLines.push(
+				'Commands: help, clear, run, python <file>, gcc <file.c>'
+			);
 		} else if (trimmed === 'clear') {
 			setTerminalLines([]);
 			setTerminalInput('');
@@ -317,7 +421,20 @@ function CodeStudio({ onClose }: Props) {
 		} else if (trimmed.startsWith('python ')) {
 			const fileName = trimmed.slice('python '.length).trim();
 			openFileInEditor(fileName);
-			nextLines.push(`Opened ${fileName}`);
+			setRunAfterOpen(fileName);
+			nextLines.push(`Running ${fileName}...`);
+		} else if (trimmed.startsWith('gcc ')) {
+			const fileName =
+				trimmed
+					.split(/\s+/)
+					.find((part) => part.endsWith('.c')) ?? '';
+			if (!fileName) {
+				nextLines.push('usage: gcc <file.c>');
+			} else {
+				openFileInEditor(fileName);
+				setRunAfterOpen(fileName);
+				nextLines.push(`Compiling ${fileName}...`);
+			}
 		} else {
 			nextLines.push(`bash: ${trimmed.split(' ')[0]}: command not found`);
 		}
@@ -331,14 +448,18 @@ function CodeStudio({ onClose }: Props) {
 		if (event.key === 'Enter') handleTerminalSubmit();
 	};
 
-	const pyodideLabel =
-		pyodideStatus === 'ready'
-			? 'Pyodide ready'
-			: pyodideStatus === 'loading'
-				? 'Loading Pyodide...'
-				: pyodideStatus === 'error'
-					? 'Pyodide error'
-					: 'Python 3.11 (Pyodide)';
+	const runtimeLabel =
+		activeLanguage === 'c'
+			? 'GCC (Piston)'
+			: activeLanguage === 'python'
+				? pyodideStatus === 'ready'
+					? 'Python 3.11 (Pyodide)'
+					: pyodideStatus === 'loading'
+						? 'Loading Pyodide...'
+						: pyodideStatus === 'error'
+							? 'Pyodide error'
+							: 'Python 3.11 (Pyodide)'
+				: 'Plain Text';
 
 	return (
 		<DraggableWindow
@@ -355,8 +476,14 @@ function CodeStudio({ onClose }: Props) {
 			onClose={onClose}
 		>
 			<div className={styles.shell}>
-				{runMode === 'replay' && (
-					<div className={styles.banner}>Demo replay — sample output</div>
+				{bannerMessage && (
+					<div
+						className={`${styles.banner} ${
+							runMode === 'fallback' ? styles.bannerFallback : ''
+						}`}
+					>
+						{bannerMessage}
+					</div>
 				)}
 				<div className={styles.body}>
 					<aside className={styles.activityBar}>
@@ -564,7 +691,7 @@ function CodeStudio({ onClose }: Props) {
 
 				<footer className={styles.statusBar}>
 					<span className={styles.statusItem}>⎇ main</span>
-					<span className={styles.statusItem}>{pyodideLabel}</span>
+					<span className={styles.statusItem}>{runtimeLabel}</span>
 					<span className={styles.statusSpacer} />
 					<span className={styles.statusItem}>UTF-8</span>
 					<span className={styles.statusItem}>Spaces: 4</span>

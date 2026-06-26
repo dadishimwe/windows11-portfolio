@@ -23,7 +23,7 @@ export type CommandResult = {
 	clear?: boolean;
 	cachedPublicIp?: string;
 	openWindow?: keyof OpenWindows;
-	codeStudio?: { workspaceId?: string; fileName?: string };
+	codeStudio?: { workspaceId?: string; fileName?: string; run?: boolean };
 };
 
 const HELP_TEXT = [
@@ -43,6 +43,8 @@ const HELP_TEXT = [
 	'play snake    — open Packet Snake game',
 	'games.exe     — launch Packet Snake',
 	'code [file]   — open Code Studio (VS Code)',
+	'python <file> — run Python sample in Code Studio',
+	'gcc <file.c>  — compile C sample in Code Studio',
 	'skills        — technical skills',
 	'ip / ifconfig — network interfaces (public IP)',
 	'ping <host>   — simulated ping',
@@ -277,6 +279,42 @@ export async function runTerminalCommand(
 			return {
 				response: 'Opening Visual Studio Code...',
 				openWindow: 'codeStudio',
+			};
+		}
+
+		case 'python': {
+			const fileName = args[0];
+			if (!fileName) {
+				return { response: 'usage: python <file>' };
+			}
+			const location = findFileInWorkspaces(fileName);
+			if (!location) {
+				return {
+					response: `python: can't open file '${fileName}'`,
+				};
+			}
+			return {
+				response: `Running ${fileName} in Code Studio...`,
+				openWindow: 'codeStudio',
+				codeStudio: { ...location, run: true },
+			};
+		}
+
+		case 'gcc': {
+			const fileName = args.find((arg) => arg.endsWith('.c'));
+			if (!fileName) {
+				return { response: 'usage: gcc <file.c>' };
+			}
+			const location = findFileInWorkspaces(fileName);
+			if (!location) {
+				return {
+					response: `gcc: can't open file '${fileName}'`,
+				};
+			}
+			return {
+				response: `Compiling ${fileName} in Code Studio...`,
+				openWindow: 'codeStudio',
+				codeStudio: { ...location, run: true },
 			};
 		}
 

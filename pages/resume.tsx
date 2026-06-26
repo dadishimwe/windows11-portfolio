@@ -1,7 +1,6 @@
 import Icons from '../components/modules/Icons/Icons';
 import PageHead from '../components/utils/PageHead/PageHead';
 import { getCloudinaryResume } from '../lib/cloudinary';
-import { useOpenResumeOnLoad } from '../hooks/useOpenResumeOnLoad';
 import { PdfDocument } from '../typings';
 
 type Props = {
@@ -9,8 +8,6 @@ type Props = {
 };
 
 function ResumePage({ resume }: Props) {
-	useOpenResumeOnLoad(resume);
-
 	return (
 		<>
 			<PageHead
@@ -18,7 +15,7 @@ function ResumePage({ resume }: Props) {
 				description="Dadi Ishimwe — network engineer and data scientist résumé."
 				path="/resume"
 			/>
-			<Icons />
+			<Icons resume={resume} />
 		</>
 	);
 }

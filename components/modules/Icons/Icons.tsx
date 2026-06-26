@@ -5,6 +5,8 @@ import Selecto from 'react-selecto';
 import { Context } from '../../../context/ContextProvider';
 import { hrefToWindow } from '../../../lib/windowUtils';
 import { useWindowManager } from '../../../hooks/useWindowManager';
+import { usePdfViewer } from '../../../hooks/usePdfViewer';
+import { PdfDocument } from '../../../typings';
 import styles from './Icons.module.css';
 
 const DELETE_KEYS = ['Delete'];
@@ -58,7 +60,55 @@ function DesktopLink({ href, children }: DesktopLinkProps) {
 	);
 }
 
-function Icons() {
+function ResumeDesktopLink({
+	resume,
+	children,
+}: {
+	resume: PdfDocument | null;
+	children: React.ReactNode;
+}) {
+	const router = useRouter();
+	const { minimizedState } = useContext(Context);
+	const [minimized, setMinimized] = minimizedState;
+	const { openPdf, pdfViewer, restorePdf } = usePdfViewer();
+
+	const handleClick = () => {
+		if (!resume) {
+			void router.push('/explorer/resume');
+			return;
+		}
+
+		if (pdfViewer.isOpen && minimized.pdfViewer) {
+			void restorePdf();
+			return;
+		}
+
+		if (
+			pdfViewer.isOpen &&
+			pdfViewer.document?.public_id === resume.public_id
+		) {
+			return;
+		}
+
+		void openPdf(resume);
+	};
+
+	return (
+		<div
+			className={styles.desktopLink}
+			onClick={handleClick}
+			role="link"
+			tabIndex={0}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') handleClick();
+			}}
+		>
+			{children}
+		</div>
+	);
+}
+
+function Icons({ resume = null }: { resume?: PdfDocument | null }) {
 	const [deleted, setDeleted] = useState(false);
 
 	const handleDelete = () => {
@@ -117,7 +167,7 @@ function Icons() {
 							<p>About me</p>
 						</div>
 					</DesktopLink>
-					<DesktopLink href="/resume">
+					<ResumeDesktopLink resume={resume}>
 						<div className={`${styles.item} selectoItem`}>
 							<Image
 								src="/icons/documents/documents.png"
@@ -127,7 +177,7 @@ function Icons() {
 							/>
 							<p>Résumé</p>
 						</div>
-					</DesktopLink>
+					</ResumeDesktopLink>
 					<DesktopLink href="/explorer/projects">
 						<div className={`${styles.item} selectoItem`}>
 							<Image

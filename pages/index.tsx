@@ -1,9 +1,15 @@
 import Icons from '../components/modules/Icons/Icons';
 import PageHead from '../components/utils/PageHead/PageHead';
 import { site } from '../config/site';
+import { getCloudinaryResume } from '../lib/cloudinary';
 import { buildPersonJsonLd, buildWebSiteJsonLd } from '../lib/seo';
+import { PdfDocument } from '../typings';
 
-export default function Home() {
+type Props = {
+	resume: PdfDocument | null;
+};
+
+export default function Home({ resume }: Props) {
 	return (
 		<>
 			<PageHead
@@ -13,8 +19,17 @@ export default function Home() {
 				jsonLd={[buildPersonJsonLd(), buildWebSiteJsonLd()]}
 			/>
 			<div style={{ height: '100%' }}>
-				<Icons />
+				<Icons resume={resume} />
 			</div>
 		</>
 	);
+}
+
+export async function getStaticProps() {
+	const resume = await getCloudinaryResume();
+
+	return {
+		props: { resume },
+		revalidate: 60,
+	};
 }

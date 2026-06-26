@@ -44,6 +44,49 @@ export function parsePythonProblems(
 	return problems;
 }
 
+export function parseGccProblems(
+	fileName: string,
+	diagnostics: string
+): CodeProblem[] {
+	const problems: CodeProblem[] = [];
+	const lines = diagnostics.split('\n');
+
+	for (const line of lines) {
+		const detailed = line.match(
+			/^(.+?):(\d+):(\d+):\s*(error|warning):\s*(.+)$/
+		);
+		if (detailed) {
+			problems.push({
+				file: detailed[1].split(/[/\\]/).pop() ?? fileName,
+				line: Number(detailed[2]),
+				column: Number(detailed[3]),
+				message: detailed[5].trim(),
+				severity: detailed[4] as 'error' | 'warning',
+			});
+			continue;
+		}
+
+		const simple = line.match(
+			/^(.+?):(\d+):\s*(error|warning):\s*(.+)$/
+		);
+		if (!simple) continue;
+
+		problems.push({
+			file: simple[1].split(/[/\\]/).pop() ?? fileName,
+			line: Number(simple[2]),
+			column: 1,
+			message: simple[4].trim(),
+			severity: simple[3] as 'error' | 'warning',
+		});
+	}
+
+	if (problems.length === 0 && diagnostics.trim()) {
+		return parseRunError(fileName, diagnostics, 'c');
+	}
+
+	return problems;
+}
+
 export function parseRunError(
 	fileName: string,
 	error: string,

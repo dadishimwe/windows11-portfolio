@@ -289,6 +289,11 @@
 	font-size: 11px;
 }
 
+.bannerFallback {
+	background: #5a3e1b;
+	color: #ffe8c8;
+}
+
 .emptyEditor {
 	display: flex;
 	align-items: center;
