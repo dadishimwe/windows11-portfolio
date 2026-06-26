@@ -5,7 +5,7 @@ import { SearchMatch } from '../../../lib/codeStudio/search';
 import { OpenFile } from '../../../lib/codeStudio/workspace';
 import styles from './CodeStudio.module.css';
 
-export type SidebarView = 'explorer' | 'search';
+export type SidebarView = 'explorer' | 'search' | 'settings';
 
 type Props = {
 	view: SidebarView;
@@ -21,6 +21,7 @@ type Props = {
 	onToggleExplorer: () => void;
 	onSearchQueryChange: (value: string) => void;
 	onOpenFile: (path: string) => void;
+	onGoToSearchResult: (result: SearchMatch) => void;
 };
 
 function CodeStudioSidebar({
@@ -37,7 +38,10 @@ function CodeStudioSidebar({
 	onToggleExplorer,
 	onSearchQueryChange,
 	onOpenFile,
+	onGoToSearchResult,
 }: Props) {
+	if (view === 'settings') return null;
+
 	if (view === 'search') {
 		return (
 			<aside className={styles.sidebar}>
@@ -69,7 +73,7 @@ function CodeStudioSidebar({
 							<button
 								type="button"
 								className={styles.searchResultItem}
-								onClick={() => onOpenFile(result.file)}
+								onClick={() => onGoToSearchResult(result)}
 							>
 								<div className={styles.searchResultTitle}>
 									<FileTypeIcon

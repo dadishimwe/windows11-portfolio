@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import type { editor } from 'monaco-editor';
 import {
 	KeyboardEvent,
 	useCallback,
@@ -11,8 +12,10 @@ import {
 } from 'react';
 import Codicon from './Codicon';
 import CodeStudioMenuBar, { MenuSection } from './CodeStudioMenuBar';
+import CodeStudioSettingsPanel from './CodeStudioSettingsPanel';
 import CodeStudioSidebar, { SidebarView } from './CodeStudioSidebar';
 import FileTypeIcon from './FileTypeIcon';
+import { useCodeStudioSettings } from './useCodeStudioSettings';
 import { usePanelResize } from './usePanelResize';
 import { codeStudioAppMeta } from '../../../config/apps/codeStudio';
 import { getReplayScript } from '../../../config/codeStudio/replays';
@@ -38,6 +41,10 @@ import {
 	type PyodideStatus,
 } from '../../../lib/codeStudio/execution/pythonRunner';
 import {
+	revealEditorLocation,
+	type EditorLocation,
+} from '../../../lib/codeStudio/editorNavigation';
+import {
 	CODE_STUDIO_OPEN_EVENT,
 	parseCodeStudioOpenDetail,
 	type CodeStudioOpenDetail,
@@ -55,6 +62,7 @@ import {
 	savePersistedState,
 } from '../../../lib/codeStudio/workspace';
 import { searchWorkspaceFiles } from '../../../lib/codeStudio/search';
+import { FONT_FAMILY_MAP } from '../../../lib/codeStudio/settings';
 import DraggableWindow from '../../utils/DraggableWindow/DraggableWindow';
 import styles from './CodeStudio.module.css';
 
@@ -99,12 +107,15 @@ function CodeStudio({ onClose }: Props) {
 	const [explorerOpen, setExplorerOpen] = useState(true);
 	const [sidebarView, setSidebarView] = useState<SidebarView>('explorer');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [showMinimap, setShowMinimap] = useState(false);
-	const [panelVisible, setPanelVisible] = useState(true);
+	const { settings, updateSettings, resetSettings } = useCodeStudioSettings();
 	const { panelHeight, onResizeStart } = usePanelResize({ initial: 200 });
 	const [resizeActive, setResizeActive] = useState(false);
+	const [pendingLocation, setPendingLocation] = useState<EditorLocation | null>(
+		null
+	);
 
 	const cancelReplayRef = useRef<(() => void) | null>(null);
+	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const workspace = getWorkspaceById(workspaceId) ?? initialWorkspace;
 
 	const mapReplayProblems = useCallback(
@@ -181,6 +192,26 @@ function CodeStudio({ onClose }: Props) {
 		},
 		[openFiles, persist, workspace.files, workspaceId]
 	);
+
+	const goToLocation = useCallback(
+		(location: EditorLocation) => {
+			setPendingLocation(location);
+			openFileInEditor(location.file);
+		},
+		[openFileInEditor]
+	);
+
+	useEffect(() => {
+		if (!pendingLocation || pendingLocation.file !== activeFile) return;
+
+		const frameId = requestAnimationFrame(() => {
+			if (!editorRef.current) return;
+			revealEditorLocation(editorRef.current, pendingLocation);
+			setPendingLocation(null);
+		});
+
+		return () => cancelAnimationFrame(frameId);
+	}, [pendingLocation, activeFile]);
 
 	const closeFile = useCallback(
 		(filePath: string) => {
@@ -532,6 +563,11 @@ function CodeStudio({ onClose }: Props) {
 						disabled: !activeOpenFile || isRunning,
 						onSelect: () => void handleRun(),
 					},
+					{
+						id: 'preferences',
+						label: 'Preferences',
+						onSelect: () => setSidebarView('settings'),
+					},
 				],
 			},
 			{
@@ -553,14 +589,16 @@ function CodeStudio({ onClose }: Props) {
 					{
 						id: 'minimap',
 						label: 'Minimap',
-						checked: showMinimap,
-						onSelect: () => setShowMinimap((value) => !value),
+						checked: settings.showMinimap,
+						onSelect: () =>
+							updateSettings({ showMinimap: !settings.showMinimap }),
 					},
 					{
 						id: 'panel',
 						label: 'Panel',
-						checked: panelVisible,
-						onSelect: () => setPanelVisible((value) => !value),
+						checked: settings.panelVisible,
+						onSelect: () =>
+							updateSettings({ panelVisible: !settings.panelVisible }),
 					},
 					{
 						id: 'explorer-view',
@@ -573,6 +611,12 @@ function CodeStudio({ onClose }: Props) {
 						label: 'Search',
 						checked: sidebarView === 'search',
 						onSelect: () => setSidebarView('search'),
+					},
+					{
+						id: 'settings-view',
+						label: 'Settings',
+						checked: sidebarView === 'settings',
+						onSelect: () => setSidebarView('settings'),
 					},
 				],
 			},
@@ -597,7 +641,7 @@ function CodeStudio({ onClose }: Props) {
 						id: 'show-terminal',
 						label: 'Show Integrated Terminal',
 						onSelect: () => {
-							setPanelVisible(true);
+							updateSettings({ panelVisible: true });
 							setPanelTab('terminal');
 						},
 					},
@@ -611,7 +655,7 @@ function CodeStudio({ onClose }: Props) {
 						id: 'shortcuts',
 						label: 'Keyboard Shortcuts',
 						onSelect: () => {
-							setPanelVisible(true);
+							updateSettings({ panelVisible: true });
 							setPanelTab('output');
 							setOutputText(
 								[
@@ -630,9 +674,10 @@ function CodeStudio({ onClose }: Props) {
 			closeFile,
 			handleRun,
 			isRunning,
-			panelVisible,
-			showMinimap,
+			settings.panelVisible,
+			settings.showMinimap,
 			sidebarView,
+			updateSettings,
 		]
 	);
 
@@ -721,28 +766,48 @@ function CodeStudio({ onClose }: Props) {
 						</button>
 						<button
 							type="button"
-							className={styles.activityButton}
+							className={`${styles.activityButton} ${
+								sidebarView === 'settings'
+									? styles.activityButtonActive
+									: ''
+							}`}
 							title="Settings"
+							onClick={() => setSidebarView('settings')}
 						>
 							<Codicon name="settings-gear" size="md" />
 						</button>
 					</aside>
 
-					<CodeStudioSidebar
-						view={sidebarView}
-						workspace={workspace}
-						workspaceId={workspaceId}
-						workspaceOptions={codeWorkspaces}
-						explorerOpen={explorerOpen}
-						openFiles={openFiles}
-						activeFile={activeFile}
-						searchQuery={searchQuery}
-						searchResults={searchResults}
-						onSwitchWorkspace={switchWorkspace}
-						onToggleExplorer={() => setExplorerOpen((open) => !open)}
-						onSearchQueryChange={setSearchQuery}
-						onOpenFile={openFileInEditor}
-					/>
+					{sidebarView === 'settings' ? (
+						<CodeStudioSettingsPanel
+							settings={settings}
+							onChange={updateSettings}
+							onReset={resetSettings}
+						/>
+					) : (
+						<CodeStudioSidebar
+							view={sidebarView}
+							workspace={workspace}
+							workspaceId={workspaceId}
+							workspaceOptions={codeWorkspaces}
+							explorerOpen={explorerOpen}
+							openFiles={openFiles}
+							activeFile={activeFile}
+							searchQuery={searchQuery}
+							searchResults={searchResults}
+							onSwitchWorkspace={switchWorkspace}
+							onToggleExplorer={() => setExplorerOpen((open) => !open)}
+							onSearchQueryChange={setSearchQuery}
+							onOpenFile={openFileInEditor}
+							onGoToSearchResult={(result) =>
+								goToLocation({
+									file: result.file,
+									line: result.line,
+									column: result.column,
+								})
+							}
+						/>
+					)}
 
 					<section className={styles.main}>
 						<CodeStudioMenuBar menus={menuSections} />
@@ -808,26 +873,43 @@ function CodeStudio({ onClose }: Props) {
 								<MonacoEditor
 									height="100%"
 									language={monacoLanguageId(activeLanguage)}
-									theme="vs-dark"
+									theme={settings.theme}
 									value={activeOpenFile.content}
 									onChange={(value) =>
 										updateActiveContent(value ?? '')
 									}
-									onMount={(editor) => {
-										editor.onDidChangeCursorPosition((event) => {
-											setCursor({
-												line: event.position.lineNumber,
-												column: event.position.column,
-											});
-										});
+									onMount={(editorInstance) => {
+										editorRef.current = editorInstance;
+										editorInstance.onDidChangeCursorPosition(
+											(event) => {
+												setCursor({
+													line: event.position.lineNumber,
+													column: event.position.column,
+												});
+											}
+										);
+										if (
+											pendingLocation &&
+											pendingLocation.file === activeFile
+										) {
+											revealEditorLocation(
+												editorInstance,
+												pendingLocation
+											);
+											setPendingLocation(null);
+										}
 									}}
 									options={{
-										fontSize: 13,
+										fontSize: settings.fontSize,
 										fontFamily:
-											"'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace",
-										fontLigatures: true,
+											FONT_FAMILY_MAP[settings.fontFamily],
+										fontLigatures: settings.fontLigatures,
+										tabSize: settings.tabSize,
+										wordWrap: settings.wordWrap,
 										lineHeight: 20,
-										minimap: { enabled: showMinimap },
+										minimap: {
+											enabled: settings.showMinimap,
+										},
 										scrollBeyondLastLine: false,
 										automaticLayout: true,
 										padding: { top: 8 },
@@ -868,7 +950,7 @@ function CodeStudio({ onClose }: Props) {
 							)}
 						</div>
 
-						{panelVisible && (
+						{settings.panelVisible && (
 							<div
 								className={`${styles.panelResizeHandle} ${
 									resizeActive ? styles.panelResizeHandleActive : ''
@@ -880,10 +962,12 @@ function CodeStudio({ onClose }: Props) {
 
 						<div
 							className={`${styles.panel} ${
-								panelVisible ? '' : styles.panelHidden
+								settings.panelVisible ? '' : styles.panelHidden
 							}`}
 							style={
-								panelVisible ? { height: panelHeight } : undefined
+								settings.panelVisible
+									? { height: panelHeight }
+									: undefined
 							}
 						>
 							<div className={styles.panelHeader}>
@@ -956,7 +1040,11 @@ function CodeStudio({ onClose }: Props) {
 												key={`${problem.file}-${problem.line}-${index}`}
 												className={styles.problemItem}
 												onClick={() =>
-													openFileInEditor(problem.file)
+													goToLocation({
+														file: problem.file,
+														line: problem.line,
+														column: problem.column,
+													})
 												}
 											>
 												{problem.severity === 'warning' ? (
@@ -995,7 +1083,9 @@ function CodeStudio({ onClose }: Props) {
 					</div>
 					<div className={styles.statusRight}>
 						<span className={styles.statusItem}>UTF-8</span>
-						<span className={styles.statusItem}>Spaces: 4</span>
+						<span className={styles.statusItem}>
+							Spaces: {settings.tabSize}
+						</span>
 						<span className={styles.statusItem}>
 							Ln {cursor.line}, Col {cursor.column}
 						</span>
