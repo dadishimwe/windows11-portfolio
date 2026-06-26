@@ -1,20 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { CLOUDINARY_CLOUD_NAME } from '../../config/cloudinary';
+import {
+	buildSignedPdfUrl,
+	configureCloudinarySdk,
+	isAllowedPortfolioPublicId,
+	type CloudinaryResourceType,
+} from '../../lib/cloudinaryPdfDelivery';
 
-const ALLOWED_HOST = `res.cloudinary.com`;
-
-function isAllowedCloudinaryPdfUrl(url: string): boolean {
-	try {
-		const parsed = new URL(url);
-		return (
-			parsed.hostname === ALLOWED_HOST &&
-			parsed.pathname.includes(`/${CLOUDINARY_CLOUD_NAME}/`) &&
-			(parsed.pathname.includes('/image/upload/') ||
-				parsed.pathname.includes('/raw/upload/'))
-		);
-	} catch {
-		return false;
-	}
+function parseResourceType(value: unknown): CloudinaryResourceType {
+	return value === 'raw' ? 'raw' : 'image';
 }
 
 export default async function handler(
@@ -26,23 +19,50 @@ export default async function handler(
 		return res.status(405).end('Method Not Allowed');
 	}
 
-	const rawUrl = req.query.url;
-	if (typeof rawUrl !== 'string' || !isAllowedCloudinaryPdfUrl(rawUrl)) {
-		return res.status(400).json({ error: 'Invalid PDF URL' });
+	const publicId = req.query.public_id;
+	if (typeof publicId !== 'string' || !isAllowedPortfolioPublicId(publicId)) {
+		return res.status(400).json({ error: 'Invalid public_id' });
+	}
+
+	if (!configureCloudinarySdk()) {
+		return res.status(503).json({ error: 'Cloudinary is not configured' });
+	}
+
+	const resourceType = parseResourceType(req.query.resource_type);
+	const download = req.query.download === '1';
+
+	const deliveryUrl = buildSignedPdfUrl(publicId, resourceType, {
+		attachment: download,
+	});
+
+	if (!deliveryUrl) {
+		return res.status(500).json({ error: 'Could not build PDF URL' });
 	}
 
 	try {
-		const upstream = await fetch(rawUrl);
+		const upstream = await fetch(deliveryUrl);
 		if (!upstream.ok) {
-			return res.status(upstream.status).end('Failed to fetch PDF');
+			console.error(
+				`[pdf-proxy] upstream ${upstream.status} for ${publicId}`
+			);
+			return res
+				.status(upstream.status)
+				.end(`Failed to fetch PDF (${upstream.status})`);
 		}
 
 		const buffer = Buffer.from(await upstream.arrayBuffer());
-		res.setHeader('Content-Type', 'application/pdf');
-		res.setHeader('Content-Disposition', 'inline');
-		res.setHeader('Cache-Control', 'public, max-age=3600');
+		const contentType =
+			upstream.headers.get('content-type') ?? 'application/pdf';
+
+		res.setHeader('Content-Type', contentType);
+		res.setHeader(
+			'Content-Disposition',
+			download ? 'attachment' : 'inline'
+		);
+		res.setHeader('Cache-Control', 'public, max-age=300');
 		return res.status(200).send(buffer);
-	} catch {
+	} catch (error) {
+		console.error('[pdf-proxy] fetch failed:', error);
 		return res.status(502).json({ error: 'PDF proxy failed' });
 	}
 }

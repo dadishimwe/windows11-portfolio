@@ -7,6 +7,10 @@ import {
 	CLOUDINARY_VIDEO_PREFIX,
 	getCloudinaryCredentials,
 } from '../config/cloudinary';
+import {
+	buildPdfProxyPath,
+	getCloudinaryResourceType,
+} from './cloudinaryPdfDelivery';
 import { MediaType, PdfDocument } from '../typings';
 
 type CloudinaryResource = {
@@ -226,15 +230,18 @@ function formatFileSize(bytes?: number): string {
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function pdfViewUrl(secureUrl: string): string {
-	return `/api/pdf-proxy?url=${encodeURIComponent(secureUrl)}`;
+function pdfViewUrl(
+	publicId: string,
+	resourceType: ReturnType<typeof getCloudinaryResourceType>
+): string {
+	return buildPdfProxyPath(publicId, resourceType, false);
 }
 
-function pdfDownloadUrl(secureUrl: string): string {
-	if (secureUrl.includes('/raw/upload/')) {
-		return secureUrl.replace('/upload/', '/upload/fl_attachment/');
-	}
-	return secureUrl.replace('/upload/', '/upload/fl_attachment/');
+function pdfDownloadUrl(
+	publicId: string,
+	resourceType: ReturnType<typeof getCloudinaryResourceType>
+): string {
+	return buildPdfProxyPath(publicId, resourceType, true);
 }
 
 function pdfThumbnailUrl(secureUrl: string): string | undefined {
@@ -245,14 +252,15 @@ function pdfThumbnailUrl(secureUrl: string): string | undefined {
 
 function toPdfDocument(resource: CloudinaryResource): PdfDocument {
 	const title = displayFilename(resource);
+	const resourceType = getCloudinaryResourceType(resource.secure_url);
 	return {
 		title,
 		fileName:
 			resource.format === 'pdf'
 				? `${title}.pdf`
 				: `${title}.${resource.format}`,
-		pdfUrl: pdfViewUrl(resource.secure_url),
-		downloadUrl: pdfDownloadUrl(resource.secure_url),
+		pdfUrl: pdfViewUrl(resource.public_id, resourceType),
+		downloadUrl: pdfDownloadUrl(resource.public_id, resourceType),
 		public_id: resource.public_id,
 		format: resource.format,
 		thumbnailUrl: pdfThumbnailUrl(resource.secure_url),

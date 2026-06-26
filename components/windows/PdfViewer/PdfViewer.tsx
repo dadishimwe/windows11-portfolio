@@ -47,27 +47,11 @@ function PdfViewer({ document, onClose }: Props) {
 					</div>
 				</div>
 				<div className={styles.viewer}>
-					<object
+					<iframe
 						className={styles.frame}
-						data={document.pdfUrl}
-						type="application/pdf"
-						aria-label={document.title}
-					>
-						<div className={styles.fallback}>
-							<p>
-								Inline preview is not available for this PDF in
-								your browser.
-							</p>
-							<a
-								className={styles.toolbarButton}
-								href={document.pdfUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Open PDF in new tab
-							</a>
-						</div>
-					</object>
+						src={document.pdfUrl}
+						title={document.title}
+					/>
 				</div>
 			</div>
 		</DraggableWindow>
