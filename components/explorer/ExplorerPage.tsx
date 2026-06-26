@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { postNavigateExplorerMessage } from '../../lib/explorerBridge';
 import { useOpenFromRoute } from '../../hooks/useOpenFromRoute';
 import Icons from '../modules/Icons/Icons';
 import PageHead from '../utils/PageHead/PageHead';
@@ -25,6 +26,11 @@ function ExplorerPage({ path, head, content }: Props) {
 		explorerPath: path,
 		enabled: !isEmbed,
 	});
+
+	useEffect(() => {
+		if (!isEmbed) return;
+		postNavigateExplorerMessage(path);
+	}, [isEmbed, path]);
 
 	if (isEmbed) {
 		return (

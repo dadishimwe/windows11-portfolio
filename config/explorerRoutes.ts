@@ -16,6 +16,8 @@ export type ExplorerRouteMeta = {
 	folder: string;
 	icon: string;
 	topNav: boolean;
+	/** Windows-style address bar label (may include parent folders). */
+	addressBar?: string;
 };
 
 export const explorerRoutes: Record<string, ExplorerRouteMeta> = {
@@ -46,33 +48,39 @@ export const explorerRoutes: Record<string, ExplorerRouteMeta> = {
 	},
 	'/explorer/certifications': {
 		folder: 'Certifications',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: false,
+		addressBar: 'Documents \\ Certifications',
 	},
 	'/explorer/certifications/fortinet': {
 		folder: 'Fortinet',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: true,
+		addressBar: 'Documents \\ Certifications \\ Fortinet',
 	},
 	'/explorer/certifications/peplink': {
 		folder: 'Peplink',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: true,
+		addressBar: 'Documents \\ Certifications \\ Peplink',
 	},
 	'/explorer/certifications/mit': {
 		folder: 'MIT',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: true,
+		addressBar: 'Documents \\ Certifications \\ MIT',
 	},
 	'/explorer/certifications/mit-online': {
 		folder: 'MIT Online & edX',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: true,
+		addressBar: 'Documents \\ Certifications \\ MIT Online & edX',
 	},
 	'/explorer/resume': {
 		folder: 'Resume',
-		icon: 'documents',
+		icon: 'folder',
 		topNav: false,
+		addressBar: 'Documents \\ Resume',
 	},
 	'/explorer/desktop': {
 		folder: 'Desktop',
@@ -83,6 +91,7 @@ export const explorerRoutes: Record<string, ExplorerRouteMeta> = {
 		folder: 'Documents',
 		icon: 'documents',
 		topNav: true,
+		addressBar: 'Documents',
 	},
 };
 
@@ -94,6 +103,7 @@ const pathMeta: Record<string, ExplorerRouteMeta> = {
 		folder: 'Downloads',
 		icon: 'downloads',
 		topNav: true,
+		addressBar: 'Downloads',
 	},
 	'/explorer/videos': {
 		folder: 'Videos',
@@ -124,7 +134,13 @@ const pathMeta: Record<string, ExplorerRouteMeta> = {
 
 export function getExplorerMeta(path: string): ExplorerRouteMeta {
 	const normalized = path.split('?')[0];
-	if (pathMeta[normalized]) return pathMeta[normalized];
+	if (pathMeta[normalized]) {
+		const meta = pathMeta[normalized];
+		return {
+			...meta,
+			addressBar: meta.addressBar ?? meta.folder,
+		};
+	}
 
 	const driveMatch = normalized.match(/^\/explorer\/drives\/([CD])$/);
 	if (driveMatch) {
@@ -133,6 +149,7 @@ export function getExplorerMeta(path: string): ExplorerRouteMeta {
 			folder: `Local Disk (${letter}:)`,
 			icon: 'drive',
 			topNav: true,
+			addressBar: `This PC \\ Local Disk (${letter}:)`,
 		};
 	}
 
@@ -140,5 +157,10 @@ export function getExplorerMeta(path: string): ExplorerRouteMeta {
 		folder: 'File Explorer',
 		icon: 'folder',
 		topNav: false,
+		addressBar: 'File Explorer',
 	};
+}
+
+export function getExplorerAddressBar(path: string): string {
+	return getExplorerMeta(path).addressBar ?? getExplorerMeta(path).folder;
 }

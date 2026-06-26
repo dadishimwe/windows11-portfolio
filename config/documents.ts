@@ -24,7 +24,7 @@ export const certExplorerFolders: CertExplorerFolder[] = [
 		description: 'NSE, FCF, FCA, and FortiGate Operator — verified on Credly',
 		explorerPath: '/explorer/certifications/fortinet',
 		kind: 'credly',
-		icon: '/icons/documents/documents_small.png',
+		icon: '/icons/folder/folder.png',
 	},
 	{
 		id: 'peplink',
@@ -32,7 +32,7 @@ export const certExplorerFolders: CertExplorerFolder[] = [
 		description: 'Peplink Certified Engineer and training certificates',
 		explorerPath: '/explorer/certifications/peplink',
 		kind: 'pdf',
-		icon: '/icons/documents/documents_small.png',
+		icon: '/icons/folder/folder.png',
 		cloudinaryFolder: CLOUDINARY_CERT_PEPLINK_PREFIX,
 	},
 	{
@@ -41,7 +41,7 @@ export const certExplorerFolders: CertExplorerFolder[] = [
 		description: 'MIT program certificates',
 		explorerPath: '/explorer/certifications/mit',
 		kind: 'pdf',
-		icon: '/icons/documents/documents_small.png',
+		icon: '/icons/folder/folder.png',
 		cloudinaryFolder: CLOUDINARY_CERT_MIT_PREFIX,
 	},
 	{
@@ -51,7 +51,7 @@ export const certExplorerFolders: CertExplorerFolder[] = [
 			'MIT Emerging Talent, Universal AI, and other MIT Online / edX credentials',
 		explorerPath: '/explorer/certifications/mit-online',
 		kind: 'pdf',
-		icon: '/icons/documents/documents_small.png',
+		icon: '/icons/folder/folder.png',
 		cloudinaryFolder: CLOUDINARY_CERT_MIT_ONLINE_PREFIX,
 	},
 ];

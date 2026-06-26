@@ -15,6 +15,7 @@ export type PdfDocument = {
 	public_id: string;
 	format: string;
 	thumbnailUrl?: string;
+	sizeLabel?: string;
 };
 
 export type ErrorType = {

@@ -15,7 +15,7 @@ function PdfViewer({ document, onClose }: Props) {
 			topTitle={document.title}
 			topIcon={
 				<Image
-					src="/icons/documents/documents.png"
+					src="/svg/pdf.svg"
 					alt=""
 					width={20}
 					height={20}
@@ -47,11 +47,27 @@ function PdfViewer({ document, onClose }: Props) {
 					</div>
 				</div>
 				<div className={styles.viewer}>
-					<iframe
+					<object
 						className={styles.frame}
-						src={document.pdfUrl}
-						title={document.title}
-					/>
+						data={document.pdfUrl}
+						type="application/pdf"
+						aria-label={document.title}
+					>
+						<div className={styles.fallback}>
+							<p>
+								Inline preview is not available for this PDF in
+								your browser.
+							</p>
+							<a
+								className={styles.toolbarButton}
+								href={document.pdfUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Open PDF in new tab
+							</a>
+						</div>
+					</object>
 				</div>
 			</div>
 		</DraggableWindow>

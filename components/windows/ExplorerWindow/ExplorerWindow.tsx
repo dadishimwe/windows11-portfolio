@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getExplorerMeta } from '../../../config/explorerRoutes';
+import { getExplorerAddressBar, getExplorerMeta } from '../../../config/explorerRoutes';
 import { useWindowManager } from '../../../hooks/useWindowManager';
 import FileExplorer from '../FileExplorer/FileExplorer';
 import styles from './ExplorerWindow.module.css';
@@ -24,6 +24,7 @@ function ExplorerWindow() {
 	return (
 		<FileExplorer
 			folder={meta.folder}
+			addressBar={getExplorerAddressBar(explorerPath)}
 			icon={meta.icon}
 			topNav={meta.topNav}
 			navigationMode="context"

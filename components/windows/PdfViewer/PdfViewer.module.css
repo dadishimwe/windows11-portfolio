@@ -43,7 +43,7 @@
 .viewer {
 	flex: 1;
 	min-height: 0;
-	background: #1a1a1a;
+	background: #525252;
 }
 
 .frame {
@@ -52,6 +52,19 @@
 	height: 100%;
 	border: none;
 	background: #fff;
+}
+
+.fallback {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: 24px;
+	color: #ddd;
+	font-size: 0.85rem;
+	text-align: center;
 }
 
 .shell {

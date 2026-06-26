@@ -24,9 +24,7 @@ function CertificationsHub() {
 							{EXPLORER_ITEM_DATE}
 						</p>
 						<p className={styles.listItemType}>File folder</p>
-						<p className={styles.listItemSize}>
-							{folder.kind === 'credly' ? 'Credly' : 'PDF'}
-						</p>
+						<p className={styles.listItemSize}>—</p>
 					</div>
 				</ExplorerLink>
 			))}

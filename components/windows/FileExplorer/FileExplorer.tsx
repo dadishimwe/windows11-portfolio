@@ -44,6 +44,7 @@ import styles from './FileExplorer.module.css';
 
 type Props = {
 	folder: string;
+	addressBar?: string;
 	icon: string;
 	topNav: boolean;
 	component?: React.ReactNode;
@@ -96,13 +97,15 @@ function FileExplorer(props: Props) {
 		return <Link href={href}>{children}</Link>;
 	};
 
-	const [path, setPath] = useState(props.folder);
+	const addressLabel = props.addressBar ?? props.folder;
+
+	const [path, setPath] = useState(addressLabel);
 	const [quickaccess, setQuickaccess] = useState(true);
 	const [thisPC, setThisPC] = useState(true);
 
 	useEffect(() => {
-		setPath(props.folder);
-	}, [props.folder]);
+		setPath(addressLabel);
+	}, [addressLabel]);
 
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setPath(e.target.value);
@@ -110,7 +113,7 @@ function FileExplorer(props: Props) {
 
 	const handleFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
-	const handleBlur = () => setPath(props.folder);
+	const handleBlur = () => setPath(addressLabel);
 
 	useEffect(() => {
 		const pathToTrack =

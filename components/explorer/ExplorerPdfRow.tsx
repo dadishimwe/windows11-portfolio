@@ -33,27 +33,19 @@ function ExplorerPdfRow({ document, isEmbed }: Props) {
 			onKeyDown={handleKeyDown}
 		>
 			<div className={styles.listItemName}>
-				{document.thumbnailUrl ? (
-					<Image
-						src={document.thumbnailUrl}
-						alt=""
-						width={16}
-						height={16}
-						className={styles.pdfThumb}
-					/>
-				) : (
-					<Image
-						src="/icons/documents/documents_small.png"
-						alt=""
-						width={16}
-						height={16}
-					/>
-				)}
+				<Image
+					src="/svg/pdf.svg"
+					alt=""
+					width={16}
+					height={16}
+				/>
 				<p>{document.title}</p>
 			</div>
 			<p className={styles.listItemDateModified}>{EXPLORER_ITEM_DATE}</p>
 			<p className={styles.listItemType}>PDF Document</p>
-			<p className={styles.listItemSize}>—</p>
+			<p className={styles.listItemSize}>
+				{document.sizeLabel ?? '—'}
+			</p>
 		</div>
 	);
 }

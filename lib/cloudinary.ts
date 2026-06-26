@@ -14,6 +14,7 @@ type CloudinaryResource = {
 	secure_url: string;
 	format: string;
 	display_name?: string;
+	bytes?: number;
 };
 
 const IMAGE_PREFIX_FALLBACKS = [
@@ -218,14 +219,21 @@ function isPdfResource(resource: CloudinaryResource): boolean {
 	);
 }
 
+function formatFileSize(bytes?: number): string {
+	if (!bytes || bytes <= 0) return '—';
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function pdfViewUrl(secureUrl: string): string {
-	if (secureUrl.includes('/raw/upload/')) {
-		return secureUrl;
-	}
-	return secureUrl.replace('/upload/', '/upload/fl_inline/');
+	return `/api/pdf-proxy?url=${encodeURIComponent(secureUrl)}`;
 }
 
 function pdfDownloadUrl(secureUrl: string): string {
+	if (secureUrl.includes('/raw/upload/')) {
+		return secureUrl.replace('/upload/', '/upload/fl_attachment/');
+	}
 	return secureUrl.replace('/upload/', '/upload/fl_attachment/');
 }
 
@@ -248,6 +256,7 @@ function toPdfDocument(resource: CloudinaryResource): PdfDocument {
 		public_id: resource.public_id,
 		format: resource.format,
 		thumbnailUrl: pdfThumbnailUrl(resource.secure_url),
+		sizeLabel: formatFileSize(resource.bytes),
 	};
 }
 

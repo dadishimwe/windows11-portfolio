@@ -22,7 +22,7 @@ function Downloads({ resume }: Props) {
 				<div className={styles.listItem}>
 					<div className={styles.listItemName}>
 						<Image
-							src="/icons/documents/documents_small.png"
+							src="/icons/folder/folder.png"
 							alt=""
 							width={16}
 							height={16}
@@ -42,7 +42,7 @@ function Downloads({ resume }: Props) {
 				<div className={styles.listItem}>
 					<div className={styles.listItemName}>
 						<Image
-							src="/icons/documents/documents_small.png"
+							src="/icons/folder/folder.png"
 							alt=""
 							width={16}
 							height={16}
