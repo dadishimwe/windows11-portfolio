@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
 	buildSignedPdfUrl,
 	configureCloudinarySdk,
-	isAllowedPortfolioPublicId,
+	isAllowedPdfRequest,
 	type CloudinaryResourceType,
 } from '../../lib/cloudinaryPdfDelivery';
 
@@ -20,8 +20,14 @@ export default async function handler(
 	}
 
 	const publicId = req.query.public_id;
-	if (typeof publicId !== 'string' || !isAllowedPortfolioPublicId(publicId)) {
-		return res.status(400).json({ error: 'Invalid public_id' });
+	const assetFolder = req.query.asset_folder;
+
+	if (
+		typeof publicId !== 'string' ||
+		typeof assetFolder !== 'string' ||
+		!isAllowedPdfRequest(publicId, assetFolder)
+	) {
+		return res.status(400).json({ error: 'Invalid PDF request' });
 	}
 
 	if (!configureCloudinarySdk()) {
@@ -43,7 +49,7 @@ export default async function handler(
 		const upstream = await fetch(deliveryUrl);
 		if (!upstream.ok) {
 			console.error(
-				`[pdf-proxy] upstream ${upstream.status} for ${publicId}`
+				`[pdf-proxy] upstream ${upstream.status} public_id=${publicId} folder=${assetFolder}`
 			);
 			return res
 				.status(upstream.status)

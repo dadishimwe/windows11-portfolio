@@ -19,6 +19,7 @@ type CloudinaryResource = {
 	format: string;
 	display_name?: string;
 	bytes?: number;
+	asset_folder?: string;
 };
 
 const IMAGE_PREFIX_FALLBACKS = [
@@ -232,16 +233,18 @@ function formatFileSize(bytes?: number): string {
 
 function pdfViewUrl(
 	publicId: string,
-	resourceType: ReturnType<typeof getCloudinaryResourceType>
+	resourceType: ReturnType<typeof getCloudinaryResourceType>,
+	assetFolder: string
 ): string {
-	return buildPdfProxyPath(publicId, resourceType, false);
+	return buildPdfProxyPath(publicId, resourceType, assetFolder, false);
 }
 
 function pdfDownloadUrl(
 	publicId: string,
-	resourceType: ReturnType<typeof getCloudinaryResourceType>
+	resourceType: ReturnType<typeof getCloudinaryResourceType>,
+	assetFolder: string
 ): string {
-	return buildPdfProxyPath(publicId, resourceType, true);
+	return buildPdfProxyPath(publicId, resourceType, assetFolder, true);
 }
 
 function pdfThumbnailUrl(secureUrl: string): string | undefined {
@@ -250,17 +253,21 @@ function pdfThumbnailUrl(secureUrl: string): string | undefined {
 	return base.replace(/\.pdf$/i, '.jpg');
 }
 
-function toPdfDocument(resource: CloudinaryResource): PdfDocument {
+function toPdfDocument(
+	resource: CloudinaryResource,
+	assetFolder: string
+): PdfDocument {
 	const title = displayFilename(resource);
 	const resourceType = getCloudinaryResourceType(resource.secure_url);
+	const folder = resource.asset_folder || assetFolder;
 	return {
 		title,
 		fileName:
 			resource.format === 'pdf'
 				? `${title}.pdf`
 				: `${title}.${resource.format}`,
-		pdfUrl: pdfViewUrl(resource.public_id, resourceType),
-		downloadUrl: pdfDownloadUrl(resource.public_id, resourceType),
+		pdfUrl: pdfViewUrl(resource.public_id, resourceType, folder),
+		downloadUrl: pdfDownloadUrl(resource.public_id, resourceType, folder),
 		public_id: resource.public_id,
 		format: resource.format,
 		thumbnailUrl: pdfThumbnailUrl(resource.secure_url),
@@ -279,7 +286,7 @@ async function listPdfsInAssetFolder(
 		for (const resource of byFolder) {
 			if (!isPdfResource(resource) || seen.has(resource.public_id)) continue;
 			seen.add(resource.public_id);
-			results.push(toPdfDocument(resource));
+			results.push(toPdfDocument(resource, assetFolder));
 		}
 	}
 
@@ -289,7 +296,7 @@ async function listPdfsInAssetFolder(
 		for (const resource of byPrefix) {
 			if (!isPdfResource(resource) || seen.has(resource.public_id)) continue;
 			seen.add(resource.public_id);
-			results.push(toPdfDocument(resource));
+			results.push(toPdfDocument(resource, assetFolder));
 		}
 	}
 
